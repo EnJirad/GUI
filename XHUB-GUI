@@ -1,5 +1,5 @@
 local Screen = Instance.new("ScreenGui")
-Screen.Parent = game.Players.LocalPlayer.PlayerGui
+Screen.Parent = game.CoreGui
 
 local Main = Instance.new("Frame")
 local TopRight = Instance.new("Frame")
