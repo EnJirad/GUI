@@ -1,37 +1,54 @@
 local Screen = Instance.new("ScreenGui")
 Screen.Parent = game.Players.LocalPlayer.PlayerGui
 
+local windowWidth = workspace.CurrentCamera.ViewportSize.X * 0.4
+local windowHeight = workspace.CurrentCamera.ViewportSize.Y * 0.4
+
 local Window = Instance.new("Frame", Screen)
 Window.Parent = Screen
 Window.BorderSizePixel = 0
-Window.BackgroundColor3 = Color3.fromRGB(85, 85, 127)
-
-local windowWidth = workspace.CurrentCamera.ViewportSize.X * 0.5
-local windowHeight = workspace.CurrentCamera.ViewportSize.Y * 0.8
-
+Window.BackgroundColor3 = Color3.fromRGB(0, 153, 0)
 Window.Position = UDim2.new(0.5, -windowWidth * 0.5, 0.5, -windowHeight * 0.5)
 Window.Size = UDim2.new(0, windowWidth, 0, windowHeight)
 Window.Active = true
 Window.Draggable = true
 
-Container = Instance.new("ScrollingFrame", Window)
-Container.Size = UDim2.new(1, 0, 0.85, 0)
-Container.Position = UDim2.new(0, 0, 0.15, 0)
+local Sild = Instance.new("ScrollingFrame", Window)
+Sild.Size = UDim2.new(0.3, 0, 0.88, 0)
+Sild.Position = UDim2.new(0, 0, 0.1, 0)
+Sild.BackgroundColor3 = Color3.fromRGB(65, 65, 97)
+Sild.BorderSizePixel = 0
+
+local Container = Instance.new("ScrollingFrame", Window)
+Container.Size = UDim2.new(0.7, 0, 0.88, 0)
+Container.Position = UDim2.new(0.3, 0, 0.1, 0)
 Container.BackgroundColor3 = Color3.fromRGB(10, 150, 200)
 Container.BorderSizePixel = 0
 
-Title = Instance.new("TextLabel", Window)
-Title.Size = UDim2.new(1, 0, 0.15, 0)
+local Title = Instance.new("TextLabel", Window)
+Title.Size = UDim2.new(1, 0, 0.1, 0)
 Title.Position = UDim2.new(0, 0, 0, 0)
 Title.BackgroundTransparency = 1
 Title.Text = "XHUB GUI"
 
-CloseBTN = Instance.new("TextButton", Window)
+local CloseBTN = Instance.new("TextButton", Window)
 CloseBTN.Text = "X"
-CloseBTN.Size = UDim2.new(0.1, 0, 0.1, 0)
+CloseBTN.Size = UDim2.new(-0.1, 0, 0.1, 0)
+CloseBTN.Position = UDim2.new(1, 0, 0, 0)
 CloseBTN.BorderSizePixel = 0
-CloseBTN.Position = UDim2.new(1, -CloseBTN.Size.X.Offset, 0, 0)
 
 CloseBTN.MouseButton1Down:Connect(function()
     Window.Visible = false
+end)
+
+
+
+OpenBTN = Instance.new("TextButton",Screen)
+OpenBTN.Text = "Open"
+OpenBTN.Size = UDim2.new(0.05,0,0.05,0)
+OpenBTN.Position = UDim2.new(0.05,0,0.15,0)
+OpenBTN.BorderSizePixel = 0
+
+OpenBTN.MouseButton1Down:connect(function()
+	Window.Visible =true
 end)
