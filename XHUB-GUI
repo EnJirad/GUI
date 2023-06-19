@@ -1,13 +1,25 @@
-print("XHUB GUI")
 Screen = Instance.new("ScreenGui")
 Screen.Parent = game.Players.LocalPlayer.PlayerGui
 
 Window = Instance.new("Frame", Screen)
 Window.BorderSizePixel = 0
 Window.BackgroundColor3 = Color3.fromRGB(85, 85, 127)
-Window.Position = UDim2.new(0.5, -250, 0.5, -160) -- Center position
-Window.Size = UDim2.new(0, 500, 0, 320)
+Window.Position = UDim2.new(0.5, -250, 0.5, -160)
+Window.Size = UDim2.new(0.5,0,0.5,0)
 Window.Active = true
+
+-- Function to update the window size based on the screen dimensions
+function UpdateWindowSize()
+screenSize = Screen:GetGuiObjectSize()
+Window.Size = UDim2.new(0, screenSize.X * 0.5, 0, screenSize.Y * 0.3)
+Window.Position = UDim2.new(0.5, -Window.Size.X.Offset * 0.5, 0.5, -Window.Size.Y.Offset * 0.5)
+end
+
+-- Call the function initially
+UpdateWindowSize()
+
+-- Update the window size whenever the player's screen changes size
+game.Players.LocalPlayer.PlayerGui.ScreenResolutionChanged:Connect(UpdateWindowSize)
 
 
 Container = Instance.new("ScrollingFrame", Window)
