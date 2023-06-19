@@ -48,6 +48,38 @@ Main.BorderSizePixel = 0
 Main.Position = UDim2.new(0.5, 0, 0.5, 0)
 Main.Size = UDim2.new(0, 600, 0, 400)
 
+
+Close.Name = "Close"
+Close.Parent = TopRight
+Close.BackgroundColor3 = Color3.fromRGB(51, 51, 77)
+Close.BorderColor3 = Color3.fromRGB(255, 255, 255)
+Close.BorderSizePixel = 0
+Close.Position = UDim2.new(0, 395, 0, 5)
+Close.Size = UDim2.new(0, 30, 0, 30)
+Close.Image = "rbxassetid://13798324300"
+UICorner.Parent = Close
+Close.Active = true
+
+Close.MouseButton1Down:Connect(function()
+    Main.Visible = false
+end)
+
+Open.Name = "Open"
+Open.Parent = Screen
+Open.BackgroundColor3 = Color3.fromRGB(51, 51, 77)
+Open.BorderSizePixel = 0
+Open.Size = UDim2.new(0, 30, 0, 30)
+Open.Position = UDim2.new(0.1,0,0.15,0)
+Open.Image = "rbxassetid://13799826890"
+UICorner_2.Parent = Open
+Open.Active = true
+
+Open.MouseButton1Down:connect(function()
+	Main.Visible =true
+end)
+
+
+
 TopRight.Name = "TopRight"
 TopRight.Parent = Main
 TopRight.BackgroundColor3 = Color3.fromRGB(61, 61, 92)
@@ -69,32 +101,6 @@ NameGame.TextSize = 18.000
 NameGame.TextWrapped = true
 NameGame.TextXAlignment = Enum.TextXAlignment.Left
 
-Close.Name = "Close"
-Close.Parent = TopRight
-Close.BackgroundColor3 = Color3.fromRGB(51, 51, 77)
-Close.BorderColor3 = Color3.fromRGB(255, 255, 255)
-Close.BorderSizePixel = 0
-Close.Position = UDim2.new(0, 395, 0, 5)
-Close.Size = UDim2.new(0, 30, 0, 30)
-Close.Image = "rbxassetid://13798324300"
-UICorner.Parent = Close
-
-Close.MouseButton1Down:Connect(function()
-    Main.Visible = false
-end)
-
-Open.Name = "Open"
-Open.Parent = Screen
-Open.BackgroundColor3 = Color3.fromRGB(51, 51, 77)
-Open.BorderSizePixel = 0
-Open.Size = UDim2.new(0, 30, 0, 30)
-Open.Position = UDim2.new(0.1,0,0.15,0)
-Open.Image = "rbxassetid://13799826890"
-UICorner_2.Parent = Open
-
-Open.MouseButton1Down:connect(function()
-	Main.Visible =true
-end)
 
 TopLeft.Name = "TopLeft"
 TopLeft.Parent = Main
