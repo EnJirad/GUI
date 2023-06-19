@@ -37,6 +37,8 @@ local UICorner_13 = Instance.new("UICorner")
 local TabButton12 = Instance.new("TextButton")
 local UICorner_14 = Instance.new("UICorner")
 local UICorner_15 = Instance.new("UICorner")
+local X = Instance.new("ImageButton")
+local UICorner_16 = Instance.new("UICorner")
 local Drag = Instance.new("Frame")
 
 
@@ -56,7 +58,7 @@ Close.BorderColor3 = Color3.fromRGB(255, 255, 255)
 Close.BorderSizePixel = 0
 Close.Position = UDim2.new(0, 395, 0, 5)
 Close.Size = UDim2.new(0, 30, 0, 30)
-Close.Image = "rbxassetid://13798324300"
+Close.Image = "rbxassetid://13801207849"
 UICorner.Parent = Close
 Close.Active = true
 
@@ -69,15 +71,28 @@ Open.Parent = Screen
 Open.BackgroundColor3 = Color3.fromRGB(51, 51, 77)
 Open.BorderSizePixel = 0
 Open.Size = UDim2.new(0, 30, 0, 30)
-Open.Position = UDim2.new(0.06,0,0.15,0)
-Open.Image = "rbxassetid://13799826890"
+Open.Position = UDim2.new(0.09,0,0.15,0)
+Open.Image = "rbxassetid://13801258623"
 UICorner_2.Parent = Open
 Open.Active = true
 
-Open.MouseButton1Down:connect(function()
-	Main.Visible =true
+Open.MouseButton1Down:Connect(function()
+    Main.Visible = not Main.Visible
 end)
 
+X.Name = "X"
+X.Parent = Screen
+X.BackgroundColor3 = Color3.fromRGB(51, 51, 77)
+X.BorderSizePixel = 0
+X.Size = UDim2.new(0, 30, 0, 30)
+X.Position = UDim2.new(0.06,0,0.08,0)
+X.Image = "rbxassetid://13801200427"
+UICorner_16.Parent = X
+X.Active = true
+
+X.MouseButton1Down:Connect(function()
+    Screen:Destroy()
+end)
 
 
 TopRight.Name = "TopRight"
