@@ -39,8 +39,8 @@ local UICorner_14 = Instance.new("UICorner")
 local UICorner_15 = Instance.new("UICorner")
 local Drag = Instance.new("Frame")
 
-local windowWidth = workspace.CurrentCamera.ViewportSize.X * 0.5
-local windowHeight = workspace.CurrentCamera.ViewportSize.Y * 0.5
+local windowWidth = workspace.CurrentCamera.ViewportSize.X * 0.6
+local windowHeight = workspace.CurrentCamera.ViewportSize.Y * 0.6
 
 Main.Name = "Main"
 Main.Parent = Screen
