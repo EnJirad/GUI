@@ -5,8 +5,12 @@ local Window = Instance.new("Frame", Screen)
 Window.Parent = Screen
 Window.BorderSizePixel = 0
 Window.BackgroundColor3 = Color3.fromRGB(85, 85, 127)
-Window.Position = UDim2.new(0.5, -250, 0.5, -160)
-Window.Size = UDim2.new(0, 1525, 0, 500)
+
+local windowWidth = workspace.CurrentCamera.ViewportSize.X * 0.5
+local windowHeight = workspace.CurrentCamera.ViewportSize.Y * 0.5
+
+Window.Position = UDim2.new(0.5, -windowWidth * 0.5, 0.5, -windowHeight * 0.5)
+Window.Size = UDim2.new(0, windowWidth, 0, windowHeight)
 Window.Active = true
 Window.Draggable = true
 
@@ -16,8 +20,7 @@ Container.Position = UDim2.new(0, 0, 0.15, 0)
 Container.BackgroundColor3 = Color3.fromRGB(10, 150, 200)
 Container.BorderSizePixel = 0
 
-
-Title  = Instance.new("TextLabel", Window)
+Title = Instance.new("TextLabel", Window)
 Title.Size = UDim2.new(1, 0, 0.15, 0)
 Title.Position = UDim2.new(0, 0, 0, 0)
 Title.BackgroundTransparency = 1
@@ -32,11 +35,3 @@ CloseBTN.Position = UDim2.new(1, -CloseBTN.Size.X.Offset, 0, 0)
 CloseBTN.MouseButton1Down:Connect(function()
     Window.Visible = false
 end)
-
-local function UpdateWindowSize()
-    local screenSize = Screen:GetGuiObjectSize()
-    Window.Size = UDim2.new(0, screenSize.X * 0.5, 0, screenSize.Y * 0.3)
-    Window.Position = UDim2.new(0.5, -Window.Size.X.Offset * 0.5, 0.5, -Window.Size.Y.Offset * 0.5)
-end
-UpdateWindowSize()
-game.Players.LocalPlayer.PlayerGui.ScreenResolutionChanged:Connect(UpdateWindowSize)
