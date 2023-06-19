@@ -1,150 +1,105 @@
 local Screen = Instance.new("ScreenGui")
 Screen.Parent = game.CoreGui
 
-local Main = Instance.new("Frame")
+
+local XHUB = Instance.new("Frame")
 local TopRight = Instance.new("Frame")
-local NameGame = Instance.new("TextLabel")
-local Close = Instance.new("ImageButton")
-local Open = Instance.new("ImageButton")
-local UICorner = Instance.new("UICorner")
-local TopLeft = Instance.new("Frame")
-local MainTab = Instance.new("TextLabel")
-local UICorner_2 = Instance.new("UICorner")
-local ScrolRight = Instance.new("ScrollingFrame")
+local MainBar = Instance.new("Frame")
 local ScrolLeft = Instance.new("ScrollingFrame")
 local TabButton1 = Instance.new("TextButton")
-local UICorner_3 = Instance.new("UICorner")
+local UICorner = Instance.new("UICorner")
 local TabButton2 = Instance.new("TextButton")
-local UICorner_4 = Instance.new("UICorner")
+local UICorner_2 = Instance.new("UICorner")
 local TabButton4 = Instance.new("TextButton")
-local UICorner_5 = Instance.new("UICorner")
+local UICorner_3 = Instance.new("UICorner")
 local TabButton3 = Instance.new("TextButton")
-local UICorner_6 = Instance.new("UICorner")
+local UICorner_4 = Instance.new("UICorner")
 local TabButton5 = Instance.new("TextButton")
-local UICorner_7 = Instance.new("UICorner")
+local UICorner_5 = Instance.new("UICorner")
 local TabButton6 = Instance.new("TextButton")
-local UICorner_8 = Instance.new("UICorner")
+local UICorner_6 = Instance.new("UICorner")
 local TabButton7 = Instance.new("TextButton")
-local UICorner_9 = Instance.new("UICorner")
+local UICorner_7 = Instance.new("UICorner")
 local TabButton8 = Instance.new("TextButton")
-local UICorner_10 = Instance.new("UICorner")
+local UICorner_8 = Instance.new("UICorner")
 local TabButton9 = Instance.new("TextButton")
-local UICorner_11 = Instance.new("UICorner")
+local UICorner_9 = Instance.new("UICorner")
 local TabButton10 = Instance.new("TextButton")
-local UICorner_12 = Instance.new("UICorner")
+local UICorner_10 = Instance.new("UICorner")
 local TabButton11 = Instance.new("TextButton")
-local UICorner_13 = Instance.new("UICorner")
+local UICorner_11 = Instance.new("UICorner")
 local TabButton12 = Instance.new("TextButton")
+local UICorner_12 = Instance.new("UICorner")
+local UICorner_13 = Instance.new("UICorner")
+local ScrolRight = Instance.new("ScrollingFrame")
+local TabButton1_2 = Instance.new("TextButton")
 local UICorner_14 = Instance.new("UICorner")
+local TabButton2_2 = Instance.new("TextButton")
 local UICorner_15 = Instance.new("UICorner")
-local X = Instance.new("ImageButton")
+local TabButton3_2 = Instance.new("TextButton")
 local UICorner_16 = Instance.new("UICorner")
-local Drag = Instance.new("Frame")
+local TabButton4_2 = Instance.new("TextButton")
+local UICorner_17 = Instance.new("UICorner")
+local TabButton5_2 = Instance.new("TextButton")
+local UICorner_18 = Instance.new("UICorner")
+local TabButton6_2 = Instance.new("TextButton")
+local UICorner_19 = Instance.new("UICorner")
+local TabButton7_2 = Instance.new("TextButton")
+local UICorner_20 = Instance.new("UICorner")
+local TabButton8_2 = Instance.new("TextButton")
+local UICorner_21 = Instance.new("UICorner")
+local TabButton9_2 = Instance.new("TextButton")
+local UICorner_22 = Instance.new("UICorner")
+local TabButton10_2 = Instance.new("TextButton")
+local UICorner_23 = Instance.new("UICorner")
+local TabButton11_2 = Instance.new("TextButton")
+local UICorner_24 = Instance.new("UICorner")
+local TabButton12_2 = Instance.new("TextButton")
+local UICorner_25 = Instance.new("UICorner")
+local TopLeft = Instance.new("Frame")
+local Close = Instance.new("ImageButton")
+local UICorner_26 = Instance.new("UICorner")
+local Open = Instance.new("ImageButton")
+local UICorner_27 = Instance.new("UICorner")
+local MainTab = Instance.new("TextLabel")
+local NameGame = Instance.new("TextLabel")
 
+--Properties:
 
-Main.Name = "Main"
-Main.Parent = Screen
-Main.AnchorPoint = Vector2.new(0.5, 0.5)
-Main.BackgroundColor3 = Color3.fromRGB(85, 85, 127)
-Main.BorderSizePixel = 0
-Main.Position = UDim2.new(0.5, 0, 0.5, 0)
-Main.Size = UDim2.new(0, 600, 0, 350)
-
-
-Close.Name = "Close"
-Close.Parent = TopRight
-Close.BackgroundColor3 = Color3.fromRGB(51, 51, 77)
-Close.BorderColor3 = Color3.fromRGB(255, 255, 255)
-Close.BorderSizePixel = 0
-Close.Position = UDim2.new(0, 395, 0, 5)
-Close.Size = UDim2.new(0, 30, 0, 30)
-Close.Image = "rbxassetid://13801200427"
-UICorner.Parent = Close
-Close.Active = true
-
-Close.MouseButton1Down:Connect(function()
-    Screen:Destroy()
-end)
-
-Open.Name = "Open"
-Open.Parent = Screen
-Open.BackgroundColor3 = Color3.fromRGB(51, 51, 77)
-Open.BorderSizePixel = 0
-Open.Size = UDim2.new(0, 30, 0, 30)
-Open.Position = UDim2.new(0.09,0,0.15,0)
-Open.Image = "rbxassetid://13801258623"
-UICorner_2.Parent = Open
-Open.Active = true
-
-Open.MouseButton1Down:Connect(function()
-    Main.Visible = not Main.Visible
-end)
+XHUB.Name = "XHUB"
+XHUB.Parent = Screen
+XHUB.AnchorPoint = Vector2.new(0.5, 0.5)
+XHUB.BackgroundColor3 = Color3.fromRGB(85, 85, 127)
+XHUB.BorderSizePixel = 0
+XHUB.Position = UDim2.new(0.5, 0, 0.5, 0)
+XHUB.Size = UDim2.new(0, 600, 0, 400)
+XHUB.Active = true
+XHUB.Draggable = true
 
 TopRight.Name = "TopRight"
-TopRight.Parent = Main
+TopRight.Parent = XHUB
 TopRight.BackgroundColor3 = Color3.fromRGB(61, 61, 92)
 TopRight.BorderSizePixel = 0
 TopRight.Position = UDim2.new(0, 170, 0, 0)
-TopRight.Size = UDim2.new(1, -170, 0, 40)
+TopRight.Size = UDim2.new(0, 430, 0, 40)
+TopRight.Active = true
+TopRight.Draggable = true
 
-NameGame.Name = "NameGame"
-NameGame.Parent = TopRight
-NameGame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-NameGame.BackgroundTransparency = 1.000
-NameGame.BorderSizePixel = 0
-NameGame.Position = UDim2.new(0.0299999993, 0, 0.129999995, 0)
-NameGame.Size = UDim2.new(0, 375, 0, 30)
-NameGame.Font = Enum.Font.ArialBold
-NameGame.Text = "UI Library"
-NameGame.TextColor3 = Color3.fromRGB(255, 255, 255)
-NameGame.TextSize = 18.000
-NameGame.TextWrapped = true
-NameGame.TextXAlignment = Enum.TextXAlignment.Left
-
-
-TopLeft.Name = "TopLeft"
-TopLeft.Parent = Main
-TopLeft.BackgroundColor3 = Color3.fromRGB(51, 51, 77)
-TopLeft.BorderSizePixel = 0
-TopLeft.Position = UDim2.new(0, 170, 0, 0)
-TopLeft.Size = UDim2.new(0, -170, 0, 40)
-
-MainTab.Name = "MainTab"
-MainTab.Parent = TopLeft
-MainTab.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-MainTab.BackgroundTransparency = 1.000
-MainTab.BorderColor3 = Color3.fromRGB(27, 42, 53)
-MainTab.BorderSizePixel = 0
-MainTab.Position = UDim2.new(0.0500000007, 0, 0.129999995, 0)
-MainTab.Size = UDim2.new(0, 155, 0, 30)
-MainTab.Font = Enum.Font.ArialBold
-MainTab.Text = "UI Library"
-MainTab.TextColor3 = Color3.fromRGB(255, 255, 255)
-MainTab.TextSize = 18.000
-MainTab.TextWrapped = true
-
-ScrolRight.Name = "ScrolRight"
-ScrolRight.Parent = Main
-ScrolRight.Active = true
-ScrolRight.BackgroundColor3 = Color3.fromRGB(75, 75, 112)
-ScrolRight.BorderColor3 = Color3.fromRGB(27, 42, 53)
-ScrolRight.BorderSizePixel = 0
-ScrolRight.Position = UDim2.new(0, 170, 0, 42)
-ScrolRight.Size = UDim2.new(1, -176, 1, -48)
-ScrolRight.CanvasSize = UDim2.new(0, 0, 0, 0)
-ScrolRight.ScrollBarThickness = 2
+MainBar.Name = "MainBar"
+MainBar.Parent = XHUB
+MainBar.BackgroundColor3 = Color3.fromRGB(85, 85, 127)
+MainBar.Position = UDim2.new(0, 0, 0.100000001, 0)
+MainBar.Size = UDim2.new(0, 600, 0, 360)
 
 ScrolLeft.Name = "ScrolLeft"
-ScrolLeft.Parent = Main
+ScrolLeft.Parent = MainBar
 ScrolLeft.Active = true
 ScrolLeft.BackgroundColor3 = Color3.fromRGB(61, 61, 92)
 ScrolLeft.BorderColor3 = Color3.fromRGB(27, 42, 53)
 ScrolLeft.BorderSizePixel = 0
-ScrolLeft.Position = UDim2.new(0, 5, 0, 42)
-ScrolLeft.Size = UDim2.new(0, 165, 1, -48)
-ScrolLeft.ZIndex = 2
+ScrolLeft.Size = UDim2.new(0, 170, 1, 0)
 ScrolLeft.CanvasSize = UDim2.new(0, 0, 0, 0)
-ScrolLeft.ScrollBarThickness = 1
+ScrolLeft.ScrollBarThickness = 3
 
 TabButton1.Name = "TabButton1"
 TabButton1.Parent = ScrolLeft
@@ -157,8 +112,8 @@ TabButton1.TextColor3 = Color3.fromRGB(255, 255, 255)
 TabButton1.TextSize = 14.000
 TabButton1.TextWrapped = true
 
-UICorner_3.CornerRadius = UDim.new(0, 5)
-UICorner_3.Parent = TabButton1
+UICorner.CornerRadius = UDim.new(0, 5)
+UICorner.Parent = TabButton1
 
 TabButton2.Name = "TabButton2"
 TabButton2.Parent = ScrolLeft
@@ -171,8 +126,8 @@ TabButton2.TextColor3 = Color3.fromRGB(255, 255, 255)
 TabButton2.TextSize = 14.000
 TabButton2.TextWrapped = true
 
-UICorner_4.CornerRadius = UDim.new(0, 5)
-UICorner_4.Parent = TabButton2
+UICorner_2.CornerRadius = UDim.new(0, 5)
+UICorner_2.Parent = TabButton2
 
 TabButton4.Name = "TabButton4"
 TabButton4.Parent = ScrolLeft
@@ -185,8 +140,8 @@ TabButton4.TextColor3 = Color3.fromRGB(255, 255, 255)
 TabButton4.TextSize = 14.000
 TabButton4.TextWrapped = true
 
-UICorner_5.CornerRadius = UDim.new(0, 5)
-UICorner_5.Parent = TabButton4
+UICorner_3.CornerRadius = UDim.new(0, 5)
+UICorner_3.Parent = TabButton4
 
 TabButton3.Name = "TabButton3"
 TabButton3.Parent = ScrolLeft
@@ -199,8 +154,8 @@ TabButton3.TextColor3 = Color3.fromRGB(255, 255, 255)
 TabButton3.TextSize = 14.000
 TabButton3.TextWrapped = true
 
-UICorner_6.CornerRadius = UDim.new(0, 5)
-UICorner_6.Parent = TabButton3
+UICorner_4.CornerRadius = UDim.new(0, 5)
+UICorner_4.Parent = TabButton3
 
 TabButton5.Name = "TabButton5"
 TabButton5.Parent = ScrolLeft
@@ -213,8 +168,8 @@ TabButton5.TextColor3 = Color3.fromRGB(255, 255, 255)
 TabButton5.TextSize = 14.000
 TabButton5.TextWrapped = true
 
-UICorner_7.CornerRadius = UDim.new(0, 5)
-UICorner_7.Parent = TabButton5
+UICorner_5.CornerRadius = UDim.new(0, 5)
+UICorner_5.Parent = TabButton5
 
 TabButton6.Name = "TabButton6"
 TabButton6.Parent = ScrolLeft
@@ -227,8 +182,8 @@ TabButton6.TextColor3 = Color3.fromRGB(255, 255, 255)
 TabButton6.TextSize = 14.000
 TabButton6.TextWrapped = true
 
-UICorner_8.CornerRadius = UDim.new(0, 5)
-UICorner_8.Parent = TabButton6
+UICorner_6.CornerRadius = UDim.new(0, 5)
+UICorner_6.Parent = TabButton6
 
 TabButton7.Name = "TabButton7"
 TabButton7.Parent = ScrolLeft
@@ -241,8 +196,8 @@ TabButton7.TextColor3 = Color3.fromRGB(255, 255, 255)
 TabButton7.TextSize = 14.000
 TabButton7.TextWrapped = true
 
-UICorner_9.CornerRadius = UDim.new(0, 5)
-UICorner_9.Parent = TabButton7
+UICorner_7.CornerRadius = UDim.new(0, 5)
+UICorner_7.Parent = TabButton7
 
 TabButton8.Name = "TabButton8"
 TabButton8.Parent = ScrolLeft
@@ -255,8 +210,8 @@ TabButton8.TextColor3 = Color3.fromRGB(255, 255, 255)
 TabButton8.TextSize = 14.000
 TabButton8.TextWrapped = true
 
-UICorner_10.CornerRadius = UDim.new(0, 5)
-UICorner_10.Parent = TabButton8
+UICorner_8.CornerRadius = UDim.new(0, 5)
+UICorner_8.Parent = TabButton8
 
 TabButton9.Name = "TabButton9"
 TabButton9.Parent = ScrolLeft
@@ -269,8 +224,8 @@ TabButton9.TextColor3 = Color3.fromRGB(255, 255, 255)
 TabButton9.TextSize = 14.000
 TabButton9.TextWrapped = true
 
-UICorner_11.CornerRadius = UDim.new(0, 5)
-UICorner_11.Parent = TabButton9
+UICorner_9.CornerRadius = UDim.new(0, 5)
+UICorner_9.Parent = TabButton9
 
 TabButton10.Name = "TabButton10"
 TabButton10.Parent = ScrolLeft
@@ -283,8 +238,8 @@ TabButton10.TextColor3 = Color3.fromRGB(255, 255, 255)
 TabButton10.TextSize = 14.000
 TabButton10.TextWrapped = true
 
-UICorner_12.CornerRadius = UDim.new(0, 5)
-UICorner_12.Parent = TabButton10
+UICorner_10.CornerRadius = UDim.new(0, 5)
+UICorner_10.Parent = TabButton10
 
 TabButton11.Name = "TabButton11"
 TabButton11.Parent = ScrolLeft
@@ -297,8 +252,8 @@ TabButton11.TextColor3 = Color3.fromRGB(255, 255, 255)
 TabButton11.TextSize = 14.000
 TabButton11.TextWrapped = true
 
-UICorner_13.CornerRadius = UDim.new(0, 5)
-UICorner_13.Parent = TabButton11
+UICorner_11.CornerRadius = UDim.new(0, 5)
+UICorner_11.Parent = TabButton11
 
 TabButton12.Name = "TabButton12"
 TabButton12.Parent = ScrolLeft
@@ -311,15 +266,251 @@ TabButton12.TextColor3 = Color3.fromRGB(255, 255, 255)
 TabButton12.TextSize = 14.000
 TabButton12.TextWrapped = true
 
+UICorner_12.CornerRadius = UDim.new(0, 5)
+UICorner_12.Parent = TabButton12
+
+UICorner_13.Parent = MainBar
+
+ScrolRight.Name = "ScrolRight"
+ScrolRight.Parent = MainBar
+ScrolRight.Active = true
+ScrolRight.BackgroundColor3 = Color3.fromRGB(75, 75, 112)
+ScrolRight.BorderColor3 = Color3.fromRGB(27, 42, 53)
+ScrolRight.BorderSizePixel = 0
+ScrolRight.Position = UDim2.new(0, 170, 0, 0)
+ScrolRight.Size = UDim2.new(1, -170, 1, 0)
+ScrolRight.CanvasSize = UDim2.new(0, 0, 0, 0)
+ScrolRight.ScrollBarThickness = 3
+
+TabButton1_2.Name = "TabButton1"
+TabButton1_2.Parent = ScrolRight
+TabButton1_2.BackgroundColor3 = Color3.fromRGB(61, 61, 92)
+TabButton1_2.BorderSizePixel = 0
+TabButton1_2.Position = UDim2.new(0.0300000571, 0, 0, 5)
+TabButton1_2.Size = UDim2.new(0, 400, 0, 30)
+TabButton1_2.Font = Enum.Font.ArialBold
+TabButton1_2.TextColor3 = Color3.fromRGB(255, 255, 255)
+TabButton1_2.TextSize = 14.000
+TabButton1_2.TextWrapped = true
+
 UICorner_14.CornerRadius = UDim.new(0, 5)
-UICorner_14.Parent = TabButton12
+UICorner_14.Parent = TabButton1_2
 
-UICorner_15.Parent = Main
+TabButton2_2.Name = "TabButton2"
+TabButton2_2.Parent = ScrolRight
+TabButton2_2.BackgroundColor3 = Color3.fromRGB(61, 61, 92)
+TabButton2_2.BorderSizePixel = 0
+TabButton2_2.Position = UDim2.new(0.0300000571, 0, 0, 40)
+TabButton2_2.Size = UDim2.new(0, 400, 0, 30)
+TabButton2_2.Font = Enum.Font.ArialBold
+TabButton2_2.TextColor3 = Color3.fromRGB(255, 255, 255)
+TabButton2_2.TextSize = 14.000
+TabButton2_2.TextWrapped = true
 
-Drag.Name = "Drag"
-Drag.Parent = Main
-Drag.BackgroundColor3 = Color3.fromRGB(61, 61, 92)
-Drag.BackgroundTransparency = 1.000
-Drag.BorderSizePixel = 0
-Drag.Size = UDim2.new(1, -40, 0, 40)
-Drag.Draggable = true
+UICorner_15.CornerRadius = UDim.new(0, 5)
+UICorner_15.Parent = TabButton2_2
+
+TabButton3_2.Name = "TabButton3"
+TabButton3_2.Parent = ScrolRight
+TabButton3_2.BackgroundColor3 = Color3.fromRGB(61, 61, 92)
+TabButton3_2.BorderSizePixel = 0
+TabButton3_2.Position = UDim2.new(0.0300000571, 0, 0, 75)
+TabButton3_2.Size = UDim2.new(0, 400, 0, 30)
+TabButton3_2.Font = Enum.Font.ArialBold
+TabButton3_2.TextColor3 = Color3.fromRGB(255, 255, 255)
+TabButton3_2.TextSize = 14.000
+TabButton3_2.TextWrapped = true
+
+UICorner_16.CornerRadius = UDim.new(0, 5)
+UICorner_16.Parent = TabButton3_2
+
+TabButton4_2.Name = "TabButton4"
+TabButton4_2.Parent = ScrolRight
+TabButton4_2.BackgroundColor3 = Color3.fromRGB(61, 61, 92)
+TabButton4_2.BorderSizePixel = 0
+TabButton4_2.Position = UDim2.new(0.0300000571, 0, 0, 110)
+TabButton4_2.Size = UDim2.new(0, 400, 0, 30)
+TabButton4_2.Font = Enum.Font.ArialBold
+TabButton4_2.TextColor3 = Color3.fromRGB(255, 255, 255)
+TabButton4_2.TextSize = 14.000
+TabButton4_2.TextWrapped = true
+
+UICorner_17.CornerRadius = UDim.new(0, 5)
+UICorner_17.Parent = TabButton4_2
+
+TabButton5_2.Name = "TabButton5"
+TabButton5_2.Parent = ScrolRight
+TabButton5_2.BackgroundColor3 = Color3.fromRGB(61, 61, 92)
+TabButton5_2.BorderSizePixel = 0
+TabButton5_2.Position = UDim2.new(0.0300000571, 0, 0, 145)
+TabButton5_2.Size = UDim2.new(0, 400, 0, 30)
+TabButton5_2.Font = Enum.Font.ArialBold
+TabButton5_2.TextColor3 = Color3.fromRGB(255, 255, 255)
+TabButton5_2.TextSize = 14.000
+TabButton5_2.TextWrapped = true
+
+UICorner_18.CornerRadius = UDim.new(0, 5)
+UICorner_18.Parent = TabButton5_2
+
+TabButton6_2.Name = "TabButton6"
+TabButton6_2.Parent = ScrolRight
+TabButton6_2.BackgroundColor3 = Color3.fromRGB(61, 61, 92)
+TabButton6_2.BorderSizePixel = 0
+TabButton6_2.Position = UDim2.new(0.0300000571, 0, 0, 180)
+TabButton6_2.Size = UDim2.new(0, 400, 0, 30)
+TabButton6_2.Font = Enum.Font.ArialBold
+TabButton6_2.TextColor3 = Color3.fromRGB(255, 255, 255)
+TabButton6_2.TextSize = 14.000
+TabButton6_2.TextWrapped = true
+
+UICorner_19.CornerRadius = UDim.new(0, 5)
+UICorner_19.Parent = TabButton6_2
+
+TabButton7_2.Name = "TabButton7"
+TabButton7_2.Parent = ScrolRight
+TabButton7_2.BackgroundColor3 = Color3.fromRGB(61, 61, 92)
+TabButton7_2.BorderSizePixel = 0
+TabButton7_2.Position = UDim2.new(0.0300000571, 0, 0, 215)
+TabButton7_2.Size = UDim2.new(0, 400, 0, 30)
+TabButton7_2.Font = Enum.Font.ArialBold
+TabButton7_2.TextColor3 = Color3.fromRGB(255, 255, 255)
+TabButton7_2.TextSize = 14.000
+TabButton7_2.TextWrapped = true
+
+UICorner_20.CornerRadius = UDim.new(0, 5)
+UICorner_20.Parent = TabButton7_2
+
+TabButton8_2.Name = "TabButton8"
+TabButton8_2.Parent = ScrolRight
+TabButton8_2.BackgroundColor3 = Color3.fromRGB(61, 61, 92)
+TabButton8_2.BorderSizePixel = 0
+TabButton8_2.Position = UDim2.new(0.0300000571, 0, 8.47710524e-08, 250)
+TabButton8_2.Size = UDim2.new(0, 400, 0, 30)
+TabButton8_2.Font = Enum.Font.ArialBold
+TabButton8_2.TextColor3 = Color3.fromRGB(255, 255, 255)
+TabButton8_2.TextSize = 14.000
+TabButton8_2.TextWrapped = true
+
+UICorner_21.CornerRadius = UDim.new(0, 5)
+UICorner_21.Parent = TabButton8_2
+
+TabButton9_2.Name = "TabButton9"
+TabButton9_2.Parent = ScrolRight
+TabButton9_2.BackgroundColor3 = Color3.fromRGB(61, 61, 92)
+TabButton9_2.BorderSizePixel = 0
+TabButton9_2.Position = UDim2.new(0.0300000571, 0, 8.47710524e-08, 285)
+TabButton9_2.Size = UDim2.new(0, 400, 0, 30)
+TabButton9_2.Font = Enum.Font.ArialBold
+TabButton9_2.TextColor3 = Color3.fromRGB(255, 255, 255)
+TabButton9_2.TextSize = 14.000
+TabButton9_2.TextWrapped = true
+
+UICorner_22.CornerRadius = UDim.new(0, 5)
+UICorner_22.Parent = TabButton9_2
+
+TabButton10_2.Name = "TabButton10"
+TabButton10_2.Parent = ScrolRight
+TabButton10_2.BackgroundColor3 = Color3.fromRGB(61, 61, 92)
+TabButton10_2.BorderSizePixel = 0
+TabButton10_2.Position = UDim2.new(0.0300000571, 0, 8.47710524e-08, 320)
+TabButton10_2.Size = UDim2.new(0, 400, 0, 30)
+TabButton10_2.Font = Enum.Font.ArialBold
+TabButton10_2.TextColor3 = Color3.fromRGB(255, 255, 255)
+TabButton10_2.TextSize = 14.000
+TabButton10_2.TextWrapped = true
+
+UICorner_23.CornerRadius = UDim.new(0, 5)
+UICorner_23.Parent = TabButton10_2
+
+TabButton11_2.Name = "TabButton11"
+TabButton11_2.Parent = ScrolRight
+TabButton11_2.BackgroundColor3 = Color3.fromRGB(61, 61, 92)
+TabButton11_2.BorderSizePixel = 0
+TabButton11_2.Position = UDim2.new(0.0300000571, 0, 8.47710524e-08, 355)
+TabButton11_2.Size = UDim2.new(0, 400, 0, 30)
+TabButton11_2.Font = Enum.Font.ArialBold
+TabButton11_2.TextColor3 = Color3.fromRGB(255, 255, 255)
+TabButton11_2.TextSize = 14.000
+TabButton11_2.TextWrapped = true
+
+UICorner_24.CornerRadius = UDim.new(0, 5)
+UICorner_24.Parent = TabButton11_2
+
+TabButton12_2.Name = "TabButton12"
+TabButton12_2.Parent = ScrolRight
+TabButton12_2.BackgroundColor3 = Color3.fromRGB(61, 61, 92)
+TabButton12_2.BorderSizePixel = 0
+TabButton12_2.Position = UDim2.new(0.0300000571, 0, 8.47710524e-08, 390)
+TabButton12_2.Size = UDim2.new(0, 400, 0, 30)
+TabButton12_2.Font = Enum.Font.ArialBold
+TabButton12_2.TextColor3 = Color3.fromRGB(255, 255, 255)
+TabButton12_2.TextSize = 14.000
+TabButton12_2.TextWrapped = true
+
+UICorner_25.CornerRadius = UDim.new(0, 5)
+UICorner_25.Parent = TabButton12_2
+
+TopLeft.Name = "TopLeft"
+TopLeft.Parent = XHUB
+TopLeft.BackgroundColor3 = Color3.fromRGB(51, 51, 77)
+TopLeft.BorderSizePixel = 0
+TopLeft.Size = UDim2.new(0, 170, 0, 40)
+TopLeft.Draggable = true
+TopLeft.Active = true
+
+Close.Name = "Close"
+Close.Parent = XHUB
+Close.BackgroundColor3 = Color3.fromRGB(51, 51, 77)
+Close.BorderColor3 = Color3.fromRGB(255, 255, 255)
+Close.BorderSizePixel = 0
+Close.Position = UDim2.new(0, 560, 0, 5)
+Close.Size = UDim2.new(0, 30, 0, 30)
+Close.Image = "rbxassetid://13801207849"
+UICorner_26.Parent = Close
+Open.Active = true
+
+Close.MouseButton1Down:Connect(function()
+    Screen:Destroy()
+end)
+
+Open.Name = "Open"
+Open.Parent = Screen
+Open.BackgroundColor3 = Color3.fromRGB(51, 51, 77)
+Open.BorderSizePixel = 0
+Open.Size = UDim2.new(0, 30, 0, 30)
+Open.Position = UDim2.new(0.09,0,0.15,0)
+Open.Image = "rbxassetid://13801258623"
+UICorner_27.Parent = Open
+Open.Active = true
+
+Open.MouseButton1Down:Connect(function()
+    XHUB.Visible = not XHUB.Visible
+end)
+
+MainTab.Name = "MainTab"
+MainTab.Parent = XHUB
+MainTab.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+MainTab.BackgroundTransparency = 1.000
+MainTab.BorderColor3 = Color3.fromRGB(27, 42, 53)
+MainTab.BorderSizePixel = 0
+MainTab.Position = UDim2.new(0.00999999978, 0, 0.0199999996, 0)
+MainTab.Size = UDim2.new(0, 155, 0, 30)
+MainTab.Font = Enum.Font.ArialBold
+MainTab.Text = "XHUB"
+MainTab.TextColor3 = Color3.fromRGB(255, 255, 255)
+MainTab.TextSize = 18.000
+MainTab.TextWrapped = true
+
+NameGame.Name = "NameGame"
+NameGame.Parent = XHUB
+NameGame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+NameGame.BackgroundTransparency = 1.000
+NameGame.BorderSizePixel = 0
+NameGame.Position = UDim2.new(0.300000012, 0, 0.0199999996, 0)
+NameGame.Size = UDim2.new(0, 375, 0, 30)
+NameGame.Font = Enum.Font.ArialBold
+NameGame.Text = "NameGame"
+NameGame.TextColor3 = Color3.fromRGB(255, 255, 255)
+NameGame.TextSize = 18.000
+NameGame.TextWrapped = true
+NameGame.TextXAlignment = Enum.TextXAlignment.Left
