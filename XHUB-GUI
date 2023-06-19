@@ -6,7 +6,7 @@ Window.Parent = Screen
 Window.BorderSizePixel = 0
 Window.BackgroundColor3 = Color3.fromRGB(85, 85, 127)
 Window.Position = UDim2.new(0.5, -250, 0.5, -160)
-Window.Size = UDim2.new(0, 1000, 0, 800)
+Window.Size = UDim2.new(0, 1525, 0, 500)
 Window.Active = true
 Window.Draggable = true
 
