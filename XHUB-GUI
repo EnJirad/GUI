@@ -1,9 +1,6 @@
 local Screen = Instance.new("ScreenGui")
 Screen.Parent = game.Players.LocalPlayer.PlayerGui
 
-local windowWidth = workspace.CurrentCamera.ViewportSize.X * 0.5
-local windowHeight = workspace.CurrentCamera.ViewportSize.Y * 0.5
-
 Window = Instance.new("Frame", Screen)
 Window.Parent = Screen
 Window.BorderSizePixel = 0
@@ -17,12 +14,12 @@ UICorner = Instance.new("UICorner")
 UICorner.CornerRadius = UDim.new(0, 20)
 UICorner.Parent = Window
 
-Sild = Instance.new("ScrollingFrame", Window)
+local Sild = Instance.new("ScrollingFrame", Window)
 Sild.Size = UDim2.new(0.3, 0, 0.88, 0)
 Sild.Position = UDim2.new(0, 0, 0.1, 0)
 Sild.BackgroundColor3 = Color3.fromRGB(65, 65, 97)
 Sild.BorderSizePixel = 0
-Sild.Style = Enum.ButtonStyle.RobloxRoundDefaultButton
+
 
 Container = Instance.new("ScrollingFrame", Window)
 Container.Size = UDim2.new(0.7, 0, 0.88, 0)
