@@ -33,10 +33,3 @@ CloseBTN.MouseButton1Down:Connect(function()
     Window.Visible = false
 end)
 
-local function UpdateWindowSize()
-    local screenSize = Screen:GetGuiObjectSize()
-    Window.Size = UDim2.new(0, screenSize.X * 0.5, 0, screenSize.Y * 0.3)
-    Window.Position = UDim2.new(0.5, -Window.Size.X.Offset * 0.5, 0.5, -Window.Size.Y.Offset * 0.5)
-end
-UpdateWindowSize()
-game.Players.LocalPlayer.PlayerGui.ScreenResolutionChanged:Connect(UpdateWindowSize)
