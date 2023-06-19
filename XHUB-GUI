@@ -58,12 +58,12 @@ Close.BorderColor3 = Color3.fromRGB(255, 255, 255)
 Close.BorderSizePixel = 0
 Close.Position = UDim2.new(0, 395, 0, 5)
 Close.Size = UDim2.new(0, 30, 0, 30)
-Close.Image = "rbxassetid://13801207849"
+Close.Image = "rbxassetid://13801200427"
 UICorner.Parent = Close
 Close.Active = true
 
 Close.MouseButton1Down:Connect(function()
-    Main.Visible = false
+    Screen:Destroy()
 end)
 
 Open.Name = "Open"
@@ -79,21 +79,6 @@ Open.Active = true
 Open.MouseButton1Down:Connect(function()
     Main.Visible = not Main.Visible
 end)
-
-X.Name = "X"
-X.Parent = Screen
-X.BackgroundColor3 = Color3.fromRGB(51, 51, 77)
-X.BorderSizePixel = 0
-X.Size = UDim2.new(0, 30, 0, 30)
-X.Position = UDim2.new(0.03,0,0.08,0)
-X.Image = "rbxassetid://13801200427"
-UICorner_16.Parent = X
-X.Active = true
-
-X.MouseButton1Down:Connect(function()
-    Screen:Destroy()
-end)
-
 
 TopRight.Name = "TopRight"
 TopRight.Parent = Main
