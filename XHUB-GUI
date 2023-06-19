@@ -1,8 +1,8 @@
 local Screen = Instance.new("ScreenGui")
 Screen.Parent = game.Players.LocalPlayer.PlayerGui
 
-local windowWidth = workspace.CurrentCamera.ViewportSize.X * 0.4
-local windowHeight = workspace.CurrentCamera.ViewportSize.Y * 0.4
+local windowWidth = workspace.CurrentCamera.ViewportSize.X * 0.5
+local windowHeight = workspace.CurrentCamera.ViewportSize.Y * 0.5
 
 local Window = Instance.new("Frame", Screen)
 Window.Parent = Screen
