@@ -322,3 +322,4 @@ Drag.BackgroundColor3 = Color3.fromRGB(61, 61, 92)
 Drag.BackgroundTransparency = 1.000
 Drag.BorderSizePixel = 0
 Drag.Size = UDim2.new(1, -40, 0, 40)
+Drag.Draggable = true
