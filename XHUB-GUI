@@ -22,7 +22,7 @@ Title  = Instance.new("TextLabel", Window)
 Title.Size = UDim2.new(1, 0, 0.15, 0)
 Title.Position = UDim2.new(0, 0, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "Lol i dont like FE fak you. Made by goldengabe."
+Title.Text = "XHUB GUI"
 
 CloseBTN = Instance.new("TextButton", Window)
 CloseBTN.Text = "X"
@@ -41,3 +41,4 @@ local function UpdateWindowSize()
 end
 UpdateWindowSize()
 game.Players.LocalPlayer.PlayerGui.ScreenResolutionChanged:Connect(UpdateWindowSize)
+
