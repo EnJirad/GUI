@@ -8,10 +8,15 @@ local Window = Instance.new("Frame", Screen)
 Window.Parent = Screen
 Window.BorderSizePixel = 0
 Window.BackgroundColor3 = Color3.fromRGB(0, 153, 0)
-Window.Position = UDim2.new(0.5, -windowWidth * 0.5, 0.5, -windowHeight * 0.5)
-Window.Size = UDim2.new(0, windowWidth, 0, windowHeight)
+Window.Size = UDim2.new(0.5,0,0.5,0)
+Window.Position = UDim2.new(0.25,0,0.25,0)
 Window.Active = true
 Window.Draggable = true
+
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 5)
+UICorner.Parent = Window
+
 
 local Sild = Instance.new("ScrollingFrame", Window)
 Sild.Size = UDim2.new(0.3, 0, 0.88, 0)
