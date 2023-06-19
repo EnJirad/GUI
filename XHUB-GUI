@@ -4,7 +4,7 @@ Screen.Parent = game.Players.LocalPlayer.PlayerGui
 local windowWidth = workspace.CurrentCamera.ViewportSize.X * 0.5
 local windowHeight = workspace.CurrentCamera.ViewportSize.Y * 0.5
 
-local Window = Instance.new("Frame", Screen)
+Window = Instance.new("Frame", Screen)
 Window.Parent = Screen
 Window.BorderSizePixel = 0
 Window.BackgroundColor3 = Color3.fromRGB(0, 153, 0)
@@ -13,47 +13,45 @@ Window.Position = UDim2.new(0.25,0,0.25,0)
 Window.Active = true
 Window.Draggable = true
 
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 5)
+UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 20)
 UICorner.Parent = Window
 
-
-local Sild = Instance.new("ScrollingFrame", Window)
+Sild = Instance.new("ScrollingFrame", Window)
 Sild.Size = UDim2.new(0.3, 0, 0.88, 0)
 Sild.Position = UDim2.new(0, 0, 0.1, 0)
 Sild.BackgroundColor3 = Color3.fromRGB(65, 65, 97)
 Sild.BorderSizePixel = 0
+Sild.Style = Enum.ButtonStyle.RobloxRoundDefaultButton
 
-local Container = Instance.new("ScrollingFrame", Window)
+Container = Instance.new("ScrollingFrame", Window)
 Container.Size = UDim2.new(0.7, 0, 0.88, 0)
 Container.Position = UDim2.new(0.3, 0, 0.1, 0)
 Container.BackgroundColor3 = Color3.fromRGB(10, 150, 200)
 Container.BorderSizePixel = 0
 
-local Title = Instance.new("TextLabel", Window)
+Title = Instance.new("TextLabel", Window)
 Title.Size = UDim2.new(1, 0, 0.1, 0)
 Title.Position = UDim2.new(0, 0, 0, 0)
 Title.BackgroundTransparency = 1
 Title.Text = "XHUB GUI"
 
-local CloseBTN = Instance.new("TextButton", Window)
-CloseBTN.Text = "X"
-CloseBTN.Size = UDim2.new(-0.1, 0, 0.1, 0)
-CloseBTN.Position = UDim2.new(1, 0, 0, 0)
-CloseBTN.BorderSizePixel = 0
+Close = Instance.new("TextButton", Window)
+Close.Text = "X"
+Close.Size = UDim2.new(-0.1, 0, 0.1, 0)
+Close.Position = UDim2.new(1, 0, 0, 0)
+Close.BorderSizePixel = 0
 
-CloseBTN.MouseButton1Down:Connect(function()
+Close.MouseButton1Down:Connect(function()
     Window.Visible = false
 end)
 
+Open = Instance.new("TextButton",Screen)
+Open.Text = "Open"
+Open.Size = UDim2.new(0.05,0,0.05,0)
+Open.Position = UDim2.new(0.05,0,0.15,0)
+Open.BorderSizePixel = 0
 
-
-OpenBTN = Instance.new("TextButton",Screen)
-OpenBTN.Text = "Open"
-OpenBTN.Size = UDim2.new(0.05,0,0.05,0)
-OpenBTN.Position = UDim2.new(0.05,0,0.15,0)
-OpenBTN.BorderSizePixel = 0
-
-OpenBTN.MouseButton1Down:connect(function()
+Open.MouseButton1Down:connect(function()
 	Window.Visible =true
 end)
