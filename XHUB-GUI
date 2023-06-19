@@ -8,8 +8,7 @@ Window.BackgroundColor3 = Color3.fromRGB(85, 85, 127)
 Window.Position = UDim2.new(0.5, -250, 0.5, -160)
 Window.Size = UDim2.new(0, 500, 0, 320)
 Window.Active = true
-
-
+Window.Draggable = true
 
 Container = Instance.new("ScrollingFrame", Window)
 Container.Size = UDim2.new(1, 0, 0.85, 0)
@@ -41,4 +40,3 @@ local function UpdateWindowSize()
 end
 UpdateWindowSize()
 game.Players.LocalPlayer.PlayerGui.ScreenResolutionChanged:Connect(UpdateWindowSize)
-
