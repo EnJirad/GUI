@@ -1,0 +1,27 @@
+local UI = {}
+
+-- สร้างหน้าต่าง
+function UI.CreateWindow(title, width, height)
+    local window = syn.new_window(title, width, height)
+    return window
+end
+
+-- เพิ่มปุ่มในหน้าต่าง
+function UI.AddButton(window, text, onClick)
+    local button = syn.new_button(window, text, onClick)
+    return button
+end
+
+-- เพิ่มภาพในหน้าต่าง
+function UI.AddImage(window, imageURL)
+    local image = syn.new_image(window, imageURL)
+    return image
+end
+
+-- เพิ่มเท็กซ์ต์ในหน้าต่าง
+function UI.AddTextBox(window, text)
+    local textBox = syn.new_textbox(window, text)
+    return textBox
+end
+
+return UI
