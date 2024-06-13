@@ -36,15 +36,22 @@ function Xlib:MakeWindow(config)
             table.insert(self.Tabs, tab)
             return tab
         end,
-        Render = function(self, parent)
+        Render = function(self, player)
+            local gui = Instance.new("ScreenGui")
+            gui.Name = self.Name
+            gui.IgnoreGuiInset = true
+            gui.ResetOnSpawn = false
+            gui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+            gui.Parent = player.PlayerGui
+
             local frame = Instance.new("Frame")
-            frame.Name = self.Name
+            frame.Name = "MainFrame"
             frame.Position = self.Position
             frame.Size = self.Size
             frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
             frame.BorderSizePixel = 0
             frame.Visible = not self.Minimized
-            frame.Parent = parent
+            frame.Parent = gui
 
             local dragArea = Instance.new("Frame")
             dragArea.Name = "DragArea"
@@ -86,7 +93,7 @@ function Xlib:MakeWindow(config)
             closeButton.Position = UDim2.new(1, -60, 0, 0)
             closeButton.Parent = dragArea
             closeButton.MouseButton1Click:Connect(function()
-                frame:Destroy()
+                gui:Destroy()
             end)
 
             local tabContainer = Instance.new("Frame")
@@ -182,7 +189,7 @@ function Xlib:MakeWindow(config)
                 end
             end)
 
-            return frame
+            return gui
         end,
     }
     return window
