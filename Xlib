@@ -93,32 +93,31 @@ function Xlib:MakeWindow(properties)
                 end
                 tabButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 
-                local togglesFrame = mainFrame:FindFirstChild("TogglesFrame")
-                if not togglesFrame then
-                    togglesFrame = Instance.new("ScrollingFrame", mainFrame)
-                    togglesFrame.Name = "TogglesFrame"
-                    togglesFrame.Size = UDim2.new(0, 280, 1, -40)  -- Adjusted size to fit properly
-                    togglesFrame.Position = UDim2.new(0, 110, 0, 40)  -- Adjusted position to fit properly
-                    togglesFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-                    togglesFrame.CanvasSize = UDim2.new(0, 0, 2, 0)  -- Adjust as needed
-                    togglesFrame.ScrollBarThickness = 8
+                local togglesFrame = Instance.new("ScrollingFrame", mainFrame)
+                togglesFrame.Size = UDim2.new(0, 280, 1, -40)  -- Adjusted size to fit properly
+                togglesFrame.Position = UDim2.new(0, 110, 0, 40)  -- Adjusted position to fit properly
+                togglesFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+                togglesFrame.CanvasSize = UDim2.new(0, 0, 2, 0)  -- Adjust as needed
+                togglesFrame.ScrollBarThickness = 8
+
+                local function createToggles()
+                    for _, toggleName in ipairs(tabProperties.Toggles or {}) do
+                        local toggleButton = Instance.new("TextButton", togglesFrame)
+                        toggleButton.Size = UDim2.new(1, -10, 0, 30)  -- Adjusted to fit within the toggleFrame
+                        toggleButton.Position = UDim2.new(0, 5, 0, (#togglesFrame:GetChildren() * 35) + 5)  -- Adjusted for proper margin and spacing
+                        toggleButton.Text = toggleName
+                        toggleButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+                        toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+                        toggleButton.Font = Enum.Font.SourceSans
+                        toggleButton.TextSize = 16
+                        toggleButton.MouseButton1Click:Connect(function()
+                            -- Toggle logic goes here
+                        end)
+                    end
                 end
 
                 togglesFrame:ClearAllChildren()
-
-                for _, toggleName in ipairs(tabProperties.Toggles or {}) do
-                    local toggleButton = Instance.new("TextButton", togglesFrame)
-                    toggleButton.Size = UDim2.new(1, -10, 0, 30)  -- Adjusted to fit within the toggleFrame
-                    toggleButton.Position = UDim2.new(0, 5, 0, (#togglesFrame:GetChildren() * 35) + 5)  -- Adjusted for proper margin and spacing
-                    toggleButton.Text = toggleName
-                    toggleButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-                    toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-                    toggleButton.Font = Enum.Font.SourceSans
-                    toggleButton.TextSize = 16
-                    toggleButton.MouseButton1Click:Connect(function()
-                        -- Toggle logic goes here
-                    end)
-                end
+                createToggles()
             end)
 
             tabs[#tabs + 1] = tabButton
