@@ -1,29 +1,110 @@
 -- Xlib.lua
 
--- Define the main UI window
+-- นิยามตัวแปรเริ่มต้น
 local Xlib = {}
+Xlib.__index = Xlib
 
+-- ฟังก์ชันใหม่เพื่อสร้างอินสแตนซ์ใหม่
 function Xlib:new()
     local newObj = {
-        bars = {} -- Table to hold bars
+        bars = {},
+        window = nil,
+        minimized = false,
+        closeButton = nil,
+        minimizeButton = nil
     }
-    self.__index = self
-    return setmetatable(newObj, self)
+    setmetatable(newObj, self)
+    return newObj
 end
 
+-- ฟังก์ชันเปลี่ยนชื่อหน้าต่าง
 function Xlib:setWindowName(newName)
-    game:GetService("GuiService"):FindMenu("Xlib"):SetTitle(newName)
+    if self.window then
+        self.window.Title.Text = newName
+    end
 end
 
+-- ฟังก์ชันสร้างหน้าต่าง UI
+function Xlib:createUIWindow()
+    local ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.Name = "Xlib"
+    ScreenGui.Parent = game.CoreGui
+    
+    local Frame = Instance.new("Frame")
+    Frame.Size = UDim2.new(0.5, 0, 0.5, 0)
+    Frame.Position = UDim2.new(0.25, 0, 0.25, 0)
+    Frame.BackgroundColor3 = Color3.new(0.3, 0.3, 0.3)
+    Frame.BorderSizePixel = 0
+    Frame.Active = true
+    Frame.Draggable = true
+    Frame.Name = "Window"
+    self.window = Frame
+    Frame.Parent = ScreenGui
+    
+    local Title = Instance.new("TextLabel")
+    Title.Size = UDim2.new(1, 0, 0, 30)
+    Title.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
+    Title.TextColor3 = Color3.new(1, 1, 1)
+    Title.Text = "Window Title"
+    Title.Font = Enum.Font.SourceSans
+    Title.TextSize = 20
+    Title.Name = "Title"
+    Title.Parent = Frame
+    
+    local CloseButton = Instance.new("TextButton")
+    CloseButton.Size = UDim2.new(0, 30, 0, 30)
+    CloseButton.Position = UDim2.new(1, -30, 0, 0)
+    CloseButton.BackgroundColor3 = Color3.new(1, 0, 0)
+    CloseButton.TextColor3 = Color3.new(1, 1, 1)
+    CloseButton.Text = "X"
+    CloseButton.Font = Enum.Font.SourceSans
+    CloseButton.TextSize = 20
+    CloseButton.Name = "CloseButton"
+    CloseButton.Parent = Title
+    self.closeButton = CloseButton
+    CloseButton.MouseButton1Click:Connect(function()
+        ScreenGui:Destroy()
+    end)
+    
+    local MinimizeButton = Instance.new("TextButton")
+    MinimizeButton.Size = UDim2.new(0, 30, 0, 30)
+    MinimizeButton.Position = UDim2.new(1, -60, 0, 0)
+    MinimizeButton.BackgroundColor3 = Color3.new(0, 0, 1)
+    MinimizeButton.TextColor3 = Color3.new(1, 1, 1)
+    MinimizeButton.Text = "-"
+    MinimizeButton.Font = Enum.Font.SourceSans
+    MinimizeButton.TextSize = 20
+    MinimizeButton.Name = "MinimizeButton"
+    MinimizeButton.Parent = Title
+    self.minimizeButton = MinimizeButton
+    MinimizeButton.MouseButton1Click:Connect(function()
+        self:minimize()
+    end)
+    
+    return ScreenGui
+end
+
+-- ฟังก์ชันปิดหน้าต่าง UI
+function Xlib:minimize()
+    self.minimized = not self.minimized
+    if self.minimized then
+        self.window.Visible = false
+    else
+        self.window.Visible = true
+    end
+end
+
+-- ฟังก์ชันสร้างแถบใหม่
 function Xlib:createBar(barName)
     local newBar = {
         name = barName,
-        subBars = {} -- Table to hold sub-bars
+        subBars = {}
     }
     table.insert(self.bars, newBar)
     return newBar
 end
 
+-- ฟังก์ชันเพิ่มแถบย่อยในแถบที่กำหนด
 function Xlib:addSubBar(bar, subBarName)
     local newSubBar = {
         name = subBarName
