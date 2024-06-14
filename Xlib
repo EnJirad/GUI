@@ -1,3 +1,4 @@
+-- Xlib Library for creating GUI windows and tabs
 local Xlib = {}
 
 function Xlib:MakeWindow(properties)
@@ -26,16 +27,6 @@ function Xlib:MakeWindow(properties)
     titleLabel.BackgroundTransparency = 1
     titleLabel.Font = Enum.Font.SourceSansBold
     titleLabel.TextSize = 18
-    
-    local minimizeButton = Instance.new("TextButton", titleBar)
-    minimizeButton.Size = UDim2.new(0, 20, 0, 20)
-    minimizeButton.Position = UDim2.new(1, -55, 0, 5)
-    minimizeButton.Text = "-"
-    minimizeButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-    minimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    minimizeButton.Font = Enum.Font.SourceSans
-    minimizeButton.TextSize = 16
-    minimizeButton.MouseButton1Click:Connect(minimize)
 
     local closeButton = Instance.new("TextButton", titleBar)
     closeButton.Size = UDim2.new(0, 30, 0, 30)
@@ -60,10 +51,8 @@ function Xlib:MakeWindow(properties)
     local function switchTab(tab)
         if currentTab then
             currentTab.frame.Visible = false
-            currentTab.button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
         end
         tab.frame.Visible = true
-        tab.button.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
         currentTab = tab
     end
 
@@ -77,7 +66,7 @@ function Xlib:MakeWindow(properties)
         tabButton.Font = Enum.Font.SourceSansBold
         tabButton.TextSize = 16
         tabButton.MouseButton1Click:Connect(function()
-            switchTab(tab)
+            switchTab(tabButton)
         end)
 
         local tabFrame = Instance.new("Frame", mainFrame)
@@ -114,50 +103,6 @@ function Xlib:MakeWindow(properties)
         switchTab(tab)
         return tab
     end
-    
-    local minimized = false
-    local minimizedIcon
-
-    local function minimize()
-        if minimized then
-            mainFrame.Visible = true
-            if minimizedIcon then
-                minimizedIcon:Destroy()
-                minimizedIcon = nil
-            end
-            minimized = false
-        else
-            mainFrame.Visible = false
-            minimizedIcon = Instance.new("TextButton", window)
-            minimizedIcon.Size = UDim2.new(0, 35, 0, 35)
-            minimizedIcon.Position = UDim2.new(0, 35, 0, 35)
-            minimizedIcon.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-            minimizedIcon.Text = "O"
-            minimizedIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
-            minimizedIcon.Font = Enum.Font.SourceSans
-            minimizedIcon.TextSize = 24
-            minimizedIcon.Draggable = true
-            minimizedIcon.Active = true
-            minimizedIcon.MouseButton1Click:Connect(function()
-                mainFrame.Visible = true
-                minimizedIcon:Destroy()
-                minimizedIcon = nil
-                minimized = false
-            end)
-            minimized = true
-        end
-    end
-
-    local icon = Instance.new("TextButton", window)
-    icon.Size = UDim2.new(0, 50, 0, 50)
-    icon.Position = UDim2.new(1, -55, 0, 0)
-    icon.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    icon.TextColor3 = Color3.fromRGB(255, 255, 255)
-    icon.Font = Enum.Font.SourceSansBold
-    icon.TextSize = 20
-    icon.Text = "↖"
-
-    icon.MouseButton1Click:Connect(minimize)
 
     return tabs
 end
