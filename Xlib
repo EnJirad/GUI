@@ -148,6 +148,17 @@ function Xlib:MakeWindow(properties)
         end
     end
 
+    local icon = Instance.new("TextButton", window)
+    icon.Size = UDim2.new(0, 50, 0, 50)
+    icon.Position = UDim2.new(1, -55, 0, 0)
+    icon.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    icon.TextColor3 = Color3.fromRGB(255, 255, 255)
+    icon.Font = Enum.Font.SourceSansBold
+    icon.TextSize = 20
+    icon.Text = "↖"
+
+    icon.MouseButton1Click:Connect(minimize)
+
     return tabs
 end
 
