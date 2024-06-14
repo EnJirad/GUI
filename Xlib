@@ -1,3 +1,5 @@
+-- Xlib.lua
+
 local Xlib = {}
 
 function Xlib:MakeWindow(properties)
@@ -99,7 +101,7 @@ function Xlib:MakeWindow(properties)
 
     local function createTabs()
         local tabs = {}
-    
+
         function tabs:MakeTab(tabProperties)
             local tabButton = Instance.new("TextButton", tabFrame)
             tabButton.Size = UDim2.new(1, -10, 0, 30)
@@ -117,7 +119,7 @@ function Xlib:MakeWindow(properties)
                     end
                 end
                 tabButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-    
+
                 local togglesFrame = mainFrame:FindFirstChild("TogglesFrame")
                 if not togglesFrame then
                     togglesFrame = Instance.new("ScrollingFrame", mainFrame)
@@ -128,7 +130,7 @@ function Xlib:MakeWindow(properties)
                     togglesFrame.CanvasSize = UDim2.new(0, 0, 2, 0)
                     togglesFrame.ScrollBarThickness = 8
                 end
-    
+
                 togglesFrame:ClearAllChildren()
                 for _, toggle in ipairs(tabProperties.Toggles or {}) do
                     local toggleButton = Instance.new("TextButton", togglesFrame)
@@ -148,45 +150,10 @@ function Xlib:MakeWindow(properties)
                         end
                     end)
                 end
-    
-                -- สร้าง subfunctions สำหรับแต่ละ tab
-                local subfunctions = {}
-    
-                function subfunctions:AddSubFunction(subFunctionProperties)
-                    -- การสร้าง subfunction จะใช้ togglesFrame เพื่อสร้างหน้าที่อยู่ในแท็บ
-                    local subFunctionButton = Instance.new("TextButton", togglesFrame)
-                    subFunctionButton.Size = UDim2.new(1, -10, 0, 30)
-                    subFunctionButton.Position = UDim2.new(0, 5, 0, (#togglesFrame:GetChildren() * 35) + 5)
-                    subFunctionButton.Text = subFunctionProperties.Name or "SubFunction"
-                    subFunctionButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-                    subFunctionButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-                    subFunctionButton.Font = Enum.Font.SourceSansBold
-                    subFunctionButton.TextSize = 16
-                    subFunctionButton.AutoButtonColor = false
-                    subFunctionButton.MouseButton1Click:Connect(function()
-                        -- ทำสิ่งที่ต้องการเมื่อคลิกที่ subfunction นี้
-                        if subFunctionProperties.Callback then
-                            subFunctionProperties.Callback()
-                        end
-                    end)
-                end
-    
-                return {
-                    AddToggle = function(toggleProperties)
-                        local toggles = tabProperties.Toggles or {}
-                        table.insert(toggles, {
-                            Name = toggleProperties.Name or "Toggle",
-                            Value = toggleProperties.Default or false,
-                            Callback = toggleProperties.Callback
-                        })
-                        tabProperties.Toggles = toggles
-                    end,
-                    AddSubFunction = subfunctions.AddSubFunction
-                }
             end)
-    
+
             tabs[#tabs + 1] = tabButton
-    
+
             return {
                 AddToggle = function(toggleProperties)
                     local toggles = tabProperties.Toggles or {}
@@ -196,11 +163,10 @@ function Xlib:MakeWindow(properties)
                         Callback = toggleProperties.Callback
                     })
                     tabProperties.Toggles = toggles
-                end,
-                AddSubFunction = subfunctions.AddSubFunction
+                end
             }
         end
-    
+
         return tabs
     end
 
