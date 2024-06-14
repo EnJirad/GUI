@@ -1,4 +1,3 @@
--- Xlib.lua
 local Xlib = {}
 
 function Xlib:MakeWindow(properties)
@@ -16,12 +15,35 @@ function Xlib:MakeWindow(properties)
     mainFrame.Draggable = properties.Draggable or false
 
     local isOpen = true
+
+    local iconButton
+
     local function toggleWindow()
         isOpen = not isOpen
         if isOpen then
-            mainFrame.Position = properties.Position or UDim2.new(0.5, -200, 0.5, -175)
+            mainFrame.Visible = true
+            if iconButton then
+                iconButton.Visible = false
+            end
         else
-            mainFrame.Position = UDim2.new(0.5, -200, 1, -50)
+            mainFrame.Visible = false
+            if not iconButton then
+                iconButton = Instance.new("TextButton")
+                iconButton.Size = UDim2.new(0, 50, 0, 50)
+                iconButton.Position = UDim2.new(0.5, -25, 0.5, -25)
+                iconButton.Text = "☰"
+                iconButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+                iconButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+                iconButton.Font = Enum.Font.SourceSansBold
+                iconButton.TextSize = 24
+                iconButton.Parent = window
+                iconButton.Draggable = true
+                iconButton.MouseButton1Click:Connect(function()
+                    toggleWindow()
+                end)
+            else
+                iconButton.Visible = true
+            end
         end
     end
 
@@ -118,18 +140,22 @@ function Xlib:MakeWindow(properties)
                 end
 
                 togglesFrame:ClearAllChildren()
-                for _, toggleName in ipairs(tabProperties.Toggles or {}) do
+                for _, toggle in ipairs(tabProperties.Toggles or {}) do
                     local toggleButton = Instance.new("TextButton", togglesFrame)
                     toggleButton.Size = UDim2.new(1, -10, 0, 30)
                     toggleButton.Position = UDim2.new(0, 5, 0, (#togglesFrame:GetChildren() * 35) + 5)
-                    toggleButton.Text = toggleName
+                    toggleButton.Text = toggle.Name or "Toggle"
                     toggleButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
                     toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
                     toggleButton.Font = Enum.Font.SourceSansBold
                     toggleButton.TextSize = 16
                     toggleButton.AutoButtonColor = false
                     toggleButton.MouseButton1Click:Connect(function()
-                        -- Toggle logic goes here
+                        toggle.Value = not toggle.Value
+                        toggleButton.BackgroundColor3 = toggle.Value and Color3.fromRGB(100, 100, 100) or Color3.fromRGB(80, 80, 80)
+                        if toggle.Callback then
+                            toggle.Callback(toggle.Value)
+                        end
                     end)
                 end
             end)
@@ -139,7 +165,11 @@ function Xlib:MakeWindow(properties)
             return {
                 AddToggle = function(toggleProperties)
                     local toggles = tabProperties.Toggles or {}
-                    toggles[#toggles + 1] = toggleProperties.Name or "Toggle"
+                    table.insert(toggles, {
+                        Name = toggleProperties.Name or "Toggle",
+                        Value = toggleProperties.Default or false,
+                        Callback = toggleProperties.Callback
+                    })
                     tabProperties.Toggles = toggles
                 end
             }
@@ -151,8 +181,7 @@ function Xlib:MakeWindow(properties)
     local tabs = createTabs()
 
     return {
-        MakeTab = tabs.MakeTab,
-        AddToggle = tabs[1].AddToggle,  -- Assuming we always start with the first tab
+        MakeTab = function(tabProperties) return tabs:MakeTab(tabProperties) end,
         ToggleWindow = toggleWindow  -- Expose toggleWindow function for external use
     }
 end
