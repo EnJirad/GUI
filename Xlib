@@ -15,6 +15,16 @@ function Xlib:MakeWindow(properties)
     mainFrame.Active = true
     mainFrame.Draggable = properties.Draggable or false
 
+    local isOpen = true
+    local function toggleWindow()
+        isOpen = not isOpen
+        if isOpen then
+            mainFrame.Position = properties.Position or UDim2.new(0.5, -200, 0.5, -175)
+        else
+            mainFrame.Position = UDim2.new(0.5, -200, 1, -50)
+        end
+    end
+
     local function createTitleBar()
         local titleBar = Instance.new("Frame", mainFrame)
         titleBar.Size = UDim2.new(1, 0, 0, 30)
@@ -44,7 +54,7 @@ function Xlib:MakeWindow(properties)
         minimizeButton.TextSize = 20
         minimizeButton.AutoButtonColor = false
         minimizeButton.MouseButton1Click:Connect(function()
-            mainFrame.Visible = not mainFrame.Visible
+            toggleWindow()
         end)
 
         local closeButton = Instance.new("TextButton", titleBar)
@@ -142,7 +152,8 @@ function Xlib:MakeWindow(properties)
 
     return {
         MakeTab = tabs.MakeTab,
-        AddToggle = tabs[1].AddToggle  -- Assuming we always start with the first tab
+        AddToggle = tabs[1].AddToggle,  -- Assuming we always start with the first tab
+        ToggleWindow = toggleWindow  -- Expose toggleWindow function for external use
     }
 end
 
