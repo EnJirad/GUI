@@ -7,7 +7,7 @@ Xlib.__index = Xlib
 -- ฟังก์ชันใหม่เพื่อสร้างอินสแตนซ์ใหม่
 function Xlib:new()
     local newObj = {
-        bars = {},
+        tabs = {},
         window = nil,
         minimized = false,
         closeButton = nil,
@@ -30,13 +30,13 @@ function Xlib:createUIWindow()
     ScreenGui.Name = "Xlib"
     ScreenGui.Parent = game.CoreGui
     
-    local MainFrame = Instance.new("Frame")
-    MainFrame.Size = UDim2.new(0.2, 0, 1, 0)
-    MainFrame.Position = UDim2.new(0, 0, 0, 0)
-    MainFrame.BackgroundColor3 = Color3.new(0.3, 0.3, 0.3)
-    MainFrame.BorderSizePixel = 0
-    MainFrame.Name = "MainFrame"
-    MainFrame.Parent = ScreenGui
+    local MainContainer = Instance.new("Frame")
+    MainContainer.Size = UDim2.new(0.2, 0, 1, 0)
+    MainContainer.Position = UDim2.new(0, 0, 0, 0)
+    MainContainer.BackgroundColor3 = Color3.new(0.3, 0.3, 0.3)
+    MainContainer.BorderSizePixel = 0
+    MainContainer.Name = "MainContainer"
+    MainContainer.Parent = ScreenGui
     
     local TabContainer = Instance.new("Frame")
     TabContainer.Size = UDim2.new(0.8, 0, 1, 0)
@@ -54,7 +54,7 @@ function Xlib:createUIWindow()
     Title.Font = Enum.Font.SourceSans
     Title.TextSize = 20
     Title.Name = "Title"
-    Title.Parent = MainFrame
+    Title.Parent = MainContainer
     
     local CloseButton = Instance.new("TextButton")
     CloseButton.Size = UDim2.new(0, 30, 0, 30)
@@ -99,22 +99,46 @@ function Xlib:minimize()
     end
 end
 
--- ฟังก์ชันสร้างแถบใหม่
+-- ฟังก์ชันสร้างแท็บใหม่
 function Xlib:createTab(tabName)
     local newTab = {
         name = tabName,
-        items = {}
+        items = {},
+        frame = nil
     }
+    
+    newTab.frame = Instance.new("Frame")
+    newTab.frame.Size = UDim2.new(1, 0, 1, 0)
+    newTab.frame.BackgroundTransparency = 1
+    newTab.frame.Name = tabName
+    newTab.frame.Parent = self.tabs
+    
     return newTab
 end
 
--- ฟังก์ชันเพิ่มรายการลงในแท็บ
+-- ฟังก์ชันเพิ่มรายการในแท็บ
 function Xlib:addItem(tab, itemName, itemType)
     local newItem = {
         name = itemName,
-        type = itemType
+        type = itemType,
+        frame = nil
     }
-    table.insert(tab.items, newItem)
+    
+    newItem.frame = Instance.new("Frame")
+    newItem.frame.Size = UDim2.new(1, 0, 0, 30)
+    newItem.frame.BackgroundColor3 = Color3.new(0.3, 0.3, 0.3)
+    newItem.frame.Name = itemName
+    newItem.frame.Parent = tab.frame
+    
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.TextColor3 = Color3.new(1, 1, 1)
+    label.Text = itemName
+    label.Font = Enum.Font.SourceSans
+    label.TextSize = 20
+    label.Parent = newItem.frame
+    
     return newItem
 end
 
@@ -122,9 +146,50 @@ end
 function Xlib:createDropDown(tab, dropDownName, options)
     local newDropDown = {
         name = dropDownName,
-        options = options
+        options = options,
+        frame = nil
     }
-    table.insert(tab.items, newDropDown)
+    
+    newDropDown.frame = Instance.new("Frame")
+    newDropDown.frame.Size = UDim2.new(1, 0, 0, 60)
+    newDropDown.frame.BackgroundColor3 = Color3.new(0.3, 0.3, 0.3)
+    newDropDown.frame.Name = dropDownName
+    newDropDown.frame.Parent = tab.frame
+    
+    local dropdownLabel = Instance.new("TextLabel")
+    dropdownLabel.Size = UDim2.new(1, 0, 0, 30)
+    dropdownLabel.Position = UDim2.new(0, 0, 0, 0)
+    dropdownLabel.BackgroundColor3 = Color3.new(0.4, 0.4, 0.4)
+    dropdownLabel.TextColor3 = Color3.new(1, 1, 1)
+    dropdownLabel.Text = dropDownName
+    dropdownLabel.Font = Enum.Font.SourceSans
+    dropdownLabel.TextSize = 20
+    dropdownLabel.Parent = newDropDown.frame
+    
+    local dropdownFrame = Instance.new("Frame")
+    dropdownFrame.Size = UDim2.new(1, 0, 0, 30 * #options)
+    dropdownFrame.Position = UDim2.new(0, 0, 1, 0)
+    dropdownFrame.BackgroundTransparency = 1
+    dropdownFrame.Visible = false
+    dropdownFrame.Name = "Options"
+    dropdownFrame.Parent = newDropDown.frame
+    
+    for i, option in ipairs(options) do
+        local optionButton = Instance.new("TextButton")
+        optionButton.Size = UDim2.new(1, 0, 0, 30)
+        optionButton.Position = UDim2.new(0, 0, 0, (i - 1) * 30)
+        optionButton.BackgroundColor3 = Color3.new(0.4, 0.4, 0.4)
+        optionButton.TextColor3 = Color3.new(1, 1, 1)
+        optionButton.Text = option
+        optionButton.Font = Enum.Font.SourceSans
+        optionButton.TextSize = 20
+        optionButton.Parent = dropdownFrame
+    end
+    
+    dropdownLabel.MouseButton1Click:Connect(function()
+        dropdownFrame.Visible = not dropdownFrame.Visible
+    end)
+    
     return newDropDown
 end
 
