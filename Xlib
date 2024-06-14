@@ -32,7 +32,7 @@ function Xlib:MakeWindow(properties)
                 iconButton.Size = UDim2.new(0, 35, 0, 35)
                 iconButton.Position = UDim2.new(0, 35, 0, 35)
                 iconButton.Text = "∆"
-                iconButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+                iconButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
                 iconButton.TextColor3 = Color3.fromRGB(255, 255, 255)
                 iconButton.Font = Enum.Font.SourceSansBold
                 iconButton.TextSize = 24
@@ -114,7 +114,7 @@ function Xlib:MakeWindow(properties)
             local tabButton = Instance.new("TextButton", tabFrame)
             tabButton.Size = UDim2.new(1, -10, 0, 30)
             tabButton.Position = UDim2.new(0, 5, 0, (#tabs * 35) + 5)
-            tabButton.Text = tabProperties.Name
+            tabButton.Text = tabProperties.Name or "Tab"
             tabButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
             tabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
             tabButton.Font = Enum.Font.SourceSansBold
