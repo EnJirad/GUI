@@ -1,0 +1,69 @@
+-- Xlib Module
+local Xlib = {}
+
+function Xlib:MakeWindow(properties)
+    local window = {}
+    window.Name = properties.Name or "Window"
+    window.MainFrame = Instance.new("Frame")
+    window.MainFrame.Name = window.Name
+    window.MainFrame.Parent = properties.Parent or game.Players.LocalPlayer:WaitForChild("PlayerGui")
+    window.MainFrame.Size = properties.Size or UDim2.new(0, 400, 0, 350)
+    window.MainFrame.Position = properties.Position or UDim2.new(0.5, -200, 0.5, -175)
+    window.MainFrame.BackgroundColor3 = properties.BackgroundColor3 or Color3.fromRGB(40, 40, 40)
+    window.MainFrame.Active = true
+    window.MainFrame.Visible = true
+    window.MainFrame.Draggable = properties.Draggable or true
+    
+    window.Tabs = {}
+
+    function window:MakeTab(tabProperties)
+        local tab = {}
+        tab.Name = tabProperties.Name or "Tab"
+        tab.Frame = Instance.new("Frame")
+        tab.Frame.Name = tab.Name
+        tab.Frame.Parent = window.MainFrame
+        tab.Frame.Size = properties.Size or UDim2.new(0, 400, 0, 350)
+        tab.Frame.Position = properties.Position or UDim2.new(0.5, -200, 0.5, -175)
+        tab.Frame.BackgroundColor3 = properties.BackgroundColor3 or Color3.fromRGB(40, 40, 40)
+        tab.Frame.Active = true
+        tab.Frame.Visible = true
+        tab.Frame.Draggable = properties.Draggable or true
+        tab.Toggles = {}
+
+        function tab:AddToggle(toggleProperties)
+            local toggle = {}
+            toggle.Name = toggleProperties.Name or "Toggle"
+            toggle.Default = toggleProperties.Default or false
+            toggle.Callback = toggleProperties.Callback or function(value)
+                print("Toggle value changed to:", value)
+            end
+
+            toggle.Button = Instance.new("TextButton")
+            toggle.Button.Name = toggle.Name
+            toggle.Button.Parent = tab.Frame
+            toggle.Button.Size = UDim2.new(1, -10, 0, 30)
+            toggle.Button.Position = UDim2.new(0, 5, 0, #tab.Toggles * 35 + 5)
+            toggle.Button.Text = toggle.Name
+            toggle.Button.BackgroundColor3 = properties.BackgroundColor3 or Color3.fromRGB(80, 80, 80)
+            toggle.Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+            toggle.Button.Font = Enum.Font.SourceSans
+            toggle.Button.TextSize = 16
+            toggle.Button.MouseButton1Click:Connect(function()
+                toggle.Default = not toggle.Default
+                toggle.Callback(toggle.Default)
+            end)
+
+            table.insert(tab.Toggles, toggle)
+
+            return toggle
+        end
+
+        table.insert(window.Tabs, tab)
+
+        return tab
+    end
+
+    return window
+end
+
+return Xlib
