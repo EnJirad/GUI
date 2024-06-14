@@ -103,14 +103,13 @@ function Xlib:MakeWindow(properties)
         function tabs:MakeTab(tabProperties)
             local tabButton = Instance.new("TextButton", tabFrame)
             tabButton.Size = UDim2.new(1, -10, 0, 30)
-            tabButton.Position = UDim2.new(0, 5, 0, (#tabFrame:GetChildren() * 35) + 5)
+            tabButton.Position = UDim2.new(0, 5, 0, (#tabs * 35) + 5)
             tabButton.Text = tabProperties.Name or "Tab"
             tabButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
             tabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
             tabButton.Font = Enum.Font.SourceSansBold
             tabButton.TextSize = 16
             tabButton.AutoButtonColor = false
-
             tabButton.MouseButton1Click:Connect(function()
                 for _, child in ipairs(tabFrame:GetChildren()) do
                     if child:IsA("TextButton") then
@@ -169,20 +168,11 @@ function Xlib:MakeWindow(properties)
         return tabs
     end
 
-    local function MakeWindow(properties)
-        local window = {}
-        local tabs = createTabs()
-
-        function window:MakeTab(tabProperties)
-            local tab = tabs:MakeTab(tabProperties)
-            return tab
-        end
-
-        return window
-    end
+    local tabs = createTabs()
 
     return {
-        MakeWindow = MakeWindow
+        MakeTab = function(tabProperties) return tabs:MakeTab(tabProperties) end,
+        ToggleWindow = toggleWindow
     }
 end
 
