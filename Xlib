@@ -1,175 +1,34 @@
-local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
-local Players = game:GetService("Players")
+-- เพิ่มฟังก์ชันสำหรับการเพิ่ม Toggle ในแถบ UI
 
-local player = Players.LocalPlayer
-local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-local mainFrame = Instance.new("Frame", screenGui)
-local titleBar = Instance.new("Frame", mainFrame)
-local titleBarBg = Instance.new("Frame", titleBar)
-local titleLabel = Instance.new("TextLabel", titleBar)
-local toggleFrame = Instance.new("ScrollingFrame", mainFrame)
-local minimizeButton = Instance.new("TextButton", titleBar)
-local closeButton = Instance.new("TextButton", titleBar)
-local mainFrameUICorner = Instance.new("UICorner", mainFrame)
-local titleBarUICorner = Instance.new("UICorner", titleBarBg)
+local Xlib = {}
 
-local tabs = {}  -- สร้างตัวแปรสำหรับเก็บแถบ
-local tabFrames = {}  -- สร้างตัวแปรสำหรับเก็บกรอบของแถบ
-local toggles = {}  -- สร้างตัวแปรสำหรับเก็บการเปิด-ปิด
-
--- สร้างฟังก์ชันสำหรับสร้างแถบ
-local function createTab(tabName)
-    local tabButton = Instance.new("TextButton", titleBar)
-    tabButton.Size = UDim2.new(0, 80, 1, 0)
-    tabButton.Position = UDim2.new(0, #tabs * 85, 0, 0)
-    tabButton.Text = tabName
-    tabButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    tabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    tabButton.Font = Enum.Font.SourceSans
-    tabButton.TextSize = 16
-
-    local tabFrame = Instance.new("ScrollingFrame", mainFrame)
-    tabFrame.Size = UDim2.new(1, 0, 1, -40)
-    tabFrame.Position = UDim2.new(0, 0, 0, 40)
-    tabFrame.Visible = false
-    tabFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-    tabFrame.CanvasSize = UDim2.new(0, 0, 2, 0)  -- ปรับตามต้องการ
-    tabFrame.ScrollBarThickness = 8
-
-    local function showTab()
-        for _, frame in pairs(tabFrames) do
-            frame.Visible = false
-        end
-        tabFrame.Visible = true
-    end
-
-    tabButton.MouseButton1Click:Connect(showTab)
-
-    table.insert(tabs, tabName)
-    tabFrames[tabName] = tabFrame
-
-    return {
-        AddToggle = function(self, toggleName, defaultValue, callback)
-            local toggleButton = Instance.new("TextButton", tabFrame)
-            toggleButton.Size = UDim2.new(1, -10, 0, 30)
-            toggleButton.Position = UDim2.new(0, 5, 0, #toggles * 35 + 5)
-            toggleButton.Text = toggleName
-            toggleButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-            toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-            toggleButton.Font = Enum.Font.SourceSans
-            toggleButton.TextSize = 16
-
-            local toggleValue = defaultValue
-            toggleButton.MouseButton1Click:Connect(function()
-                toggleValue = not toggleValue
-                callback(toggleValue)
-            end)
-
-            table.insert(toggles, {
-                ToggleName = toggleName,
-                ToggleButton = toggleButton,
-                Value = defaultValue
-            })
-
-            return {
-                GetValue = function()
-                    return toggleValue
-                end,
-                SetValue = function(value)
-                    toggleValue = value
-                    callback(toggleValue)
-                end
-            }
-        end
+function Xlib:MakeWindow(config)
+    local window = {
+        Name = config.Name,
+        Tabs = {},
     }
-end
-
--- Styling
-screenGui.Name = "Xlib"
-
-mainFrame.Size = UDim2.new(0, 400, 0, 350)
-mainFrame.Position = UDim2.new(0.5, -200, 0.5, -175)
-mainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-mainFrame.Draggable = true
-mainFrame.Active = true
-
-mainFrameUICorner.CornerRadius = UDim.new(0, 10)  -- Rounded corners for the main frame
-
-titleBar.Size = UDim2.new(1, 0, 0, 30)
-titleBar.BackgroundTransparency = 1
-
-titleBarBg.Size = UDim2.new(1, 0, 1, 0)
-titleBarBg.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-titleBarBg.ZIndex = 0
-
-titleBarUICorner.CornerRadius = UDim.new(0, 10)  -- Rounded corners only for the top
-titleBarUICorner.Parent = titleBarBg
-
-titleLabel.Size = UDim2.new(1, -60, 1, 0)
-titleLabel.Position = UDim2.new(0, 10, 0, 0)
-titleLabel.Text = "Xlib UI"
-titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-titleLabel.BackgroundTransparency = 1
-titleLabel.Font = Enum.Font.SourceSans
-titleLabel.TextSize = 18
-
-minimizeButton.Size = UDim2.new(0, 20, 0, 20)
-minimizeButton.Position = UDim2.new(1, -55, 0, 5)
-minimizeButton.Text = "-"
-minimizeButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-minimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-minimizeButton.Font = Enum.Font.SourceSans
-minimizeButton.TextSize = 16
-
-closeButton.Size = UDim2.new(0, 20, 0, 20)
-closeButton.Position = UDim2.new(1, -25, 0, 5)
-closeButton.Text = "X"
-closeButton.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
-closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-closeButton.Font = Enum.Font.SourceSans
-closeButton.TextSize = 16
-
-local minimized = false
-local minimizedIcon
-
--- Function to minimize the main frame
-local function minimize()
-    if minimized then
-        mainFrame.Visible = true
-        minimizedIcon:Destroy()
-        minimized = false
-    else
-        mainFrame.Visible = false
-        minimizedIcon = Instance.new("TextButton", screenGui)
-        minimizedIcon.Size = UDim2.new(0, 35, 0, 35)
-        minimizedIcon.Position = UDim2.new(0, 35, 0, 35)
-        minimizedIcon.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-        minimizedIcon.Text = "O"
-        minimizedIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
-        minimizedIcon.Font = Enum.Font.SourceSans
-        minimizedIcon.TextSize = 24
-        minimizedIcon.Draggable = true
-        minimizedIcon.Active = true
-        minimizedIcon.MouseButton1Click:Connect(function()
-            mainFrame.Visible = true
-            minimizedIcon:Destroy()
-            minimized = false
-        end)
-        minimized = true
+    
+    function window:MakeTab(tabConfig)
+        local tab = {
+            Name = tabConfig.Name,
+            Toggles = {},
+        }
+        
+        function tab:AddToggle(toggleConfig)
+            local toggle = {
+                Name = toggleConfig.Name,
+                Default = toggleConfig.Default,
+                Callback = toggleConfig.Callback,
+            }
+            
+            table.insert(tab.Toggles, toggle)
+        end
+        
+        table.insert(window.Tabs, tab)
+        return tab
     end
+    
+    return window
 end
-
--- Function to close the main frame
-local function close()
-    screenGui:Destroy()
-end
-
-minimizeButton.MouseButton1Click:Connect(minimize)
-closeButton.MouseButton1Click:Connect(close)
-
-local Xlib = {
-    CreateTab = createTab
-}
 
 return Xlib
