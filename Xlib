@@ -1,3 +1,4 @@
+-- Xlib Module
 local Xlib = {}
 
 function Xlib:MakeWindow(properties)
@@ -14,56 +15,50 @@ function Xlib:MakeWindow(properties)
     mainFrame.Active = true
     mainFrame.Draggable = properties.Draggable or false
 
-    local function createTitleBar()
-        local titleBar = Instance.new("Frame", mainFrame)
-        titleBar.Size = UDim2.new(1, 0, 0, 30)
-        titleBar.BackgroundTransparency = 1
+    local titleBar = Instance.new("Frame", mainFrame)
+    titleBar.Size = UDim2.new(1, 0, 0, 30)
+    titleBar.BackgroundTransparency = 1
 
-        local titleBarBg = Instance.new("Frame", titleBar)
-        titleBarBg.Size = UDim2.new(1, 0, 1, 0)
-        titleBarBg.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-        titleBarBg.ZIndex = 0
+    local titleBarBg = Instance.new("Frame", titleBar)
+    titleBarBg.Size = UDim2.new(1, 0, 1, 0)
+    titleBarBg.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    titleBarBg.ZIndex = 0
 
-        local titleLabel = Instance.new("TextLabel", titleBar)
-        titleLabel.Size = UDim2.new(1, -60, 1, 0)
-        titleLabel.Position = UDim2.new(0, 10, 0, 0)
-        titleLabel.Text = properties.Name or "Window"
-        titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-        titleLabel.BackgroundTransparency = 1
-        titleLabel.Font = Enum.Font.SourceSans
-        titleLabel.TextSize = 18
+    local titleLabel = Instance.new("TextLabel", titleBar)
+    titleLabel.Size = UDim2.new(1, -60, 1, 0)
+    titleLabel.Position = UDim2.new(0, 10, 0, 0)
+    titleLabel.Text = properties.Name or "Window"
+    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Font = Enum.Font.SourceSans
+    titleLabel.TextSize = 18
 
-        local minimizeButton = Instance.new("TextButton", titleBar)
-        minimizeButton.Size = UDim2.new(0, 20, 0, 20)
-        minimizeButton.Position = UDim2.new(1, -55, 0, 5)
-        minimizeButton.Text = "-"
-        minimizeButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-        minimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-        minimizeButton.Font = Enum.Font.SourceSans
-        minimizeButton.TextSize = 16
-        minimizeButton.MouseButton1Click:Connect(function()
-            mainFrame.Visible = not mainFrame.Visible
-        end)
+    local minimizeButton = Instance.new("TextButton", titleBar)
+    minimizeButton.Size = UDim2.new(0, 20, 0, 20)
+    minimizeButton.Position = UDim2.new(1, -55, 0, 5)
+    minimizeButton.Text = "-"
+    minimizeButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+    minimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    minimizeButton.Font = Enum.Font.SourceSans
+    minimizeButton.TextSize = 16
+    minimizeButton.MouseButton1Click:Connect(function()
+        mainFrame.Visible = not mainFrame.Visible
+    end)
 
-        local closeButton = Instance.new("TextButton", titleBar)
-        closeButton.Size = UDim2.new(0, 20, 0, 20)
-        closeButton.Position = UDim2.new(1, -25, 0, 5)
-        closeButton.Text = "X"
-        closeButton.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
-        closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-        closeButton.Font = Enum.Font.SourceSans
-        closeButton.TextSize = 16
-        closeButton.MouseButton1Click:Connect(function()
-            window:Destroy()
-        end)
+    local closeButton = Instance.new("TextButton", titleBar)
+    closeButton.Size = UDim2.new(0, 20, 0, 20)
+    closeButton.Position = UDim2.new(1, -25, 0, 5)
+    closeButton.Text = "X"
+    closeButton.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
+    closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    closeButton.Font = Enum.Font.SourceSans
+    closeButton.TextSize = 16
+    closeButton.MouseButton1Click:Connect(function()
+        window:Destroy()
+    end)
 
-        local titleBarUICorner = Instance.new("UICorner", titleBarBg)
-        titleBarUICorner.CornerRadius = UDim.new(0, 10)  -- Rounded corners only for the top
-
-        return titleBar
-    end
-
-    local titleBar = createTitleBar()
+    local titleBarUICorner = Instance.new("UICorner", titleBarBg)
+    titleBarUICorner.CornerRadius = UDim.new(0, 10)  -- Rounded corners only for the top
 
     local tabFrame = Instance.new("ScrollingFrame", mainFrame)
     tabFrame.Size = UDim2.new(0, 100, 1, -40)
