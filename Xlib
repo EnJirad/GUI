@@ -30,16 +30,21 @@ function Xlib:createUIWindow()
     ScreenGui.Name = "Xlib"
     ScreenGui.Parent = game.CoreGui
     
-    local Frame = Instance.new("Frame")
-    Frame.Size = UDim2.new(0.5, 0, 0.5, 0)
-    Frame.Position = UDim2.new(0.25, 0, 0.25, 0)
-    Frame.BackgroundColor3 = Color3.new(0.3, 0.3, 0.3)
-    Frame.BorderSizePixel = 0
-    Frame.Active = true
-    Frame.Draggable = true
-    Frame.Name = "Window"
-    self.window = Frame
-    Frame.Parent = ScreenGui
+    local MainFrame = Instance.new("Frame")
+    MainFrame.Size = UDim2.new(0.2, 0, 1, 0)
+    MainFrame.Position = UDim2.new(0, 0, 0, 0)
+    MainFrame.BackgroundColor3 = Color3.new(0.3, 0.3, 0.3)
+    MainFrame.BorderSizePixel = 0
+    MainFrame.Name = "MainFrame"
+    MainFrame.Parent = ScreenGui
+    
+    local TabContainer = Instance.new("Frame")
+    TabContainer.Size = UDim2.new(0.8, 0, 1, 0)
+    TabContainer.Position = UDim2.new(0.2, 0, 0, 0)
+    TabContainer.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
+    TabContainer.BorderSizePixel = 0
+    TabContainer.Name = "TabContainer"
+    TabContainer.Parent = ScreenGui
     
     local Title = Instance.new("TextLabel")
     Title.Size = UDim2.new(1, 0, 0, 30)
@@ -49,7 +54,7 @@ function Xlib:createUIWindow()
     Title.Font = Enum.Font.SourceSans
     Title.TextSize = 20
     Title.Name = "Title"
-    Title.Parent = Frame
+    Title.Parent = MainFrame
     
     local CloseButton = Instance.new("TextButton")
     CloseButton.Size = UDim2.new(0, 30, 0, 30)
@@ -95,22 +100,32 @@ function Xlib:minimize()
 end
 
 -- ฟังก์ชันสร้างแถบใหม่
-function Xlib:createBar(barName)
-    local newBar = {
-        name = barName,
-        subBars = {}
+function Xlib:createTab(tabName)
+    local newTab = {
+        name = tabName,
+        items = {}
     }
-    table.insert(self.bars, newBar)
-    return newBar
+    return newTab
 end
 
--- ฟังก์ชันเพิ่มแถบย่อยในแถบที่กำหนด
-function Xlib:addSubBar(bar, subBarName)
-    local newSubBar = {
-        name = subBarName
+-- ฟังก์ชันเพิ่มรายการลงในแท็บ
+function Xlib:addItem(tab, itemName, itemType)
+    local newItem = {
+        name = itemName,
+        type = itemType
     }
-    table.insert(bar.subBars, newSubBar)
-    return newSubBar
+    table.insert(tab.items, newItem)
+    return newItem
+end
+
+-- ฟังก์ชันสร้าง drop down
+function Xlib:createDropDown(tab, dropDownName, options)
+    local newDropDown = {
+        name = dropDownName,
+        options = options
+    }
+    table.insert(tab.items, newDropDown)
+    return newDropDown
 end
 
 return Xlib
