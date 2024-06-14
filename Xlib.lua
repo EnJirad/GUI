@@ -1,38 +1,89 @@
+-- Xlib.lua
+
 local Xlib = {}
 
-function Xlib:MakeWindow(WindowConfig)
-    -- สร้างหน้าต่างตาม WindowConfig ที่รับเข้ามา
-    local Window = {
-        Name = WindowConfig.Name or "Window",
-        HidePremium = WindowConfig.HidePremium or false,
-        SaveConfig = WindowConfig.SaveConfig or false,
-        ConfigFolder = WindowConfig.ConfigFolder or "DefaultConfigFolder"
+-- Function to create a window
+function Xlib:MakeWindow(config)
+    -- Default config values
+    config = config or {}
+    local defaultConfig = {
+        Name = "Window",
+        Size = UDim2.new(0, 400, 0, 300),
+        Position = UDim2.new(0.5, -200, 0.5, -150),
+        BackgroundColor = Color3.fromRGB(255, 255, 255),
+        BorderSizePixel = 1,
+        Parent = game:GetService("CoreGui")
     }
+    for key, value in pairs(defaultConfig) do
+        config[key] = config[key] or value
+    end
 
-    local function MakeTab(TabConfig)
-        -- ฟังก์ชันสำหรับสร้างแท็บ
-        local Tab = {
-            Name = TabConfig.Name or "Tab",
-            Icon = TabConfig.Icon or "",
-            PremiumOnly = TabConfig.PremiumOnly or false
+    -- Create the main window frame
+    local Window = Instance.new("Frame")
+    Window.Name = config.Name
+    Window.Size = config.Size
+    Window.Position = config.Position
+    Window.BackgroundColor3 = config.BackgroundColor
+    Window.BorderColor3 = config.BorderColor
+    Window.BorderSizePixel = config.BorderSizePixel
+    Window.Parent = config.Parent
+
+    -- Example method to create a tab
+    function Window:MakeTab(tabConfig)
+        tabConfig = tabConfig or {}
+        local defaultTabConfig = {
+            Name = "Tab",
+            Size = UDim2.new(1, 0, 1, 0),
+            Position = UDim2.new(0, 0, 0, 0),
+            BackgroundColor = Color3.fromRGB(240, 240, 240),
+            Parent = Window
         }
-
-        local function AddToggle(ToggleConfig)
-            -- ฟังก์ชันสำหรับเพิ่ม Toggle Control
-            local Toggle = {
-                Name = ToggleConfig.Name or "Toggle",
-                Default = ToggleConfig.Default or false,
-                Callback = ToggleConfig.Callback or function() end
-            }
-            -- ใส่โค้ดสำหรับการเพิ่ม Toggle Control ที่นี่ (เช่น GUI และการจัดการ Event)
-            print("Added toggle:", Toggle.Name)
+        for key, value in pairs(defaultTabConfig) do
+            tabConfig[key] = tabConfig[key] or value
         end
 
-        Tab.AddToggle = AddToggle
+        local Tab = Instance.new("Frame")
+        Tab.Name = tabConfig.Name
+        Tab.Size = tabConfig.Size
+        Tab.Position = tabConfig.Position
+        Tab.BackgroundColor3 = tabConfig.BackgroundColor
+        Tab.Parent = tabConfig.Parent
+
+        -- Example method to add a toggle control
+        function Tab:AddToggle(toggleConfig)
+            toggleConfig = toggleConfig or {}
+            local defaultToggleConfig = {
+                Name = "Toggle",
+                Size = UDim2.new(0, 200, 0, 50),
+                Position = UDim2.new(0.5, -100, 0.5, -25),
+                BackgroundColor = Color3.fromRGB(200, 200, 200),
+                TextColor = Color3.fromRGB(0, 0, 0),
+                Parent = Tab
+            }
+            for key, value in pairs(defaultToggleConfig) do
+                toggleConfig[key] = toggleConfig[key] or value
+            end
+
+            local Toggle = Instance.new("TextButton")
+            Toggle.Name = toggleConfig.Name
+            Toggle.Size = toggleConfig.Size
+            Toggle.Position = toggleConfig.Position
+            Toggle.BackgroundColor3 = toggleConfig.BackgroundColor
+            Toggle.TextColor3 = toggleConfig.TextColor
+            Toggle.Text = toggleConfig.Text or "Toggle"
+            Toggle.Parent = toggleConfig.Parent
+
+            -- Example callback for the toggle control
+            function Toggle:SetValue(value)
+                toggleConfig.Callback(value)
+            end
+
+            return Toggle
+        end
+
         return Tab
     end
 
-    Window.MakeTab = MakeTab
     return Window
 end
 
