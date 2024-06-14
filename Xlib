@@ -1,4 +1,3 @@
--- Xlib Module
 local Xlib = {}
 
 function Xlib:MakeWindow(properties)
