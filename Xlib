@@ -25,7 +25,42 @@ function Xlib:MakeWindow(properties)
     titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     titleLabel.BackgroundTransparency = 1
     titleLabel.Font = Enum.Font.SourceSansBold
-    titleLabel.TextSize = 14  -- ปรับขนาดตัวอักษรใน titleBar
+    titleLabel.TextSize = 18
+
+    local closeButton = Instance.new("TextButton", titleBar)
+    closeButton.Size = UDim2.new(0, 30, 0, 30)
+    closeButton.Position = UDim2.new(1, -40, 0, 0)
+    closeButton.Text = "X"
+    closeButton.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
+    closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+local Xlib = {}
+
+function Xlib:MakeWindow(properties)
+    local window = Instance.new("ScreenGui")
+    window.Name = properties.Name or "Window"
+    window.Parent = properties.Parent or game.Players.LocalPlayer:WaitForChild("PlayerGui")
+    window.ResetOnSpawn = false
+
+    local mainFrame = Instance.new("Frame", window)
+    mainFrame.Size = properties.Size or UDim2.new(0, 400, 0, 350)
+    mainFrame.Position = properties.Position or UDim2.new(0.5, -200, 0.5, -175)
+    mainFrame.BackgroundColor3 = properties.BackgroundColor3 or Color3.fromRGB(40, 40, 40)
+    mainFrame.BorderSizePixel = 0
+    mainFrame.Active = true
+    mainFrame.Draggable = properties.Draggable or true
+
+    local titleBar = Instance.new("Frame", mainFrame)
+    titleBar.Size = UDim2.new(1, 0, 0, 30)
+    titleBar.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+
+    local titleLabel = Instance.new("TextLabel", titleBar)
+    titleLabel.Size = UDim2.new(1, -60, 1, 0)
+    titleLabel.Position = UDim2.new(0, 10, 0, 0)
+    titleLabel.Text = properties.Name or "Window"
+    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Font = Enum.Font.SourceSansBold
+    titleLabel.TextSize = 18
 
     local closeButton = Instance.new("TextButton", titleBar)
     closeButton.Size = UDim2.new(0, 30, 0, 30)
@@ -34,19 +69,20 @@ function Xlib:MakeWindow(properties)
     closeButton.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
     closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     closeButton.Font = Enum.Font.SourceSansBold
-    closeButton.TextSize = 18  -- ปรับขนาดตัวอักษรในปุ่มปิด
+    closeButton.TextSize = 20
     closeButton.MouseButton1Click:Connect(function()
         window:Destroy()
     end)
 
+    -- Minimize Button
     local minimizeButton = Instance.new("TextButton", titleBar)
     minimizeButton.Size = UDim2.new(0, 30, 0, 30)
     minimizeButton.Position = UDim2.new(1, -80, 0, 0)
-    minimizeButton.Text = "_"
-    minimizeButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    minimizeButton.Text = "-"
+    minimizeButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     minimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     minimizeButton.Font = Enum.Font.SourceSansBold
-    minimizeButton.TextSize = 18  -- ปรับขนาดตัวอักษรในปุ่มพับหน้าต่าง
+    minimizeButton.TextSize = 20
     minimizeButton.MouseButton1Click:Connect(function()
         mainFrame.Visible = not mainFrame.Visible
     end)
@@ -62,10 +98,8 @@ function Xlib:MakeWindow(properties)
     local function switchTab(tab)
         if currentTab then
             currentTab.frame.Visible = false
-            currentTab.button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)  -- สีพื้นหลังของแท็บที่ไม่ได้เลือก
         end
         tab.frame.Visible = true
-        tab.button.BackgroundColor3 = Color3.fromRGB(70, 70, 70)  -- สีพื้นหลังของแท็บที่เลือก
         currentTab = tab
     end
 
@@ -77,15 +111,15 @@ function Xlib:MakeWindow(properties)
         tabButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
         tabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
         tabButton.Font = Enum.Font.SourceSansBold
-        tabButton.TextSize = 14  -- ปรับขนาดตัวอักษรในปุ่มแท็บ
+        tabButton.TextSize = 16
         tabButton.MouseButton1Click:Connect(function()
-            switchTab(tab)
+            switchTab(tabButton)
         end)
 
         local tabFrame = Instance.new("Frame", mainFrame)
         tabFrame.Size = UDim2.new(1, -120, 1, -30)
         tabFrame.Position = UDim2.new(0, 120, 0, 30)
-        tabFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)  -- สีพื้นหลังของ Tab Frame
+        tabFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
         tabFrame.Visible = false
 
         local tab = {
