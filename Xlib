@@ -15,22 +15,18 @@ function Xlib:MakeWindow(properties)
     mainFrame.Draggable = properties.Draggable or false
 
     local isOpen = true
-
     local iconButton
 
     local function toggleWindow()
         isOpen = not isOpen
-        if isOpen then
-            mainFrame.Visible = true
-            if iconButton then
-                iconButton.Visible = false
-            end
+        mainFrame.Visible = isOpen
+        if iconButton then
+            iconButton.Visible = not isOpen
         else
-            mainFrame.Visible = false
-            if not iconButton then
+            if not isOpen then
                 iconButton = Instance.new("TextButton")
                 iconButton.Size = UDim2.new(0, 35, 0, 35)
-                iconButton.Position = UDim2.new(0, 35, 0, 35)
+                iconButton.Position = properties.IconButtonPosition or UDim2.new(0, 35, 0, 35)
                 iconButton.Text = "∆"
                 iconButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
                 iconButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -38,11 +34,7 @@ function Xlib:MakeWindow(properties)
                 iconButton.TextSize = 24
                 iconButton.Parent = window
                 iconButton.Draggable = true
-                iconButton.MouseButton1Click:Connect(function()
-                    toggleWindow()
-                end)
-            else
-                iconButton.Visible = true
+                iconButton.MouseButton1Click:Connect(toggleWindow)
             end
         end
     end
@@ -75,9 +67,7 @@ function Xlib:MakeWindow(properties)
         minimizeButton.Font = Enum.Font.SourceSansBold
         minimizeButton.TextSize = 20
         minimizeButton.AutoButtonColor = false
-        minimizeButton.MouseButton1Click:Connect(function()
-            toggleWindow()
-        end)
+        minimizeButton.MouseButton1Click:Connect(toggleWindow)
 
         local closeButton = Instance.new("TextButton", titleBar)
         closeButton.Size = UDim2.new(0, 30, 0, 30)
@@ -93,7 +83,7 @@ function Xlib:MakeWindow(properties)
         end)
 
         local titleBarUICorner = Instance.new("UICorner", titleBarBg)
-        titleBarUICorner.CornerRadius = UDim.new(0, 10)  -- Rounded corners only for the top
+        titleBarUICorner.CornerRadius = UDim.new(0, 10)
 
         return titleBar
     end
@@ -104,7 +94,7 @@ function Xlib:MakeWindow(properties)
     tabFrame.Size = UDim2.new(0, 120, 1, -40)
     tabFrame.Position = UDim2.new(0, 0, 0, 40)
     tabFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    tabFrame.CanvasSize = UDim2.new(0, 0, 2, 0)  -- Adjust as needed
+    tabFrame.CanvasSize = UDim2.new(0, 0, 2, 0)
     tabFrame.ScrollBarThickness = 8
 
     local function createTabs()
@@ -135,7 +125,7 @@ function Xlib:MakeWindow(properties)
                     togglesFrame.Size = UDim2.new(1, -120, 1, -40)
                     togglesFrame.Position = UDim2.new(0, 120, 0, 40)
                     togglesFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-                    togglesFrame.CanvasSize = UDim2.new(0, 0, 2, 0)  -- Adjust as needed
+                    togglesFrame.CanvasSize = UDim2.new(0, 0, 2, 0)
                     togglesFrame.ScrollBarThickness = 8
                 end
 
@@ -182,7 +172,7 @@ function Xlib:MakeWindow(properties)
 
     return {
         MakeTab = function(tabProperties) return tabs:MakeTab(tabProperties) end,
-        ToggleWindow = toggleWindow  -- เปิดเผยฟังก์ชันสลับหน้าต่างสำหรับการใช้งานภายนอก
+        ToggleWindow = toggleWindow
     }
 end
 
