@@ -1,196 +1,175 @@
--- Xlib.lua
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
 
--- นิยามตัวแปรเริ่มต้น
-local Xlib = {}
-Xlib.__index = Xlib
+local player = Players.LocalPlayer
+local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+local mainFrame = Instance.new("Frame", screenGui)
+local titleBar = Instance.new("Frame", mainFrame)
+local titleBarBg = Instance.new("Frame", titleBar)
+local titleLabel = Instance.new("TextLabel", titleBar)
+local toggleFrame = Instance.new("ScrollingFrame", mainFrame)
+local minimizeButton = Instance.new("TextButton", titleBar)
+local closeButton = Instance.new("TextButton", titleBar)
+local mainFrameUICorner = Instance.new("UICorner", mainFrame)
+local titleBarUICorner = Instance.new("UICorner", titleBarBg)
 
--- ฟังก์ชันใหม่เพื่อสร้างอินสแตนซ์ใหม่
-function Xlib:new()
-    local newObj = {
-        tabs = {},
-        window = nil,
-        minimized = false,
-        closeButton = nil,
-        minimizeButton = nil
-    }
-    setmetatable(newObj, self)
-    return newObj
-end
+local tabs = {}  -- สร้างตัวแปรสำหรับเก็บแถบ
+local tabFrames = {}  -- สร้างตัวแปรสำหรับเก็บกรอบของแถบ
+local toggles = {}  -- สร้างตัวแปรสำหรับเก็บการเปิด-ปิด
 
--- ฟังก์ชันเปลี่ยนชื่อหน้าต่าง
-function Xlib:setWindowName(newName)
-    if self.window then
-        self.window.Title.Text = newName
+-- สร้างฟังก์ชันสำหรับสร้างแถบ
+local function createTab(tabName)
+    local tabButton = Instance.new("TextButton", titleBar)
+    tabButton.Size = UDim2.new(0, 80, 1, 0)
+    tabButton.Position = UDim2.new(0, #tabs * 85, 0, 0)
+    tabButton.Text = tabName
+    tabButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    tabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    tabButton.Font = Enum.Font.SourceSans
+    tabButton.TextSize = 16
+
+    local tabFrame = Instance.new("ScrollingFrame", mainFrame)
+    tabFrame.Size = UDim2.new(1, 0, 1, -40)
+    tabFrame.Position = UDim2.new(0, 0, 0, 40)
+    tabFrame.Visible = false
+    tabFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    tabFrame.CanvasSize = UDim2.new(0, 0, 2, 0)  -- ปรับตามต้องการ
+    tabFrame.ScrollBarThickness = 8
+
+    local function showTab()
+        for _, frame in pairs(tabFrames) do
+            frame.Visible = false
+        end
+        tabFrame.Visible = true
     end
+
+    tabButton.MouseButton1Click:Connect(showTab)
+
+    table.insert(tabs, tabName)
+    tabFrames[tabName] = tabFrame
+
+    return {
+        AddToggle = function(self, toggleName, defaultValue, callback)
+            local toggleButton = Instance.new("TextButton", tabFrame)
+            toggleButton.Size = UDim2.new(1, -10, 0, 30)
+            toggleButton.Position = UDim2.new(0, 5, 0, #toggles * 35 + 5)
+            toggleButton.Text = toggleName
+            toggleButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+            toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+            toggleButton.Font = Enum.Font.SourceSans
+            toggleButton.TextSize = 16
+
+            local toggleValue = defaultValue
+            toggleButton.MouseButton1Click:Connect(function()
+                toggleValue = not toggleValue
+                callback(toggleValue)
+            end)
+
+            table.insert(toggles, {
+                ToggleName = toggleName,
+                ToggleButton = toggleButton,
+                Value = defaultValue
+            })
+
+            return {
+                GetValue = function()
+                    return toggleValue
+                end,
+                SetValue = function(value)
+                    toggleValue = value
+                    callback(toggleValue)
+                end
+            }
+        end
+    }
 end
 
--- ฟังก์ชันสร้างหน้าต่าง UI
-function Xlib:createUIWindow()
-    local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "Xlib"
-    ScreenGui.Parent = game.CoreGui
-    
-    local MainContainer = Instance.new("Frame")
-    MainContainer.Size = UDim2.new(0.2, 0, 1, 0)
-    MainContainer.Position = UDim2.new(0, 0, 0, 0)
-    MainContainer.BackgroundColor3 = Color3.new(0.3, 0.3, 0.3)
-    MainContainer.BorderSizePixel = 0
-    MainContainer.Name = "MainContainer"
-    MainContainer.Parent = ScreenGui
-    
-    local TabContainer = Instance.new("Frame")
-    TabContainer.Size = UDim2.new(0.8, 0, 1, 0)
-    TabContainer.Position = UDim2.new(0.2, 0, 0, 0)
-    TabContainer.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
-    TabContainer.BorderSizePixel = 0
-    TabContainer.Name = "TabContainer"
-    TabContainer.Parent = ScreenGui
-    
-    local Title = Instance.new("TextLabel")
-    Title.Size = UDim2.new(1, 0, 0, 30)
-    Title.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
-    Title.TextColor3 = Color3.new(1, 1, 1)
-    Title.Text = "Window Title"
-    Title.Font = Enum.Font.SourceSans
-    Title.TextSize = 20
-    Title.Name = "Title"
-    Title.Parent = MainContainer
-    
-    local CloseButton = Instance.new("TextButton")
-    CloseButton.Size = UDim2.new(0, 30, 0, 30)
-    CloseButton.Position = UDim2.new(1, -30, 0, 0)
-    CloseButton.BackgroundColor3 = Color3.new(1, 0, 0)
-    CloseButton.TextColor3 = Color3.new(1, 1, 1)
-    CloseButton.Text = "X"
-    CloseButton.Font = Enum.Font.SourceSans
-    CloseButton.TextSize = 20
-    CloseButton.Name = "CloseButton"
-    CloseButton.Parent = Title
-    self.closeButton = CloseButton
-    CloseButton.MouseButton1Click:Connect(function()
-        ScreenGui:Destroy()
-    end)
-    
-    local MinimizeButton = Instance.new("TextButton")
-    MinimizeButton.Size = UDim2.new(0, 30, 0, 30)
-    MinimizeButton.Position = UDim2.new(1, -60, 0, 0)
-    MinimizeButton.BackgroundColor3 = Color3.new(0, 0, 1)
-    MinimizeButton.TextColor3 = Color3.new(1, 1, 1)
-    MinimizeButton.Text = "-"
-    MinimizeButton.Font = Enum.Font.SourceSans
-    MinimizeButton.TextSize = 20
-    MinimizeButton.Name = "MinimizeButton"
-    MinimizeButton.Parent = Title
-    self.minimizeButton = MinimizeButton
-    MinimizeButton.MouseButton1Click:Connect(function()
-        self:minimize()
-    end)
-    
-    return ScreenGui
-end
+-- Styling
+screenGui.Name = "Xlib"
 
--- ฟังก์ชันปิดหน้าต่าง UI
-function Xlib:minimize()
-    self.minimized = not self.minimized
-    if self.minimized then
-        self.window.Visible = false
+mainFrame.Size = UDim2.new(0, 400, 0, 350)
+mainFrame.Position = UDim2.new(0.5, -200, 0.5, -175)
+mainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+mainFrame.Draggable = true
+mainFrame.Active = true
+
+mainFrameUICorner.CornerRadius = UDim.new(0, 10)  -- Rounded corners for the main frame
+
+titleBar.Size = UDim2.new(1, 0, 0, 30)
+titleBar.BackgroundTransparency = 1
+
+titleBarBg.Size = UDim2.new(1, 0, 1, 0)
+titleBarBg.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+titleBarBg.ZIndex = 0
+
+titleBarUICorner.CornerRadius = UDim.new(0, 10)  -- Rounded corners only for the top
+titleBarUICorner.Parent = titleBarBg
+
+titleLabel.Size = UDim2.new(1, -60, 1, 0)
+titleLabel.Position = UDim2.new(0, 10, 0, 0)
+titleLabel.Text = "Xlib UI"
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Font = Enum.Font.SourceSans
+titleLabel.TextSize = 18
+
+minimizeButton.Size = UDim2.new(0, 20, 0, 20)
+minimizeButton.Position = UDim2.new(1, -55, 0, 5)
+minimizeButton.Text = "-"
+minimizeButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+minimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+minimizeButton.Font = Enum.Font.SourceSans
+minimizeButton.TextSize = 16
+
+closeButton.Size = UDim2.new(0, 20, 0, 20)
+closeButton.Position = UDim2.new(1, -25, 0, 5)
+closeButton.Text = "X"
+closeButton.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
+closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeButton.Font = Enum.Font.SourceSans
+closeButton.TextSize = 16
+
+local minimized = false
+local minimizedIcon
+
+-- Function to minimize the main frame
+local function minimize()
+    if minimized then
+        mainFrame.Visible = true
+        minimizedIcon:Destroy()
+        minimized = false
     else
-        self.window.Visible = true
+        mainFrame.Visible = false
+        minimizedIcon = Instance.new("TextButton", screenGui)
+        minimizedIcon.Size = UDim2.new(0, 35, 0, 35)
+        minimizedIcon.Position = UDim2.new(0, 35, 0, 35)
+        minimizedIcon.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        minimizedIcon.Text = "O"
+        minimizedIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
+        minimizedIcon.Font = Enum.Font.SourceSans
+        minimizedIcon.TextSize = 24
+        minimizedIcon.Draggable = true
+        minimizedIcon.Active = true
+        minimizedIcon.MouseButton1Click:Connect(function()
+            mainFrame.Visible = true
+            minimizedIcon:Destroy()
+            minimized = false
+        end)
+        minimized = true
     end
 end
 
--- ฟังก์ชันสร้างแท็บใหม่
-function Xlib:createTab(tabName)
-    local newTab = {
-        name = tabName,
-        items = {},
-        frame = nil
-    }
-    
-    newTab.frame = Instance.new("Frame")
-    newTab.frame.Size = UDim2.new(1, 0, 1, 0)
-    newTab.frame.BackgroundTransparency = 1
-    newTab.frame.Name = tabName
-    newTab.frame.Parent = self.tabs
-    
-    return newTab
+-- Function to close the main frame
+local function close()
+    screenGui:Destroy()
 end
 
--- ฟังก์ชันเพิ่มรายการในแท็บ
-function Xlib:addItem(tab, itemName, itemType)
-    local newItem = {
-        name = itemName,
-        type = itemType,
-        frame = nil
-    }
-    
-    newItem.frame = Instance.new("Frame")
-    newItem.frame.Size = UDim2.new(1, 0, 0, 30)
-    newItem.frame.BackgroundColor3 = Color3.new(0.3, 0.3, 0.3)
-    newItem.frame.Name = itemName
-    newItem.frame.Parent = tab.frame
-    
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, 0, 1, 0)
-    label.BackgroundTransparency = 1
-    label.TextColor3 = Color3.new(1, 1, 1)
-    label.Text = itemName
-    label.Font = Enum.Font.SourceSans
-    label.TextSize = 20
-    label.Parent = newItem.frame
-    
-    return newItem
-end
+minimizeButton.MouseButton1Click:Connect(minimize)
+closeButton.MouseButton1Click:Connect(close)
 
--- ฟังก์ชันสร้าง drop down
-function Xlib:createDropDown(tab, dropDownName, options)
-    local newDropDown = {
-        name = dropDownName,
-        options = options,
-        frame = nil
-    }
-    
-    newDropDown.frame = Instance.new("Frame")
-    newDropDown.frame.Size = UDim2.new(1, 0, 0, 60)
-    newDropDown.frame.BackgroundColor3 = Color3.new(0.3, 0.3, 0.3)
-    newDropDown.frame.Name = dropDownName
-    newDropDown.frame.Parent = tab.frame
-    
-    local dropdownLabel = Instance.new("TextLabel")
-    dropdownLabel.Size = UDim2.new(1, 0, 0, 30)
-    dropdownLabel.Position = UDim2.new(0, 0, 0, 0)
-    dropdownLabel.BackgroundColor3 = Color3.new(0.4, 0.4, 0.4)
-    dropdownLabel.TextColor3 = Color3.new(1, 1, 1)
-    dropdownLabel.Text = dropDownName
-    dropdownLabel.Font = Enum.Font.SourceSans
-    dropdownLabel.TextSize = 20
-    dropdownLabel.Parent = newDropDown.frame
-    
-    local dropdownFrame = Instance.new("Frame")
-    dropdownFrame.Size = UDim2.new(1, 0, 0, 30 * #options)
-    dropdownFrame.Position = UDim2.new(0, 0, 1, 0)
-    dropdownFrame.BackgroundTransparency = 1
-    dropdownFrame.Visible = false
-    dropdownFrame.Name = "Options"
-    dropdownFrame.Parent = newDropDown.frame
-    
-    for i, option in ipairs(options) do
-        local optionButton = Instance.new("TextButton")
-        optionButton.Size = UDim2.new(1, 0, 0, 30)
-        optionButton.Position = UDim2.new(0, 0, 0, (i - 1) * 30)
-        optionButton.BackgroundColor3 = Color3.new(0.4, 0.4, 0.4)
-        optionButton.TextColor3 = Color3.new(1, 1, 1)
-        optionButton.Text = option
-        optionButton.Font = Enum.Font.SourceSans
-        optionButton.TextSize = 20
-        optionButton.Parent = dropdownFrame
-    end
-    
-    dropdownLabel.MouseButton1Click:Connect(function()
-        dropdownFrame.Visible = not dropdownFrame.Visible
-    end)
-    
-    return newDropDown
-end
+local Xlib = {
+    CreateTab = createTab
+}
 
 return Xlib
