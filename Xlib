@@ -1,34 +1,97 @@
--- เพิ่มฟังก์ชันสำหรับการเพิ่ม Toggle ในแถบ UI
+-- Xlib.lua (https://github.com/EnJirad/GUI/blob/main/Xlib.lua)
 
 local Xlib = {}
 
-function Xlib:MakeWindow(config)
-    local window = {
-        Name = config.Name,
-        Tabs = {},
+function Xlib:CreateUI()
+    local ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+    
+    local MainFrame = Instance.new("Frame")
+    MainFrame.Size = UDim2.new(0, 400, 0, 300)
+    MainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    MainFrame.BorderSizePixel = 0
+    MainFrame.Parent = ScreenGui
+    
+    local TitleBar = Instance.new("Frame")
+    TitleBar.Size = UDim2.new(1, 0, 0, 30)
+    TitleBar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    TitleBar.BorderSizePixel = 0
+    TitleBar.Parent = MainFrame
+    
+    local TitleLabel = Instance.new("TextLabel")
+    TitleLabel.Size = UDim2.new(1, 0, 1, 0)
+    TitleLabel.Position = UDim2.new(0, 5, 0, 0)
+    TitleLabel.Text = "MyWindow"
+    TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TitleLabel.BackgroundTransparency = 1
+    TitleLabel.Font = Enum.Font.SourceSans
+    TitleLabel.TextSize = 18
+    TitleLabel.Parent = TitleBar
+    
+    local TabFrame = Instance.new("Frame")
+    TabFrame.Size = UDim2.new(0, 100, 1, -30)
+    TabFrame.Position = UDim2.new(0, 5, 0, 30)
+    TabFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    TabFrame.BorderSizePixel = 0
+    TabFrame.Parent = MainFrame
+    
+    local ToggleFrame = Instance.new("Frame")
+    ToggleFrame.Size = UDim2.new(1, -110, 1, -30)
+    ToggleFrame.Position = UDim2.new(0, 105, 0, 30)
+    ToggleFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    ToggleFrame.BorderSizePixel = 0
+    ToggleFrame.Parent = MainFrame
+    
+    return MainFrame, TabFrame, ToggleFrame
+end
+
+function Xlib:CreateTab(tabFrame, tabName, tabToggles)
+    local tabButton = Instance.new("TextButton")
+    tabButton.Size = UDim2.new(1, 0, 0, 30)
+    tabButton.Position = UDim2.new(0, 0, 0, (#tabFrame:GetChildren() + 1) * 35)
+    tabButton.Text = tabName
+    tabButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    tabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    tabButton.Font = Enum.Font.SourceSans
+    tabButton.TextSize = 16
+    tabButton.Parent = tabFrame
+    
+    local tab = {
+        Name = tabName,
+        Toggles = {},
     }
     
-    function window:MakeTab(tabConfig)
-        local tab = {
-            Name = tabConfig.Name,
-            Toggles = {},
-        }
-        
-        function tab:AddToggle(toggleConfig)
-            local toggle = {
-                Name = toggleConfig.Name,
-                Default = toggleConfig.Default,
-                Callback = toggleConfig.Callback,
-            }
-            
-            table.insert(tab.Toggles, toggle)
-        end
-        
-        table.insert(window.Tabs, tab)
-        return tab
+    for _, toggleName in ipairs(tabToggles) do
+        table.insert(tab.Toggles, toggleName)
     end
     
-    return window
+    return tab
+end
+
+function Xlib:CreateToggle(toggleFrame, toggleName, default, callback)
+    local toggleButton = Instance.new("TextButton")
+    toggleButton.Size = UDim2.new(1, 0, 0, 30)
+    toggleButton.Position = UDim2.new(0, 0, 0, (#toggleFrame:GetChildren() + 1) * 35)
+    toggleButton.Text = toggleName
+    toggleButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+    toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    toggleButton.Font = Enum.Font.SourceSans
+    toggleButton.TextSize = 16
+    toggleButton.Parent = toggleFrame
+    
+    local toggle = {
+        Name = toggleName,
+        Default = default,
+        Callback = callback,
+    }
+    
+    toggleButton.MouseButton1Click:Connect(function()
+        toggle.Default = not toggle.Default
+        callback(toggle.Default)
+    end)
+    
+    return toggle
 end
 
 return Xlib
