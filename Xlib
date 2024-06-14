@@ -161,18 +161,8 @@ function Xlib:MakeWindow(properties)
                         Callback = toggleProperties.Callback
                     })
                     tabProperties.Toggles = toggles
-
-                    return {
-                        AddToggle = function(toggleProperties)
-                            table.insert(toggles, {
-                                Name = toggleProperties.Name or "Toggle",
-                                Value = toggleProperties.Default or false,
-                                Callback = toggleProperties.Callback
-                            })
-                        end
-                    }
                 end
-            end
+            }
         end
 
         return tabs
