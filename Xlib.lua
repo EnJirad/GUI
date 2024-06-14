@@ -1,50 +1,39 @@
--- Xlib.lua
-
 local Xlib = {}
 
-function Xlib:Create()
-    local ui = {
-        Windows = {}
+function Xlib:MakeWindow(WindowConfig)
+    -- สร้างหน้าต่างตาม WindowConfig ที่รับเข้ามา
+    local Window = {
+        Name = WindowConfig.Name or "Window",
+        HidePremium = WindowConfig.HidePremium or false,
+        SaveConfig = WindowConfig.SaveConfig or false,
+        ConfigFolder = WindowConfig.ConfigFolder or "DefaultConfigFolder"
     }
 
-    function ui:MakeWindow(params)
-        local window = {
-            Name = params.Name or "Window",
-            Tabs = {}
+    local function MakeTab(TabConfig)
+        -- ฟังก์ชันสำหรับสร้างแท็บ
+        local Tab = {
+            Name = TabConfig.Name or "Tab",
+            Icon = TabConfig.Icon or "",
+            PremiumOnly = TabConfig.PremiumOnly or false
         }
 
-        function window:MakeTab(params)
-            local tab = {
-                Name = params.Name or "Tab",
-                Elements = {}
+        local function AddToggle(ToggleConfig)
+            -- ฟังก์ชันสำหรับเพิ่ม Toggle Control
+            local Toggle = {
+                Name = ToggleConfig.Name or "Toggle",
+                Default = ToggleConfig.Default or false,
+                Callback = ToggleConfig.Callback or function() end
             }
-
-            function tab:AddToggle(params)
-                local toggle = {
-                    Name = params.Name or "Toggle",
-                    Default = params.Default or false,
-                    Callback = params.Callback or function() end,
-                    Value = params.Default or false
-                }
-
-                function toggle:SetValue(value)
-                    toggle.Value = value
-                    toggle.Callback(value)
-                end
-
-                table.insert(tab.Elements, toggle)
-                return toggle
-            end
-
-            table.insert(window.Tabs, tab)
-            return tab
+            -- ใส่โค้ดสำหรับการเพิ่ม Toggle Control ที่นี่ (เช่น GUI และการจัดการ Event)
+            print("Added toggle:", Toggle.Name)
         end
 
-        table.insert(ui.Windows, window)
-        return window
+        Tab.AddToggle = AddToggle
+        return Tab
     end
 
-    return ui
+    Window.MakeTab = MakeTab
+    return Window
 end
 
 return Xlib
