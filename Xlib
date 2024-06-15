@@ -2,9 +2,9 @@
 
 local Xlib = {}
 
-function Xlib:CreateUI()
+function Xlib:MakeWindow(config)
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "XlibScreenGui"
+    ScreenGui.Name = config.Name or "XlibScreenGui"
     ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
     
     local MainFrame = Instance.new("Frame")
@@ -25,7 +25,7 @@ function Xlib:CreateUI()
     local TitleLabel = Instance.new("TextLabel")
     TitleLabel.Size = UDim2.new(1, -60, 1, 0)
     TitleLabel.Position = UDim2.new(0, 5, 0, 0)
-    TitleLabel.Text = "Xlib UI"
+    TitleLabel.Text = config.Name or "Xlib UI"
     TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     TitleLabel.BackgroundTransparency = 1
     TitleLabel.Font = Enum.Font.SourceSans
@@ -92,46 +92,68 @@ function Xlib:CreateUI()
     MinimizeButton.MouseButton1Click:Connect(minimize)
     CloseButton.MouseButton1Click:Connect(close)
     
-    return MainFrame, TabFrame, ToggleFrame
-end
-
-function Xlib:CreateTab(tabFrame, tabName, callback)
-    local tabButton = Instance.new("TextButton")
-    tabButton.Size = UDim2.new(1, 0, 0, 30)
-    tabButton.Position = UDim2.new(0, 0, 0, (#tabFrame:GetChildren() - 1) * 35)
-    tabButton.Text = tabName
-    tabButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    tabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    tabButton.Font = Enum.Font.SourceSans
-    tabButton.TextSize = 16
-    tabButton.Parent = tabFrame
-    
-    tabButton.MouseButton1Click:Connect(callback)
-end
-
-function Xlib:CreateToggle(toggleFrame, toggleName, default, callback)
-    local toggleButton = Instance.new("TextButton")
-    toggleButton.Size = UDim2.new(1, 0, 0, 30)
-    toggleButton.Position = UDim2.new(0, 0, 0, (#toggleFrame:GetChildren() - 1) * 35)
-    toggleButton.Text = toggleName
-    toggleButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-    toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    toggleButton.Font = Enum.Font.SourceSans
-    toggleButton.TextSize = 16
-    toggleButton.Parent = toggleFrame
-    
-    local toggle = {
-        Name = toggleName,
-        Default = default,
-        Callback = callback,
+    local window = {
+        MainFrame = MainFrame,
+        TabFrame = TabFrame,
+        ToggleFrame = ToggleFrame,
+        Tabs = {}
     }
     
-    toggleButton.MouseButton1Click:Connect(function()
-        toggle.Default = not toggle.Default
-        callback(toggle.Default)
-    end)
+    function window:MakeTab(config)
+        local tabButton = Instance.new("TextButton")
+        tabButton.Size = UDim2.new(1, 0, 0, 30)
+        tabButton.Position = UDim2.new(0, 0, 0, (#self.TabFrame:GetChildren() - 1) * 35)
+        tabButton.Text = config.Name
+        tabButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        tabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+        tabButton.Font = Enum.Font.SourceSans
+        tabButton.TextSize = 16
+        tabButton.Parent = self.TabFrame
+        
+        local tab = {
+            Name = config.Name,
+            Button = tabButton,
+            Toggles = {}
+        }
+        
+        tabButton.MouseButton1Click:Connect(function()
+            for _, child in ipairs(self.ToggleFrame:GetChildren()) do
+                if child:IsA("TextButton") then
+                    child:Destroy()
+                end
+            end
+            for _, toggle in ipairs(tab.Toggles) do
+                local toggleButton = Instance.new("TextButton")
+                toggleButton.Size = UDim2.new(1, 0, 0, 30)
+                toggleButton.Position = UDim2.new(0, 0, 0, (#self.ToggleFrame:GetChildren() - 1) * 35)
+                toggleButton.Text = toggle.Name
+                toggleButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+                toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+                toggleButton.Font = Enum.Font.SourceSans
+                toggleButton.TextSize = 16
+                toggleButton.Parent = self.ToggleFrame
+                
+                toggleButton.MouseButton1Click:Connect(function()
+                    toggle.Value = not toggle.Value
+                    toggle.Callback(toggle.Value)
+                end)
+            end
+        end)
+        
+        function tab:AddToggle(config)
+            local toggle = {
+                Name = config.Name,
+                Value = config.Default,
+                Callback = config.Callback
+            }
+            table.insert(tab.Toggles, toggle)
+        end
+        
+        table.insert(self.Tabs, tab)
+        return tab
+    end
     
-    return toggle
+    return window
 end
 
 return Xlib
