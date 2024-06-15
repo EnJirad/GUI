@@ -7,8 +7,8 @@ function Xlib:MakeWindow(config)
     ScreenGui.ResetOnSpawn = false
     
     local MainFrame = Instance.new("Frame")
-    MainFrame.Size = UDim2.new(0, 600, 0, 400)
-    MainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
+    MainFrame.Size = UDim2.new(0, 400, 0, 300)  -- ปรับขนาดหน้าต่างเล็กลง
+    MainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
     MainFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
     MainFrame.BorderSizePixel = 0
     MainFrame.Parent = ScreenGui
@@ -142,6 +142,8 @@ function Xlib:MakeToggle(config)
             Toggle.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
         end
     end)
+    
+    return Toggle  -- ส่งกลับ Toggle แทนที่จะส่งกลับตัวแปร table
 end
 
 return Xlib
