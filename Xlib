@@ -61,6 +61,8 @@ function Xlib:MakeWindow(config)
     IconButton.Parent = TitleBar
     
     local isMinimized = false
+    local isDragging = false
+    local startPoint = nil
     
     local function minimizeWindow()
         isMinimized = not isMinimized
@@ -77,9 +79,6 @@ function Xlib:MakeWindow(config)
     
     MinimizeButton.MouseButton1Click:Connect(minimizeWindow)
     CloseButton.MouseButton1Click:Connect(closeWindow)
-    
-    local isDragging = false
-    local startPoint = nil
     
     IconButton.MouseButton1Down:Connect(function()
         isDragging = true
