@@ -57,13 +57,21 @@ function Xlib:MakeWindow(config)
     
     local CloseButton = Instance.new("TextButton")
     CloseButton.Size = UDim2.new(0, 20, 0, 20)
-    CloseButton.Position = UDim2.new(1, -55, 0, 5)
+    CloseButton.Position = UDim2.new(1, -10, 0, 5)
     CloseButton.Text = "X"
     CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     CloseButton.BackgroundColor3 = Color3.fromRGB(244, 67, 54)
     CloseButton.Font = Enum.Font.GothamBold
     CloseButton.TextSize = 14
     CloseButton.Parent = TitleBar
+    
+    -- Icon when minimized
+    local Icon = Instance.new("ImageButton")
+    Icon.Size = UDim2.new(0, 30, 0, 30)
+    Icon.Position = UDim2.new(0, 10, 0, 10)
+    Icon.Image = "http://www.roblox.com/asset/?id=6556269340"  -- Replace with your icon
+    Icon.Parent = MainFrame
+    Icon.Visible = false
     
     local TabFrame = Instance.new("Frame")
     TabFrame.Size = UDim2.new(0, 120, 1, -30)
@@ -81,6 +89,7 @@ function Xlib:MakeWindow(config)
     
     local function minimizeWindow()
         MainFrame.Visible = not MainFrame.Visible
+        Icon.Visible = not Icon.Visible
     end
     
     local function closeWindow()
@@ -94,12 +103,13 @@ function Xlib:MakeWindow(config)
         MainFrame = MainFrame,
         TabFrame = TabFrame,
         ContentFrame = ContentFrame,
+        Icon = Icon,
     }
 end
 
 function Xlib:MakeTab(config)
     local TabButton = Instance.new("TextButton")
-    TabButton.Size = UDim2.new(0, 120, 0, 30)
+    TabButton.Size = UDim2.new(1, 0, 0, 30)
     TabButton.BackgroundColor3 = Color3.fromRGB(50, 130, 184)
     TabButton.Text = config.Name
     TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
