@@ -12,6 +12,8 @@ function Xlib:CreateUI()
     MainFrame.Position = UDim2.new(0.5, -200, 0.5, -175)
     MainFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     MainFrame.BorderSizePixel = 0
+    MainFrame.Active = true
+    MainFrame.Draggable = true
     MainFrame.Parent = ScreenGui
     
     local TitleBar = Instance.new("Frame")
@@ -21,7 +23,7 @@ function Xlib:CreateUI()
     TitleBar.Parent = MainFrame
     
     local TitleLabel = Instance.new("TextLabel")
-    TitleLabel.Size = UDim2.new(1, 0, 1, 0)
+    TitleLabel.Size = UDim2.new(1, -60, 1, 0)
     TitleLabel.Position = UDim2.new(0, 5, 0, 0)
     TitleLabel.Text = "Xlib UI"
     TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -29,6 +31,26 @@ function Xlib:CreateUI()
     TitleLabel.Font = Enum.Font.SourceSans
     TitleLabel.TextSize = 18
     TitleLabel.Parent = TitleBar
+    
+    local MinimizeButton = Instance.new("TextButton")
+    MinimizeButton.Size = UDim2.new(0, 20, 0, 20)
+    MinimizeButton.Position = UDim2.new(1, -55, 0, 5)
+    MinimizeButton.Text = "-"
+    MinimizeButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+    MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    MinimizeButton.Font = Enum.Font.SourceSans
+    MinimizeButton.TextSize = 16
+    MinimizeButton.Parent = TitleBar
+    
+    local CloseButton = Instance.new("TextButton")
+    CloseButton.Size = UDim2.new(0, 20, 0, 20)
+    CloseButton.Position = UDim2.new(1, -25, 0, 5)
+    CloseButton.Text = "X"
+    CloseButton.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
+    CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CloseButton.Font = Enum.Font.SourceSans
+    CloseButton.TextSize = 16
+    CloseButton.Parent = TitleBar
     
     local TabFrame = Instance.new("Frame")
     TabFrame.Size = UDim2.new(0, 100, 1, -30)
@@ -45,6 +67,30 @@ function Xlib:CreateUI()
     ToggleFrame.CanvasSize = UDim2.new(0, 0, 2, 0)
     ToggleFrame.ScrollBarThickness = 8
     ToggleFrame.Parent = MainFrame
+    
+    local function minimize()
+        MainFrame.Visible = false
+        local MinimizedIcon = Instance.new("TextButton", ScreenGui)
+        MinimizedIcon.Size = UDim2.new(0, 35, 0, 35)
+        MinimizedIcon.Position = UDim2.new(0, 10, 0, 10)
+        MinimizedIcon.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        MinimizedIcon.Text = "O"
+        MinimizedIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
+        MinimizedIcon.Font = Enum.Font.SourceSans
+        MinimizedIcon.TextSize = 24
+        MinimizedIcon.Draggable = true
+        MinimizedIcon.MouseButton1Click:Connect(function()
+            MainFrame.Visible = true
+            MinimizedIcon:Destroy()
+        end)
+    end
+
+    local function close()
+        ScreenGui:Destroy()
+    end
+
+    MinimizeButton.MouseButton1Click:Connect(minimize)
+    CloseButton.MouseButton1Click:Connect(close)
     
     return MainFrame, TabFrame, ToggleFrame
 end
