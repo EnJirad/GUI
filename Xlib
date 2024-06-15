@@ -1,4 +1,4 @@
--- Xlib.lua (https://raw.githubusercontent.com/EnJirad/GUI/main/Xlib.lua)
+-- Xlib.lua
 
 local Xlib = {}
 
@@ -10,25 +10,29 @@ function Xlib:MakeWindow(config)
     local MainFrame = Instance.new("Frame")
     MainFrame.Size = UDim2.new(0, 600, 0, 400)
     MainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
-    MainFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     MainFrame.BorderSizePixel = 0
     MainFrame.Active = true
     MainFrame.Draggable = true
     MainFrame.Parent = ScreenGui
     
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 10)
+    UICorner.Parent = MainFrame
+    
     local TitleBar = Instance.new("Frame")
     TitleBar.Size = UDim2.new(1, 0, 0, 30)
-    TitleBar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    TitleBar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     TitleBar.BorderSizePixel = 0
     TitleBar.Parent = MainFrame
     
     local TitleLabel = Instance.new("TextLabel")
     TitleLabel.Size = UDim2.new(1, -60, 1, 0)
-    TitleLabel.Position = UDim2.new(0, 5, 0, 0)
+    TitleLabel.Position = UDim2.new(0, 10, 0, 0)
     TitleLabel.Text = config.Name or "Xlib UI"
     TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     TitleLabel.BackgroundTransparency = 1
-    TitleLabel.Font = Enum.Font.SourceSans
+    TitleLabel.Font = Enum.Font.GothamBold
     TitleLabel.TextSize = 18
     TitleLabel.Parent = TitleBar
     
@@ -36,9 +40,9 @@ function Xlib:MakeWindow(config)
     MinimizeButton.Size = UDim2.new(0, 20, 0, 20)
     MinimizeButton.Position = UDim2.new(1, -55, 0, 5)
     MinimizeButton.Text = "-"
-    MinimizeButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+    MinimizeButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    MinimizeButton.Font = Enum.Font.SourceSans
+    MinimizeButton.Font = Enum.Font.GothamBold
     MinimizeButton.TextSize = 16
     MinimizeButton.Parent = TitleBar
     
@@ -48,35 +52,39 @@ function Xlib:MakeWindow(config)
     CloseButton.Text = "X"
     CloseButton.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
     CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    CloseButton.Font = Enum.Font.SourceSans
+    CloseButton.Font = Enum.Font.GothamBold
     CloseButton.TextSize = 16
     CloseButton.Parent = TitleBar
     
     local TabFrame = Instance.new("Frame")
     TabFrame.Size = UDim2.new(0, 120, 1, -30)
     TabFrame.Position = UDim2.new(0, 0, 0, 30)
-    TabFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    TabFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     TabFrame.BorderSizePixel = 0
     TabFrame.Parent = MainFrame
     
     local ToggleFrame = Instance.new("ScrollingFrame")
     ToggleFrame.Size = UDim2.new(1, -125, 1, -30)
     ToggleFrame.Position = UDim2.new(0, 125, 0, 30)
-    ToggleFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    ToggleFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     ToggleFrame.BorderSizePixel = 0
     ToggleFrame.CanvasSize = UDim2.new(0, 0, 2, 0)
     ToggleFrame.ScrollBarThickness = 8
     ToggleFrame.Parent = MainFrame
+    
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 10)
+    UICorner.Parent = ToggleFrame
     
     local function minimize()
         MainFrame.Visible = false
         local MinimizedIcon = Instance.new("TextButton", ScreenGui)
         MinimizedIcon.Size = UDim2.new(0, 35, 0, 35)
         MinimizedIcon.Position = UDim2.new(0, 10, 0, 10)
-        MinimizedIcon.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        MinimizedIcon.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
         MinimizedIcon.Text = "O"
         MinimizedIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
-        MinimizedIcon.Font = Enum.Font.SourceSans
+        MinimizedIcon.Font = Enum.Font.GothamBold
         MinimizedIcon.TextSize = 24
         MinimizedIcon.Draggable = true
         MinimizedIcon.MouseButton1Click:Connect(function()
@@ -104,9 +112,9 @@ function Xlib:MakeWindow(config)
         tabButton.Size = UDim2.new(1, 0, 0, 30)
         tabButton.Position = UDim2.new(0, 0, 0, (#self.TabFrame:GetChildren() - 1) * 35)
         tabButton.Text = config.Name
-        tabButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        tabButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
         tabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-        tabButton.Font = Enum.Font.SourceSans
+        tabButton.Font = Enum.Font.GothamBold
         tabButton.TextSize = 16
         tabButton.Parent = self.TabFrame
         
@@ -127,9 +135,9 @@ function Xlib:MakeWindow(config)
                 toggleButton.Size = UDim2.new(1, 0, 0, 30)
                 toggleButton.Position = UDim2.new(0, 0, 0, (#self.ToggleFrame:GetChildren() - 1) * 35)
                 toggleButton.Text = toggle.Name
-                toggleButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+                toggleButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
                 toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-                toggleButton.Font = Enum.Font.SourceSans
+                toggleButton.Font = Enum.Font.GothamBold
                 toggleButton.TextSize = 16
                 toggleButton.Parent = self.ToggleFrame
                 
