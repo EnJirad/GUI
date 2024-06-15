@@ -39,7 +39,7 @@ function Xlib:MakeWindow(config)
     MinimizeButton.Position = UDim2.new(1, -55, 0, 5)
     MinimizeButton.Text = "<"
     MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    MinimizeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    MinimizeButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     MinimizeButton.Parent = TitleBar
 
     local CloseButton = Instance.new("TextButton")
@@ -54,7 +54,8 @@ function Xlib:MakeWindow(config)
     TabFrame.Size = UDim2.new(0, 100, 1, -30)
     TabFrame.Position = UDim2.new(0, 0, 0, 30)
     TabFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    TabFrame.BorderSizePixel = 0
+    TabFrame.BorderSizePixel = 1
+    TabFrame.BorderColor3 = Color3.fromRGB(50, 50, 50)
     TabFrame.Parent = MainFrame
 
     local ContentFrame = Instance.new("Frame")
@@ -147,7 +148,10 @@ function Xlib:MakeTab(config)
     TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     TabButton.Font = Enum.Font.Gotham
     TabButton.TextSize = 14
-    TabButton.BorderSizePixel = 0
+
+    -- Calculate the position of the new tab
+    local index = #config.Parent.TabFrame:GetChildren()
+    TabButton.Position = UDim2.new(0, 0, 0, index * 30)
     TabButton.Parent = config.Parent.TabFrame
 
     local ToggleContainer = Instance.new("Frame")
@@ -167,7 +171,6 @@ function Xlib:MakeTab(config)
     end)
 
     return {
-        TabButton = TabButton,
         ToggleContainer = ToggleContainer
     }
 end
@@ -180,39 +183,52 @@ function Xlib:MakeToggle(config)
     Toggle.Parent = config.Parent.ToggleContainer
 
     local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new
+    UICorner.CornerRadius = UDim.new(0, 5)
+    UICorner.Parent = Toggle
 
     local ToggleButton = Instance.new("TextButton")
-ToggleButton.Size = UDim2.new(0, 20, 0, 20)
-ToggleButton.Position = UDim2.new(1, -30, 0.5, -10)
-ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-ToggleButton.Text = ""
-ToggleButton.Parent = Toggle
+    ToggleButton.Size = UDim2.new(0, 30, 0, 30)
+    ToggleButton.Position = UDim2.new(1, -40, 0, 0)
+    ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    ToggleButton.Text = ""
+    ToggleButton.Parent = Toggle
 
-local ToggleLabel = Instance.new("TextLabel")
-ToggleLabel.Size = UDim2.new(1, -40, 1, 0)
-ToggleLabel.Position = UDim2.new(0, 10, 0, 0)
-ToggleLabel.Text = config.Name
-ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleLabel.BackgroundTransparency = 1
-ToggleLabel.Font = Enum.Font.Gotham
-ToggleLabel.TextSize = 14
-ToggleLabel.Parent = Toggle
+    local ToggleLabel = Instance.new("TextLabel")
+    ToggleLabel.Size = UDim2.new(1, -60, 1, 0)
+    ToggleLabel.Position = UDim2.new(0, 10, 0, 0)
+    ToggleLabel.Text = config.Name
+    ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ToggleLabel.BackgroundTransparency = 1
+    ToggleLabel.Font = Enum.Font.Gotham
+    ToggleLabel.TextSize = 14
+    ToggleLabel.Parent = Toggle
 
-local state = config.Default or false
-ToggleButton.MouseButton1Click:Connect(function()
-    state = not state
-    config.Callback(state)
+    local state = config.Default or false
+    ToggleButton.MouseButton1Click:Connect(function()
+        state = not state
+        config.Callback(state)
+        if state then
+            ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+        else
+            ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+        end
+    end)
+
+    -- Set initial state of the toggle button
     if state then
         ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
     else
         ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
     end
-end)
 
--- Set initial state of the toggle button
-if state then
-    ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-else
-    ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    return {
+        Toggle = Toggle,
+        ToggleButton = ToggleButton,
+        ToggleLabel = ToggleLabel,
+        GetState = function()
+            return state
+        end
+    }
 end
+
+return Xlib
