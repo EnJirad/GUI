@@ -1,150 +1,154 @@
+-- Xlib.lua
+
 local Xlib = {}
 
+function Xlib.new()
+    local self = setmetatable({}, { __index = Xlib })
+    self.MainFrame = Instance.new("Frame")
+    self.MainFrame.Name = "XlibMainFrame"
+    self.MainFrame.Size = UDim2.new(0, 400, 0, 300)
+    self.MainFrame.BackgroundTransparency = 0.5
+    self.MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    self.MainFrame.BorderSizePixel = 0
+    self.MainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
+    self.MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+
+    self.TabFrame = Instance.new("Frame")
+    self.TabFrame.Name = "XlibTabFrame"
+    self.TabFrame.Size = UDim2.new(0.3, 0, 1, 0)
+    self.TabFrame.Position = UDim2.new(0, 0, 0, 0)
+    self.TabFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    self.TabFrame.BorderSizePixel = 0
+    self.TabFrame.Parent = self.MainFrame
+
+    self.ToggleFrame = Instance.new("Frame")
+    self.ToggleFrame.Name = "XlibToggleFrame"
+    self.ToggleFrame.Size = UDim2.new(0.7, 0, 1, 0)
+    self.ToggleFrame.Position = UDim2.new(0.3, 0, 0, 0)
+    self.ToggleFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    self.ToggleFrame.BorderSizePixel = 0
+    self.ToggleFrame.Parent = self.MainFrame
+
+    self.Toggles = {}
+
+    return self
+end
+
 function Xlib:MakeWindow(config)
-    local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = config.Name or "XlibScreenGui"
-    ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-    
-    local MainFrame = Instance.new("Frame")
-    MainFrame.Size = UDim2.new(0, 600, 0, 400)
-    MainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
-    MainFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-    MainFrame.BorderSizePixel = 0
-    MainFrame.Active = true
-    MainFrame.Draggable = true
-    MainFrame.Parent = ScreenGui
-    
-    local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, 10)
-    UICorner.Parent = MainFrame
-    
-    local TitleBar = Instance.new("Frame")
-    TitleBar.Size = UDim2.new(1, 0, 0, 30)
-    TitleBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    TitleBar.BorderSizePixel = 0
-    TitleBar.Parent = MainFrame
-    
-    local TitleLabel = Instance.new("TextLabel")
-    TitleLabel.Size = UDim2.new(1, -60, 1, 0)
-    TitleLabel.Position = UDim2.new(0, 10, 0, 0)
-    TitleLabel.Text = config.Name or "Xlib UI"
-    TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    TitleLabel.BackgroundTransparency = 1
-    TitleLabel.Font = Enum.Font.GothamBold
-    TitleLabel.TextSize = 18
-    TitleLabel.Parent = TitleBar
-    
-    local MinimizeButton = Instance.new("TextButton")
-    MinimizeButton.Size = UDim2.new(0, 20, 0, 20)
-    MinimizeButton.Position = UDim2.new(1, -55, 0, 5)
-    MinimizeButton.Text = "_"
-    MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    MinimizeButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    MinimizeButton.Font = Enum.Font.GothamBold
-    MinimizeButton.TextSize = 14
-    MinimizeButton.Parent = TitleBar
-    
-    local CloseButton = Instance.new("TextButton")
-    CloseButton.Size = UDim2.new(0, 20, 0, 20)
-    CloseButton.Position = UDim2.new(1, -30, 0, 5)
-    CloseButton.Text = "X"
-    CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    CloseButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-    CloseButton.Font = Enum.Font.GothamBold
-    CloseButton.TextSize = 14
-    CloseButton.Parent = TitleBar
-    
-    local TabFrame = Instance.new("Frame")
-    TabFrame.Size = UDim2.new(0, 150, 1, -30)
-    TabFrame.Position = UDim2.new(0, 0, 0, 30)
-    TabFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    TabFrame.BorderSizePixel = 0
-    TabFrame.Parent = MainFrame
-    
-    local ContentFrame = Instance.new("Frame")
-    ContentFrame.Size = UDim2.new(1, -150, 1, -30)
-    ContentFrame.Position = UDim2.new(0, 150, 0, 30)
-    ContentFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    ContentFrame.BorderSizePixel = 0
-    ContentFrame.Parent = MainFrame
-    
-    local function minimizeWindow()
-        if MainFrame.Visible then
-            MainFrame.Visible = false
-        else
-            MainFrame.Visible = true
-        end
-    end
-    
-    local function closeWindow()
-        ScreenGui:Destroy()
-    end
-    
-    MinimizeButton.MouseButton1Click:Connect(minimizeWindow)
-    CloseButton.MouseButton1Click:Connect(closeWindow)
-    
-    return {
-        MainFrame = MainFrame,
-        TabFrame = TabFrame,
-        ContentFrame = ContentFrame,
-    }
+    local window = {}
+    window.Name = config.Name or "Window"
+    window.MainFrame = Xlib.MainFrame:Clone()
+    window.MainFrame.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+    window.MainFrame.Name = window.Name
+    return setmetatable(window, { __index = Xlib })
 end
 
 function Xlib:MakeTab(config)
-    local TabButton = Instance.new("TextButton")
-    TabButton.Size = UDim2.new(1, 0, 0, 30)
-    TabButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-    TabButton.Text = config.Name
-    TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    TabButton.Font = Enum.Font.Gotham
-    TabButton.TextSize = 14
-    TabButton.Parent = config.Parent.TabFrame
-    
-    local ToggleContainer = Instance.new("Frame")
-    ToggleContainer.Size = UDim2.new(1, 0, 1, 0)
-    ToggleContainer.BackgroundTransparency = 1
-    ToggleContainer.Parent = config.Parent.ContentFrame
-    ToggleContainer.Visible = false
-    
-    TabButton.MouseButton1Click:Connect(function()
-        for _, child in pairs(config.Parent.ContentFrame:GetChildren()) do
-            if child:IsA("Frame") then
-                child.Visible = false
+    local tab = {}
+    tab.Name = config.Name or "Tab"
+    tab.Frame = Instance.new("Frame")
+    tab.Frame.Name = tab.Name
+    tab.Frame.Size = UDim2.new(1, 0, 1, 0)
+    tab.Frame.BackgroundTransparency = 1
+    tab.Frame.Parent = self.TabFrame
+
+    tab.ToggleButtons = {}
+
+    local function activateTab()
+        for _, t in pairs(self.TabFrame:GetChildren()) do
+            if t:IsA("TextButton") then
+                t.BackgroundTransparency = 0.5
             end
         end
-        ToggleContainer.Visible = true
+        tab.Frame.Visible = true
+    end
+
+    local TabButton = Instance.new("TextButton")
+    TabButton.Name = tab.Name
+    TabButton.Size = UDim2.new(1, 0, 0, 50)
+    TabButton.Position = UDim2.new(0, 0, 0, #self.TabFrame:GetChildren() * 50)
+    TabButton.BackgroundColor3 = Color3.new(1, 1, 1)
+    TabButton.BackgroundTransparency = 0.5
+    TabButton.TextColor3 = Color3.new(0, 0, 0)
+    TabButton.Text = tab.Name
+    TabButton.FontSize = Enum.FontSize.Size14
+    TabButton.TextStrokeTransparency = 0.75
+    TabButton.BorderSizePixel = 0
+    TabButton.AutoButtonColor = false
+    TabButton.Parent = self.TabFrame
+
+    TabButton.MouseButton1Click:Connect(function()
+        activateTab()
     end)
-    
-    return {
-        ToggleContainer = ToggleContainer
-    }
+
+    tab.Activate = activateTab
+
+    return setmetatable(tab, { __index = self })
 end
 
 function Xlib:MakeToggle(config)
-    local Toggle = Instance.new("TextButton")
-    Toggle.Size = UDim2.new(1, -20, 0, 30)
-    Toggle.Position = UDim2.new(0, 10, 0, (#config.Parent.ToggleContainer:GetChildren() - 1) * 40 + 10)
-    Toggle.Text = config.Name
-    Toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Toggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    Toggle.Font = Enum.Font.Gotham
-    Toggle.TextSize = 14
-    Toggle.Parent = config.Parent.ToggleContainer
-    
-    local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, 5)
-    UICorner.Parent = Toggle
-    
-    local state = config.Default or false
-    Toggle.MouseButton1Click:Connect(function()
-        state = not state
-        config.Callback(state)
-        if state then
-            Toggle.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-        else
-            Toggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-        end
+    local toggle = {}
+    toggle.Name = config.Name or "Toggle"
+    toggle.Frame = Instance.new("Frame")
+    toggle.Frame.Name = toggle.Name
+    toggle.Frame.Size = UDim2.new(1, 0, 0, 30)
+    toggle.Frame.BackgroundTransparency = 1
+    toggle.Frame.Parent = self.ToggleFrame
+
+    toggle.Checkmark = Instance.new("ImageLabel")
+    toggle.Checkmark.Name = "Checkmark"
+    toggle.Checkmark.Size = UDim2.new(0, 24, 0, 24)
+    toggle.Checkmark.Position = UDim2.new(0, 3, 0.5, -12)
+    toggle.Checkmark.Image = "http://www.roblox.com/asset/?id=6087584876"  -- Replace with your checkmark image
+    toggle.Checkmark.BackgroundTransparency = 1
+    toggle.Checkmark.Parent = toggle.Frame
+
+    toggle.Label = Instance.new("TextLabel")
+    toggle.Label.Name = "Label"
+    toggle.Label.Size = UDim2.new(1, -30, 1, 0)
+    toggle.Label.Position = UDim2.new(0, 30, 0, 0)
+    toggle.Label.Text = toggle.Name
+    toggle.Label.TextColor3 = Color3.new(1, 1, 1)
+    toggle.Label.TextStrokeTransparency = 0.75
+    toggle.Label.TextXAlignment = Enum.TextXAlignment.Left
+    toggle.Label.FontSize = Enum.FontSize.Size14
+    toggle.Label.BackgroundTransparency = 1
+    toggle.Label.Parent = toggle.Frame
+
+    toggle.ToggleButton = Instance.new("TextButton")
+    toggle.ToggleButton.Name = "ToggleButton"
+    toggle.ToggleButton.Size = UDim2.new(0, 30, 1, 0)
+    toggle.ToggleButton.Position = UDim2.new(1, -30, 0, 0)
+    toggle.ToggleButton.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)
+    toggle.ToggleButton.Text = ""
+    toggle.ToggleButton.BorderSizePixel = 0
+    toggle.ToggleButton.Parent = toggle.Frame
+
+    local function updateToggle()
+        toggle.Checkmark.Visible = not toggle.Checkmark.Visible
+        config.Callback(toggle.Checkmark.Visible)
+    end
+
+    toggle.ToggleButton.MouseButton1Click:Connect(function()
+        updateToggle()
     end)
+
+    toggle.ToggleButton.MouseEnter:Connect(function()
+        toggle.ToggleButton.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
+    end)
+
+    toggle.ToggleButton.MouseLeave:Connect(function()
+        toggle.ToggleButton.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)
+    end)
+
+    toggle.Update = function(state)
+        toggle.Checkmark.Visible = state
+        config.Callback(state)
+    end
+
+    table.insert(self.Toggles, toggle)
+
+    return toggle
 end
 
 return Xlib
