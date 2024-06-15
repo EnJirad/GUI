@@ -231,4 +231,66 @@ function Xlib:MakeToggle(config)
     }
 end
 
+function Xlib:MakeDropdown(config)
+    local Dropdown = Instance.new("Frame")
+    Dropdown.Size = UDim2.new(1, -20, 0, 30)
+    Dropdown.Position = UDim2.new(0, 10, 0, (#config.Parent.ToggleContainer:GetChildren()) * 40)
+    Dropdown.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    Dropdown.Parent = config.Parent.ToggleContainer
+
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 5)
+    UICorner.Parent = Dropdown
+
+    local DropdownButton = Instance.new("TextButton")
+    DropdownButton.Size = UDim2.new(1, 0, 1, 0)
+    DropdownButton.Position = UDim2.new(0, 10, 0, 0)
+    DropdownButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    DropdownButton.Text = config.Name
+    DropdownButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    DropdownButton.Font = Enum.Font.Gotham
+    DropdownButton.TextSize = 14
+    DropdownButton.Parent = Dropdown
+
+    local DropdownMenu = Instance.new("Frame")
+    DropdownMenu.Size = UDim2.new(1, 0, 0, 0)
+    DropdownMenu.Position = UDim2.new(0, 0, 1, 0)
+    DropdownMenu.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    DropdownMenu.BorderSizePixel = 0
+    DropdownMenu.Parent = Dropdown
+
+    DropdownButton.MouseButton1Click:Connect(function()
+        if DropdownMenu.Size.Y.Offset == 0 then
+            DropdownMenu:TweenSize(UDim2.new(1, 0, 0, 100), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.3, true)
+        else
+            DropdownMenu:TweenSize(UDim2.new(1, 0, 0, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.3, true)
+        end
+    end)
+
+    local options = config.Options or {}
+    for i, option in ipairs(options) do
+        local OptionButton = Instance.new("TextButton")
+        OptionButton.Size = UDim2.new(1, 0, 0, 30)
+        OptionButton.Position = UDim2.new(0, 0, 0, (i - 1) * 30)
+        OptionButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        OptionButton.Text = option
+        OptionButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+        OptionButton.Font = Enum.Font.Gotham
+        OptionButton.TextSize = 14
+        OptionButton.Parent = DropdownMenu
+
+        OptionButton.MouseButton1Click:Connect(function()
+            DropdownButton.Text = option
+            DropdownMenu:TweenSize(UDim2.new(1, 0, 0, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.3, true)
+            config.Callback(option)
+        end)
+    end
+
+    return {
+        Dropdown = Dropdown,
+        DropdownButton = DropdownButton,
+        DropdownMenu = DropdownMenu,
+    }
+end
+
 return Xlib
