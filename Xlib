@@ -4,11 +4,12 @@ local Xlib = {}
 
 function Xlib:CreateUI()
     local ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.Name = "XlibScreenGui"
     ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
     
     local MainFrame = Instance.new("Frame")
-    MainFrame.Size = UDim2.new(0, 400, 0, 300)
-    MainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
+    MainFrame.Size = UDim2.new(0, 400, 0, 350)
+    MainFrame.Position = UDim2.new(0.5, -200, 0.5, -175)
     MainFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     MainFrame.BorderSizePixel = 0
     MainFrame.Parent = ScreenGui
@@ -22,7 +23,7 @@ function Xlib:CreateUI()
     local TitleLabel = Instance.new("TextLabel")
     TitleLabel.Size = UDim2.new(1, 0, 1, 0)
     TitleLabel.Position = UDim2.new(0, 5, 0, 0)
-    TitleLabel.Text = "MyWindow"
+    TitleLabel.Text = "Xlib UI"
     TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     TitleLabel.BackgroundTransparency = 1
     TitleLabel.Font = Enum.Font.SourceSans
@@ -36,20 +37,22 @@ function Xlib:CreateUI()
     TabFrame.BorderSizePixel = 0
     TabFrame.Parent = MainFrame
     
-    local ToggleFrame = Instance.new("Frame")
+    local ToggleFrame = Instance.new("ScrollingFrame")
     ToggleFrame.Size = UDim2.new(1, -110, 1, -30)
     ToggleFrame.Position = UDim2.new(0, 105, 0, 30)
     ToggleFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
     ToggleFrame.BorderSizePixel = 0
+    ToggleFrame.CanvasSize = UDim2.new(0, 0, 2, 0)
+    ToggleFrame.ScrollBarThickness = 8
     ToggleFrame.Parent = MainFrame
     
     return MainFrame, TabFrame, ToggleFrame
 end
 
-function Xlib:CreateTab(tabFrame, tabName, tabToggles)
+function Xlib:CreateTab(tabFrame, tabName, callback)
     local tabButton = Instance.new("TextButton")
     tabButton.Size = UDim2.new(1, 0, 0, 30)
-    tabButton.Position = UDim2.new(0, 0, 0, (#tabFrame:GetChildren() + 1) * 35)
+    tabButton.Position = UDim2.new(0, 0, 0, (#tabFrame:GetChildren() - 1) * 35)
     tabButton.Text = tabName
     tabButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     tabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -57,22 +60,13 @@ function Xlib:CreateTab(tabFrame, tabName, tabToggles)
     tabButton.TextSize = 16
     tabButton.Parent = tabFrame
     
-    local tab = {
-        Name = tabName,
-        Toggles = {},
-    }
-    
-    for _, toggleName in ipairs(tabToggles) do
-        table.insert(tab.Toggles, toggleName)
-    end
-    
-    return tab
+    tabButton.MouseButton1Click:Connect(callback)
 end
 
 function Xlib:CreateToggle(toggleFrame, toggleName, default, callback)
     local toggleButton = Instance.new("TextButton")
     toggleButton.Size = UDim2.new(1, 0, 0, 30)
-    toggleButton.Position = UDim2.new(0, 0, 0, (#toggleFrame:GetChildren() + 1) * 35)
+    toggleButton.Position = UDim2.new(0, 0, 0, (#toggleFrame:GetChildren() - 1) * 35)
     toggleButton.Text = toggleName
     toggleButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
     toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
