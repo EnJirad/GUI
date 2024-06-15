@@ -64,11 +64,6 @@ function Xlib:MakeWindow(config)
     ContentFrame.BorderSizePixel = 0
     ContentFrame.Parent = MainFrame
     
-    local ToggleFrame = Instance.new("Frame")
-    ToggleFrame.Size = UDim2.new(1, 0, 1, 0)
-    ToggleFrame.BackgroundTransparency = 1
-    ToggleFrame.Parent = ContentFrame
-    
     local function minimizeWindow()
         if MainFrame.Visible then
             MainFrame.Visible = false
@@ -87,42 +82,60 @@ function Xlib:MakeWindow(config)
     return {
         MainFrame = MainFrame,
         TabFrame = TabFrame,
-        ToggleFrame = ToggleFrame,
+        ContentFrame = ContentFrame,
     }
 end
 
-function Xlib:CreateTab(TabFrame, name, onClick)
+function Xlib:MakeTab(config)
     local TabButton = Instance.new("TextButton")
     TabButton.Size = UDim2.new(1, 0, 0, 30)
     TabButton.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    TabButton.Text = name
+    TabButton.Text = config.Name
     TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     TabButton.Font = Enum.Font.Gotham
     TabButton.TextSize = 14
-    TabButton.Parent = TabFrame
+    TabButton.Parent = config.Parent.TabFrame
     
-    TabButton.MouseButton1Click:Connect(onClick)
+    local ToggleContainer = Instance.new("Frame")
+    ToggleContainer.Size = UDim2.new(1, 0, 1, 0)
+    ToggleContainer.BackgroundTransparency = 1
+    ToggleContainer.Parent = config.Parent.ContentFrame
+    ToggleContainer.Visible = false
+    
+    TabButton.MouseButton1Click:Connect(function()
+        for _, child in pairs(config.Parent.ContentFrame:GetChildren()) do
+            if child:IsA("Frame") then
+                child.Visible = false
+            end
+        end
+        ToggleContainer.Visible = true
+    end)
+    
+    return {
+        ToggleContainer = ToggleContainer
+    }
 end
 
-function Xlib:CreateToggle(parent, name, default, callback)
+function Xlib:MakeToggle(config)
     local Toggle = Instance.new("TextButton")
     Toggle.Size = UDim2.new(1, -20, 0, 30)
-    Toggle.Position = UDim2.new(0, 10, 0, 10)
-    Toggle.Text = name
+    Toggle.Position = UDim2.new(0, 10, 0, (#config.Parent.ToggleContainer:GetChildren() - 1) * 40 + 10)
+    Toggle.Text = config.Name
     Toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
     Toggle.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     Toggle.Font = Enum.Font.Gotham
     Toggle.TextSize = 14
-    Toggle.Parent = parent
+    Toggle.Parent = config.Parent.ToggleContainer
     
     local UICorner = Instance.new("UICorner")
     UICorner.CornerRadius = UDim.new(0, 5)
     UICorner.Parent = Toggle
     
+    local state = config.Default or false
     Toggle.MouseButton1Click:Connect(function()
-        default = not default
-        callback(default)
-        if default then
+        state = not state
+        config.Callback(state)
+        if state then
             Toggle.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
         else
             Toggle.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
