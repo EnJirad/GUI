@@ -8,8 +8,8 @@ function Xlib:CreateUI()
     ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
     
     local MainFrame = Instance.new("Frame")
-    MainFrame.Size = UDim2.new(0, 400, 0, 350)
-    MainFrame.Position = UDim2.new(0.5, -200, 0.5, -175)
+    MainFrame.Size = UDim2.new(0, 600, 0, 400)
+    MainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
     MainFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     MainFrame.BorderSizePixel = 0
     MainFrame.Active = true
@@ -53,15 +53,15 @@ function Xlib:CreateUI()
     CloseButton.Parent = TitleBar
     
     local TabFrame = Instance.new("Frame")
-    TabFrame.Size = UDim2.new(0, 100, 1, -30)
-    TabFrame.Position = UDim2.new(0, 5, 0, 30)
+    TabFrame.Size = UDim2.new(0, 120, 1, -30)
+    TabFrame.Position = UDim2.new(0, 0, 0, 30)
     TabFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
     TabFrame.BorderSizePixel = 0
     TabFrame.Parent = MainFrame
     
     local ToggleFrame = Instance.new("ScrollingFrame")
-    ToggleFrame.Size = UDim2.new(1, -110, 1, -30)
-    ToggleFrame.Position = UDim2.new(0, 105, 0, 30)
+    ToggleFrame.Size = UDim2.new(1, -125, 1, -30)
+    ToggleFrame.Position = UDim2.new(0, 125, 0, 30)
     ToggleFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
     ToggleFrame.BorderSizePixel = 0
     ToggleFrame.CanvasSize = UDim2.new(0, 0, 2, 0)
@@ -97,7 +97,7 @@ end
 
 function Xlib:CreateTab(tabFrame, tabName, callback)
     local tabButton = Instance.new("TextButton")
-    tabButton.Size = UDim2.new(1, 0, 0, 30)
+    tabButton.Size = Udim2.new(1, 0, 0, 30)
     tabButton.Position = UDim2.new(0, 0, 0, (#tabFrame:GetChildren() - 1) * 35)
     tabButton.Text = tabName
     tabButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
