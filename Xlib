@@ -6,8 +6,8 @@ function Xlib:MakeWindow(config)
     ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
     
     local MainFrame = Instance.new("Frame")
-    MainFrame.Size = UDim2.new(0, 600, 0, 400)
-    MainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
+    MainFrame.Size = UDim2.new(0, 400, 0, 300)
+    MainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
     MainFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
     MainFrame.BorderSizePixel = 0
     MainFrame.Active = true
@@ -55,25 +55,21 @@ function Xlib:MakeWindow(config)
     CloseButton.Parent = TitleBar
     
     local TabFrame = Instance.new("Frame")
-    TabFrame.Size = UDim2.new(0, 150, 1, -30)
+    TabFrame.Size = UDim2.new(0, 120, 1, -30)
     TabFrame.Position = UDim2.new(0, 0, 0, 30)
     TabFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     TabFrame.BorderSizePixel = 0
     TabFrame.Parent = MainFrame
     
     local ContentFrame = Instance.new("Frame")
-    ContentFrame.Size = UDim2.new(1, -150, 1, -30)
-    ContentFrame.Position = UDim2.new(0, 150, 0, 30)
+    ContentFrame.Size = UDim2.new(1, -120, 1, -30)
+    ContentFrame.Position = UDim2.new(0, 120, 0, 30)
     ContentFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     ContentFrame.BorderSizePixel = 0
     ContentFrame.Parent = MainFrame
     
     local function minimizeWindow()
-        if MainFrame.Visible then
-            MainFrame.Visible = false
-        else
-            MainFrame.Visible = true
-        end
+        MainFrame.Visible = not MainFrame.Visible
     end
     
     local function closeWindow()
@@ -102,6 +98,7 @@ function Xlib:MakeTab(config)
     
     local ToggleContainer = Instance.new("Frame")
     ToggleContainer.Size = UDim2.new(1, 0, 1, 0)
+    ToggleContainer.Position = UDim2.new(0, 0, 0, 0)
     ToggleContainer.BackgroundTransparency = 1
     ToggleContainer.Parent = config.Parent.ContentFrame
     ToggleContainer.Visible = false
@@ -139,11 +136,7 @@ function Xlib:MakeToggle(config)
     Toggle.MouseButton1Click:Connect(function()
         state = not state
         config.Callback(state)
-        if state then
-            Toggle.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-        else
-            Toggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-        end
+        Toggle.BackgroundColor3 = state and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(50, 50, 50)
     end)
 end
 
