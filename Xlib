@@ -35,8 +35,8 @@ function Xlib:MakeWindow(config)
     
     local MinimizeButton = Instance.new("TextButton")
     MinimizeButton.Size = UDim2.new(0, 20, 0, 20)
-    MinimizeButton.Position = UDim2.new(1, -55, 0, 5)
-    MinimizeButton.Text = "_"
+    MinimizeButton.Position = UDim2.new(1, -35, 0, 5)
+    MinimizeButton.Text = "-"
     MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     MinimizeButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
     MinimizeButton.BorderSizePixel = 0
@@ -44,32 +44,30 @@ function Xlib:MakeWindow(config)
     
     local CloseButton = Instance.new("TextButton")
     CloseButton.Size = UDim2.new(0, 20, 0, 20)
-    CloseButton.Position = UDim2.new(1, -30, 0, 5)
+    CloseButton.Position = UDim2.new(1, -15, 0, 5)
     CloseButton.Text = "X"
     CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     CloseButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
     CloseButton.BorderSizePixel = 0
     CloseButton.Parent = TitleBar
     
-    local TabFrame = Instance.new("Frame")
-    TabFrame.Size = UDim2.new(0, 150, 1, -30)
-    TabFrame.Position = UDim2.new(0, 0, 0, 30)
-    TabFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    TabFrame.BorderSizePixel = 0
-    TabFrame.Parent = MainFrame
+    local IconButton = Instance.new("TextButton")
+    IconButton.Size = UDim2.new(0, 30, 0, 30)
+    IconButton.Position = UDim2.new(0, 5, 0, 5)
+    IconButton.Text = "="
+    IconButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    IconButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+    IconButton.BorderSizePixel = 0
+    IconButton.Parent = TitleBar
     
-    local ContentFrame = Instance.new("Frame")
-    ContentFrame.Size = UDim2.new(1, -150, 1, -30)
-    ContentFrame.Position = UDim2.new(0, 150, 0, 30)
-    ContentFrame.BackgroundColor3 = Color3.fromRGB(65, 65, 65)
-    ContentFrame.BorderSizePixel = 0
-    ContentFrame.Parent = MainFrame
+    local isMinimized = false
     
     local function minimizeWindow()
-        if MainFrame.Visible then
-            MainFrame.Visible = false
+        isMinimized = not isMinimized
+        if isMinimized then
+            MainFrame.Size = UDim2.new(0, 30, 0, 30)
         else
-            MainFrame.Visible = true
+            MainFrame.Size = UDim2.new(0, 300, 0, 250)
         end
     end
     
@@ -80,10 +78,28 @@ function Xlib:MakeWindow(config)
     MinimizeButton.MouseButton1Click:Connect(minimizeWindow)
     CloseButton.MouseButton1Click:Connect(closeWindow)
     
+    local isDragging = false
+    local startPoint = nil
+    
+    IconButton.MouseButton1Down:Connect(function()
+        isDragging = true
+        startPoint = MainFrame.Position
+    end)
+    
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if isDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - input.PositionDelta
+            MainFrame.Position = UDim2.new(0, delta.X, 0, delta.Y)
+        end
+    end)
+    
+    IconButton.MouseButton1Up:Connect(function()
+        isDragging = false
+    end)
+    
     return {
         MainFrame = MainFrame,
-        TabFrame = TabFrame,
-        ContentFrame = ContentFrame,
+        CloseButton = CloseButton,
     }
 end
 
