@@ -4,14 +4,13 @@ function Xlib:MakeWindow(config)
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = config.Name or "XlibScreenGui"
     ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+    ScreenGui.ResetOnSpawn = false
     
     local MainFrame = Instance.new("Frame")
     MainFrame.Size = UDim2.new(0, 600, 0, 400)
     MainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
-    MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
     MainFrame.BorderSizePixel = 0
-    MainFrame.Active = true
-    MainFrame.Draggable = true
     MainFrame.Parent = ScreenGui
     
     local UICorner = Instance.new("UICorner")
@@ -20,7 +19,7 @@ function Xlib:MakeWindow(config)
     
     local TitleBar = Instance.new("Frame")
     TitleBar.Size = UDim2.new(1, 0, 0, 30)
-    TitleBar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    TitleBar.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     TitleBar.BorderSizePixel = 0
     TitleBar.Parent = MainFrame
     
@@ -39,7 +38,8 @@ function Xlib:MakeWindow(config)
     MinimizeButton.Position = UDim2.new(1, -55, 0, 5)
     MinimizeButton.Text = "_"
     MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    MinimizeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    MinimizeButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+    MinimizeButton.BorderSizePixel = 0
     MinimizeButton.Parent = TitleBar
     
     local CloseButton = Instance.new("TextButton")
@@ -47,25 +47,30 @@ function Xlib:MakeWindow(config)
     CloseButton.Position = UDim2.new(1, -30, 0, 5)
     CloseButton.Text = "X"
     CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    CloseButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    CloseButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+    CloseButton.BorderSizePixel = 0
     CloseButton.Parent = TitleBar
     
     local TabFrame = Instance.new("Frame")
     TabFrame.Size = UDim2.new(0, 150, 1, -30)
     TabFrame.Position = UDim2.new(0, 0, 0, 30)
-    TabFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    TabFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     TabFrame.BorderSizePixel = 0
     TabFrame.Parent = MainFrame
     
     local ContentFrame = Instance.new("Frame")
     ContentFrame.Size = UDim2.new(1, -150, 1, -30)
     ContentFrame.Position = UDim2.new(0, 150, 0, 30)
-    ContentFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    ContentFrame.BackgroundColor3 = Color3.fromRGB(65, 65, 65)
     ContentFrame.BorderSizePixel = 0
     ContentFrame.Parent = MainFrame
     
     local function minimizeWindow()
-        MainFrame.Visible = not MainFrame.Visible
+        if MainFrame.Visible then
+            MainFrame.Visible = false
+        else
+            MainFrame.Visible = true
+        end
     end
     
     local function closeWindow()
@@ -85,8 +90,7 @@ end
 function Xlib:MakeTab(config)
     local TabButton = Instance.new("TextButton")
     TabButton.Size = UDim2.new(1, 0, 0, 30)
-    TabButton.Position = UDim2.new(0, 5, 0, (config.Index - 1) * 35 + 5)
-    TabButton.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    TabButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     TabButton.Text = config.Name
     TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     TabButton.Font = Enum.Font.Gotham
@@ -116,10 +120,10 @@ end
 function Xlib:MakeToggle(config)
     local Toggle = Instance.new("TextButton")
     Toggle.Size = UDim2.new(1, -20, 0, 30)
-    Toggle.Position = UDim2.new(0, 5, 0, (config.Index - 1) * 35 + 5)
+    Toggle.Position = UDim2.new(0, 10, 0, (#config.Parent.ToggleContainer:GetChildren() - 1) * 40 + 10)
     Toggle.Text = config.Name
     Toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Toggle.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    Toggle.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
     Toggle.Font = Enum.Font.Gotham
     Toggle.TextSize = 14
     Toggle.Parent = config.Parent.ToggleContainer
@@ -133,9 +137,9 @@ function Xlib:MakeToggle(config)
         state = not state
         config.Callback(state)
         if state then
-            Toggle.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+            Toggle.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
         else
-            Toggle.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+            Toggle.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
         end
     end)
 end
