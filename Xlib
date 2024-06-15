@@ -6,15 +6,15 @@ function Xlib:MakeWindow(config)
     ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
     
     local MainFrame = Instance.new("Frame")
-    MainFrame.Size = UDim2.new(0, 400, 0, 300)  -- ปรับขนาดเล็กลง
-    MainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)  -- จัดกลาง
-    MainFrame.BackgroundColor3 = Color3.fromRGB(240, 240, 240)  -- สีพื้นหลังสว่างขึ้น
+    MainFrame.Size = UDim2.new(0, 400, 0, 300)
+    MainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(240, 240, 240)
     MainFrame.BorderSizePixel = 0
     MainFrame.Active = true
     MainFrame.Draggable = true
     MainFrame.Parent = ScreenGui
     
-    -- เพิ่ม Shadow
+    -- Shadow
     local Shadow = Instance.new("ImageLabel")
     Shadow.Name = "Shadow"
     Shadow.Size = UDim2.new(1, 10, 1, 10)
@@ -31,7 +31,7 @@ function Xlib:MakeWindow(config)
     
     local TitleBar = Instance.new("Frame")
     TitleBar.Size = UDim2.new(1, 0, 0, 30)
-    TitleBar.BackgroundColor3 = Color3.fromRGB(50, 130, 184)  -- สีเข้มขึ้น
+    TitleBar.BackgroundColor3 = Color3.fromRGB(50, 130, 184)
     TitleBar.BorderSizePixel = 0
     TitleBar.Parent = MainFrame
     
@@ -45,46 +45,50 @@ function Xlib:MakeWindow(config)
     TitleLabel.TextSize = 18
     TitleLabel.Parent = TitleBar
     
-    local MinimizeButton = Instance.new("TextButton")
-    MinimizeButton.Size = UDim2.new(0, 20, 0, 20)
-    MinimizeButton.Position = UDim2.new(1, -55, 0, 5)
-    MinimizeButton.Text = "_"
-    MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    MinimizeButton.BackgroundColor3 = Color3.fromRGB(50, 130, 184)  -- สีเข้มขึ้น
-    MinimizeButton.Font = Enum.Font.GothamBold
-    MinimizeButton.TextSize = 14
-    MinimizeButton.Parent = TitleBar
+    -- ปุ่มที่ใช้ในการพับหน้าต่าง
+    local MinimizeIcon = Instance.new("ImageLabel")
+    MinimizeIcon.Size = UDim2.new(0, 20, 0, 20)
+    MinimizeIcon.Position = UDim2.new(0, 5, 0, 5)
+    MinimizeIcon.Image = "rbxassetid://3926305904"
+    MinimizeIcon.ImageRectOffset = Vector2.new(840, 0)
+    MinimizeIcon.ImageRectSize = Vector2.new(36, 36)
+    MinimizeIcon.BackgroundTransparency = 1
+    MinimizeIcon.Parent = TitleBar
+    
+    local Minimized = true
+    local function toggleWindow()
+        Minimized = not Minimized
+        MainFrame.Visible = not Minimized
+    end
+    
+    MinimizeIcon.MouseButton1Click:Connect(toggleWindow)
     
     local CloseButton = Instance.new("TextButton")
     CloseButton.Size = UDim2.new(0, 20, 0, 20)
     CloseButton.Position = UDim2.new(1, -30, 0, 5)
     CloseButton.Text = "X"
     CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    CloseButton.BackgroundColor3 = Color3.fromRGB(244, 67, 54)  -- สีแดงเข้ม
+    CloseButton.BackgroundColor3 = Color3.fromRGB(244, 67, 54)
     CloseButton.Font = Enum.Font.GothamBold
     CloseButton.TextSize = 14
     CloseButton.Parent = TitleBar
     
     local TabFrame = Instance.new("Frame")
     TabFrame.Size = UDim2.new(0, 120, 1, -30)
-    TabFrame.Position = UDim2.new(1, 0, 0, 30)  -- จัดไว้ด้านขวาของหน้าต่าง
-    TabFrame.BackgroundColor3 = Color3.fromRGB(240, 240, 240)  -- สีพื้นหลังสว่างขึ้น
+    TabFrame.Position = UDim2.new(1, 0, 0, 30)
+    TabFrame.BackgroundColor3 = Color3.fromRGB(240, 240, 240)
     TabFrame.BorderSizePixel = 0
     TabFrame.Parent = MainFrame
     
     local ContentFrame = Instance.new("Frame")
     ContentFrame.Size = UDim2.new(1, -120, 1, -30)
     ContentFrame.Position = UDim2.new(0, 0, 0, 30)
-    ContentFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)  -- สีพื้นหลังสว่างขึ้น
+    ContentFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     ContentFrame.BorderSizePixel = 0
     ContentFrame.Parent = MainFrame
     
     local function minimizeWindow()
-        if MainFrame.Visible then
-            MainFrame.Visible = false
-        else
-            MainFrame.Visible = true
-        end
+        MainFrame.Visible = not MainFrame.Visible
     end
     
     local function closeWindow()
@@ -104,7 +108,7 @@ end
 function Xlib:MakeTab(config)
     local TabButton = Instance.new("TextButton")
     TabButton.Size = UDim2.new(1, 0, 0, 30)
-    TabButton.BackgroundColor3 = Color3.fromRGB(50, 130, 184)  -- สีเข้มขึ้น
+    TabButton.BackgroundColor3 = Color3.fromRGB(50, 130, 184)
     TabButton.Text = config.Name
     TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     TabButton.Font = Enum.Font.Gotham
@@ -137,7 +141,7 @@ function Xlib:MakeToggle(config)
     Toggle.Position = UDim2.new(0, 10, 0, (#config.Parent.ToggleContainer:GetChildren() - 1) * 40 + 10)
     Toggle.Text = config.Name
     Toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Toggle.BackgroundColor3 = Color3.fromRGB(50, 130, 184)  -- สีเข้มขึ้น
+    Toggle.BackgroundColor3 = Color3.fromRGB(50, 130, 184)
     Toggle.Font = Enum.Font.Gotham
     Toggle.TextSize = 14
     Toggle.Parent = config.Parent.ToggleContainer
@@ -150,11 +154,7 @@ function Xlib:MakeToggle(config)
     Toggle.MouseButton1Click:Connect(function()
         state = not state
         config.Callback(state)
-        if state then
-            Toggle.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-        else
-            Toggle.BackgroundColor3 = Color3.fromRGB(50, 130, 184)  -- สีเข้มขึ้น
-        end
+        Toggle.BackgroundColor3 = state and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(50, 130, 184)
     end)
 end
 
