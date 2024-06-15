@@ -65,11 +65,7 @@ function Xlib:MakeWindow(config)
     ContentFrame.Parent = MainFrame
     
     local function minimizeWindow()
-        if MainFrame.Visible then
-            MainFrame.Visible = false
-        else
-            MainFrame.Visible = true
-        end
+        MainFrame.Visible = not MainFrame.Visible
     end
     
     local function closeWindow()
@@ -89,6 +85,7 @@ end
 function Xlib:MakeTab(config)
     local TabButton = Instance.new("TextButton")
     TabButton.Size = UDim2.new(1, 0, 0, 30)
+    TabButton.Position = UDim2.new(0, 5, 0, (config.Index - 1) * 35 + 5)
     TabButton.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     TabButton.Text = config.Name
     TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -119,7 +116,7 @@ end
 function Xlib:MakeToggle(config)
     local Toggle = Instance.new("TextButton")
     Toggle.Size = UDim2.new(1, -20, 0, 30)
-    Toggle.Position = UDim2.new(0, 10, 0, (#config.Parent.ToggleContainer:GetChildren() - 1) * 40 + 10)
+    Toggle.Position = UDim2.new(0, 5, 0, (config.Index - 1) * 35 + 5)
     Toggle.Text = config.Name
     Toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
     Toggle.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
