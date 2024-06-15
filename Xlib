@@ -97,7 +97,7 @@ end
 
 function Xlib:CreateTab(tabFrame, tabName, callback)
     local tabButton = Instance.new("TextButton")
-    tabButton.Size = Udim2.new(1, 0, 0, 30)
+    tabButton.Size = UDim2.new(1, 0, 0, 30)
     tabButton.Position = UDim2.new(0, 0, 0, (#tabFrame:GetChildren() - 1) * 35)
     tabButton.Text = tabName
     tabButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
