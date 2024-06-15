@@ -90,6 +90,10 @@ function Xlib:MakeTab(config)
     TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     TabButton.Font = Enum.Font.Gotham
     TabButton.TextSize = 14
+
+    -- คำนวณตำแหน่งใหม่ของ Tab
+    local index = #config.Parent.TabFrame:GetChildren()
+    TabButton.Position = UDim2.new(0, 0, 0, index * 30)
     TabButton.Parent = config.Parent.TabFrame
 
     local ToggleContainer = Instance.new("Frame")
