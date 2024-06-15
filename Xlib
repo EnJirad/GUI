@@ -145,16 +145,6 @@ function Xlib:MakeToggle(config)
             Toggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
         end
     end)
-    
-    local CheckIcon = Instance.new("ImageLabel")
-    CheckIcon.Size = UDim2.new(0, 20, 0, 20)
-    CheckIcon.Position = UDim2.new(1, -30, 0.5, -10)
-    CheckIcon.BackgroundTransparency = 1
-    CheckIcon.Image = "rbxassetid://4833981570"
-    CheckIcon.Visible = state
-    CheckIcon.Parent = Toggle
-    
-    return Toggle, CheckIcon
 end
 
 return Xlib
