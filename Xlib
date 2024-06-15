@@ -1,5 +1,3 @@
--- Xlib_Module
-
 local Xlib = {}
 
 function Xlib:MakeWindow(config)
@@ -97,6 +95,43 @@ function Xlib:MakeWindow(config)
     MinimizedIcon.MouseButton1Click:Connect(restoreWindow)
     CloseButton.MouseButton1Click:Connect(closeWindow)
 
+    -- Make the minimized icon draggable
+    local dragging
+    local dragInput
+    local dragStart
+    local startPos
+
+    local function update(input)
+        local delta = input.Position - dragStart
+        MinimizedIcon.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+
+    MinimizedIcon.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = MinimizedIcon.Position
+
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    MinimizedIcon.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            dragInput = input
+        end
+    end)
+
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            update(input)
+        end
+    end)
+
     return {
         MainFrame = MainFrame,
         TabFrame = TabFrame,
@@ -140,30 +175,56 @@ function Xlib:MakeTab(config)
 end
 
 function Xlib:MakeToggle(config)
-    local Toggle = Instance.new("TextButton")
+    local Toggle = Instance.new("Frame")
     Toggle.Size = UDim2.new(1, -20, 0, 30)
     Toggle.Position = UDim2.new(0, 10, 0, (#config.Parent.ToggleContainer:GetChildren()) * 40)
-    Toggle.Text = config.Name
-    Toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
     Toggle.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    Toggle.Font = Enum.Font.Gotham
-    Toggle.TextSize = 14
     Toggle.Parent = config.Parent.ToggleContainer
 
     local UICorner = Instance.new("UICorner")
     UICorner.CornerRadius = UDim.new(0, 5)
     UICorner.Parent = Toggle
 
+    local ToggleButton = Instance.new("TextButton")
+    ToggleButton.Size = UDim2.new(0, 20, 0, 20)
+    ToggleButton.Position = UDim2.new(1, -30, 0.5, -10)
+    ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    ToggleButton.Text = ""
+    ToggleButton.Parent = Toggle
+
+    local ToggleLabel = Instance.new("TextLabel")
+    ToggleLabel.Size = UDim2.new(1, -40, 1, 0)
+    ToggleLabel.Position = UDim2.new(0, 10, 0, 0)
+    ToggleLabel.Text = config.Name
+    ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ToggleLabel.BackgroundTransparency = 1
+    ToggleLabel.Font = Enum.Font.Gotham
+    ToggleLabel.TextSize = 14
+    ToggleLabel.Parent = Toggle
+
     local state = config.Default or false
-    Toggle.MouseButton1Click:Connect(function()
+    ToggleButton.MouseButton1Click:Connect(function()
         state = not state
         config.Callback(state)
         if state then
-            Toggle.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+            ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
         else
-            Toggle.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+            ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
         end
     end)
+
+    -- Set initial state of the toggle button
+    if state then
+        ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+    else
+        ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    end
+
+    return {
+        Toggle = Toggle,
+        ToggleButton = ToggleButton,
+        ToggleLabel = ToggleLabel
+    }
 end
 
 return Xlib
