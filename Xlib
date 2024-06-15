@@ -1,5 +1,3 @@
--- Xlib.lua
-
 local Xlib = {}
 
 function Xlib:MakeWindow(config)
@@ -39,129 +37,97 @@ function Xlib:MakeWindow(config)
     local MinimizeButton = Instance.new("TextButton")
     MinimizeButton.Size = UDim2.new(0, 20, 0, 20)
     MinimizeButton.Position = UDim2.new(1, -55, 0, 5)
-    MinimizeButton.Text = "-"
-    MinimizeButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    MinimizeButton.Text = "_"
     MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    MinimizeButton.Font = Enum.Font.GothamBold
-    MinimizeButton.TextSize = 16
+    MinimizeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
     MinimizeButton.Parent = TitleBar
     
     local CloseButton = Instance.new("TextButton")
     CloseButton.Size = UDim2.new(0, 20, 0, 20)
-    CloseButton.Position = UDim2.new(1, -25, 0, 5)
+    CloseButton.Position = UDim2.new(1, -30, 0, 5)
     CloseButton.Text = "X"
-    CloseButton.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
     CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    CloseButton.Font = Enum.Font.GothamBold
-    CloseButton.TextSize = 16
+    CloseButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
     CloseButton.Parent = TitleBar
     
     local TabFrame = Instance.new("Frame")
-    TabFrame.Size = UDim2.new(0, 120, 1, -30)
+    TabFrame.Size = UDim2.new(0, 150, 1, -30)
     TabFrame.Position = UDim2.new(0, 0, 0, 30)
     TabFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     TabFrame.BorderSizePixel = 0
     TabFrame.Parent = MainFrame
     
-    local ToggleFrame = Instance.new("ScrollingFrame")
-    ToggleFrame.Size = UDim2.new(1, -125, 1, -30)
-    ToggleFrame.Position = UDim2.new(0, 125, 0, 30)
-    ToggleFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    ToggleFrame.BorderSizePixel = 0
-    ToggleFrame.CanvasSize = UDim2.new(0, 0, 2, 0)
-    ToggleFrame.ScrollBarThickness = 8
-    ToggleFrame.Parent = MainFrame
+    local ContentFrame = Instance.new("Frame")
+    ContentFrame.Size = UDim2.new(1, -150, 1, -30)
+    ContentFrame.Position = UDim2.new(0, 150, 0, 30)
+    ContentFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    ContentFrame.BorderSizePixel = 0
+    ContentFrame.Parent = MainFrame
     
-    local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, 10)
-    UICorner.Parent = ToggleFrame
+    local ToggleFrame = Instance.new("Frame")
+    ToggleFrame.Size = UDim2.new(1, 0, 1, 0)
+    ToggleFrame.BackgroundTransparency = 1
+    ToggleFrame.Parent = ContentFrame
     
-    local function minimize()
-        MainFrame.Visible = false
-        local MinimizedIcon = Instance.new("TextButton", ScreenGui)
-        MinimizedIcon.Size = UDim2.new(0, 35, 0, 35)
-        MinimizedIcon.Position = UDim2.new(0, 10, 0, 10)
-        MinimizedIcon.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-        MinimizedIcon.Text = "O"
-        MinimizedIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
-        MinimizedIcon.Font = Enum.Font.GothamBold
-        MinimizedIcon.TextSize = 24
-        MinimizedIcon.Draggable = true
-        MinimizedIcon.MouseButton1Click:Connect(function()
+    local function minimizeWindow()
+        if MainFrame.Visible then
+            MainFrame.Visible = false
+        else
             MainFrame.Visible = true
-            MinimizedIcon:Destroy()
-        end)
+        end
     end
-
-    local function close()
+    
+    local function closeWindow()
         ScreenGui:Destroy()
     end
-
-    MinimizeButton.MouseButton1Click:Connect(minimize)
-    CloseButton.MouseButton1Click:Connect(close)
     
-    local window = {
+    MinimizeButton.MouseButton1Click:Connect(minimizeWindow)
+    CloseButton.MouseButton1Click:Connect(closeWindow)
+    
+    return {
         MainFrame = MainFrame,
         TabFrame = TabFrame,
         ToggleFrame = ToggleFrame,
-        Tabs = {}
     }
+end
+
+function Xlib:CreateTab(TabFrame, name, onClick)
+    local TabButton = Instance.new("TextButton")
+    TabButton.Size = UDim2.new(1, 0, 0, 30)
+    TabButton.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    TabButton.Text = name
+    TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TabButton.Font = Enum.Font.Gotham
+    TabButton.TextSize = 14
+    TabButton.Parent = TabFrame
     
-    function window:MakeTab(config)
-        local tabButton = Instance.new("TextButton")
-        tabButton.Size = UDim2.new(1, 0, 0, 30)
-        tabButton.Position = UDim2.new(0, 0, 0, (#self.TabFrame:GetChildren() - 1) * 35)
-        tabButton.Text = config.Name
-        tabButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-        tabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-        tabButton.Font = Enum.Font.GothamBold
-        tabButton.TextSize = 16
-        tabButton.Parent = self.TabFrame
-        
-        local tab = {
-            Name = config.Name,
-            Button = tabButton,
-            Toggles = {}
-        }
-        
-        tabButton.MouseButton1Click:Connect(function()
-            for _, child in ipairs(self.ToggleFrame:GetChildren()) do
-                if child:IsA("TextButton") then
-                    child:Destroy()
-                end
-            end
-            for _, toggle in ipairs(tab.Toggles) do
-                local toggleButton = Instance.new("TextButton")
-                toggleButton.Size = UDim2.new(1, 0, 0, 30)
-                toggleButton.Position = UDim2.new(0, 0, 0, (#self.ToggleFrame:GetChildren() - 1) * 35)
-                toggleButton.Text = toggle.Name
-                toggleButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-                toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-                toggleButton.Font = Enum.Font.GothamBold
-                toggleButton.TextSize = 16
-                toggleButton.Parent = self.ToggleFrame
-                
-                toggleButton.MouseButton1Click:Connect(function()
-                    toggle.Value = not toggle.Value
-                    toggle.Callback(toggle.Value)
-                end)
-            end
-        end)
-        
-        function tab:AddToggle(config)
-            local toggle = {
-                Name = config.Name,
-                Value = config.Default,
-                Callback = config.Callback
-            }
-            table.insert(tab.Toggles, toggle)
+    TabButton.MouseButton1Click:Connect(onClick)
+end
+
+function Xlib:CreateToggle(parent, name, default, callback)
+    local Toggle = Instance.new("TextButton")
+    Toggle.Size = UDim2.new(1, -20, 0, 30)
+    Toggle.Position = UDim2.new(0, 10, 0, 10)
+    Toggle.Text = name
+    Toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Toggle.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    Toggle.Font = Enum.Font.Gotham
+    Toggle.TextSize = 14
+    Toggle.Parent = parent
+    
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 5)
+    UICorner.Parent = Toggle
+    
+    Toggle.MouseButton1Click:Connect(function()
+        default = not default
+        callback(default)
+        if default then
+            Toggle.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+        else
+            Toggle.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
         end
-        
-        table.insert(self.Tabs, tab)
-        return tab
-    end
-    
-    return window
+    end)
 end
 
 return Xlib
