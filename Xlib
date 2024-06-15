@@ -45,27 +45,19 @@ function Xlib:MakeWindow(config)
     TitleLabel.TextSize = 18
     TitleLabel.Parent = TitleBar
     
-    -- ปุ่มที่ใช้ในการพับหน้าต่าง
-    local MinimizeIcon = Instance.new("ImageLabel")
-    MinimizeIcon.Size = UDim2.new(0, 20, 0, 20)
-    MinimizeIcon.Position = UDim2.new(0, 5, 0, 5)
-    MinimizeIcon.Image = "rbxassetid://3926305904"
-    MinimizeIcon.ImageRectOffset = Vector2.new(840, 0)
-    MinimizeIcon.ImageRectSize = Vector2.new(36, 36)
-    MinimizeIcon.BackgroundTransparency = 1
-    MinimizeIcon.Parent = TitleBar
-    
-    local Minimized = true
-    local function toggleWindow()
-        Minimized = not Minimized
-        MainFrame.Visible = not Minimized
-    end
-    
-    MinimizeIcon.MouseButton1Click:Connect(toggleWindow)
+    local MinimizeButton = Instance.new("TextButton")
+    MinimizeButton.Size = UDim2.new(0, 20, 0, 20)
+    MinimizeButton.Position = UDim2.new(1, -30, 0, 5)
+    MinimizeButton.Text = "_"
+    MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    MinimizeButton.BackgroundColor3 = Color3.fromRGB(50, 130, 184)
+    MinimizeButton.Font = Enum.Font.GothamBold
+    MinimizeButton.TextSize = 14
+    MinimizeButton.Parent = TitleBar
     
     local CloseButton = Instance.new("TextButton")
     CloseButton.Size = UDim2.new(0, 20, 0, 20)
-    CloseButton.Position = UDim2.new(1, -30, 0, 5)
+    CloseButton.Position = UDim2.new(1, -55, 0, 5)
     CloseButton.Text = "X"
     CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     CloseButton.BackgroundColor3 = Color3.fromRGB(244, 67, 54)
@@ -107,7 +99,7 @@ end
 
 function Xlib:MakeTab(config)
     local TabButton = Instance.new("TextButton")
-    TabButton.Size = UDim2.new(1, 0, 0, 30)
+    TabButton.Size = UDim2.new(0, 120, 0, 30)
     TabButton.BackgroundColor3 = Color3.fromRGB(50, 130, 184)
     TabButton.Text = config.Name
     TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
