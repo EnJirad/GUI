@@ -37,7 +37,7 @@ function Xlib:MakeWindow(config)
     local MinimizeButton = Instance.new("TextButton")
     MinimizeButton.Size = UDim2.new(0, 20, 0, 20)
     MinimizeButton.Position = UDim2.new(1, -55, 0, 5)
-    MinimizeButton.Text = "<"
+    MinimizeButton.Text = "-"
     MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     MinimizeButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     MinimizeButton.Parent = TitleBar
@@ -216,6 +216,7 @@ function Xlib:MakeToggle(config)
 
     -- Set initial state of the toggle button
     if state then
+        toggled = true
         ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
     else
         ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
@@ -226,7 +227,7 @@ function Xlib:MakeToggle(config)
         ToggleButton = ToggleButton,
         ToggleLabel = ToggleLabel,
         GetState = function()
-            return state
+            return toggled
         end
     }
 end
@@ -252,16 +253,28 @@ function Xlib:MakeDropdown(config)
     DropdownButton.TextSize = 14
     DropdownButton.Parent = Dropdown
 
+    local DropdownIcon = Instance.new("TextLabel")
+    DropdownIcon.Size = UDim2.new(0, 20, 0, 20)
+    DropdownIcon.Position = UDim2.new(1, -30, 0.5, -10)
+    DropdownIcon.AnchorPoint = Vector2.new(0, 0.5)
+    DropdownIcon.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    DropdownIcon.Text = "▼"
+    DropdownIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
+    DropdownIcon.Font = Enum.Font.Gotham
+    DropdownIcon.TextSize = 14
+    DropdownIcon.Parent = DropdownButton
+
     local DropdownMenu = Instance.new("Frame")
     DropdownMenu.Size = UDim2.new(1, 0, 0, 0)
     DropdownMenu.Position = UDim2.new(0, 0, 1, 0)
     DropdownMenu.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     DropdownMenu.BorderSizePixel = 0
+    DropdownMenu.ClipsDescendants = true
     DropdownMenu.Parent = Dropdown
 
     DropdownButton.MouseButton1Click:Connect(function()
         if DropdownMenu.Size.Y.Offset == 0 then
-            DropdownMenu:TweenSize(UDim2.new(1, 0, 0, 100), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.3, true)
+            DropdownMenu:TweenSize(UDim2.new(1, 0, 0, #config.Options * 30), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.3, true)
         else
             DropdownMenu:TweenSize(UDim2.new(1, 0, 0, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.3, true)
         end
@@ -292,5 +305,3 @@ function Xlib:MakeDropdown(config)
         DropdownMenu = DropdownMenu,
     }
 end
-
-return Xlib
