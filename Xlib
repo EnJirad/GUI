@@ -35,7 +35,7 @@ function Xlib:MakeWindow(config)
     
     local MinimizeButton = Instance.new("TextButton")
     MinimizeButton.Size = UDim2.new(0, 20, 0, 20)
-    MinimizeButton.Position = UDim2.new(1, -285, 0, 5)  -- ปรับตำแหน่งของปุ่มพับ
+    MinimizeButton.Position = UDim2.new(1, -55, 0, 5)
     MinimizeButton.Text = "_"
     MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     MinimizeButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
@@ -50,15 +50,6 @@ function Xlib:MakeWindow(config)
     CloseButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
     CloseButton.BorderSizePixel = 0
     CloseButton.Parent = TitleBar
-    
-    local DragIcon = Instance.new("TextButton")
-    DragIcon.Size = UDim2.new(0, 20, 0, 20)
-    DragIcon.Position = UDim2.new(0, 5, 0, 5)
-    DragIcon.Text = "="
-    DragIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
-    DragIcon.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-    DragIcon.BorderSizePixel = 0
-    DragIcon.Parent = TitleBar
     
     local TabFrame = Instance.new("Frame")
     TabFrame.Size = UDim2.new(0, 150, 1, -30)
@@ -86,34 +77,40 @@ function Xlib:MakeWindow(config)
         ScreenGui:Destroy()
     end
     
-    local function dragWindow()
-        local dragStart
-        local startPos
-        local function update(input)
+    MinimizeButton.MouseButton1Click:Connect(minimizeWindow)
+    CloseButton.MouseButton1Click:Connect(closeWindow)
+    
+    local dragging
+    local dragInput
+    local dragStart
+    local startPos
+    
+    TitleBar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = MainFrame.Position
+            
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+    
+    TitleBar.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
+            dragInput = input
+        end
+    end)
+    
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
             local delta = input.Position - dragStart
             MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         end
-        TitleBar.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                dragStart = input.Position
-                startPos = MainFrame.Position
-                input.Changed:Connect(function()
-                    if input.UserInputState == Enum.UserInputState.End then
-                        dragStart = nil
-                    end
-                end)
-            end
-        end)
-        TitleBar.InputChanged:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseMovement and dragStart then
-                update(input)
-            end
-        end)
-    end
-    
-    MinimizeButton.MouseButton1Click:Connect(minimizeWindow)
-    CloseButton.MouseButton1Click:Connect(closeWindow)
-    DragIcon.MouseButton1Down:Connect(dragWindow)
+    end)
     
     return {
         MainFrame = MainFrame,
@@ -148,6 +145,7 @@ function Xlib:MakeTab(config)
     end)
     
     return {
+        TabButton = TabButton,
         ToggleContainer = ToggleContainer
     }
 end
@@ -155,7 +153,7 @@ end
 function Xlib:MakeToggle(config)
     local Toggle = Instance.new("TextButton")
     Toggle.Size = UDim2.new(1, -20, 0, 30)
-    Toggle.Position = UDim2.new(0, 10, 0, config.Parent.ToggleContainer.Size.Y.Offset + 10)
+    Toggle.Position = UDim2.new(0, 10, 0, (#config.Parent.ToggleContainer:GetChildren() - 1) * 40 + 10)
     Toggle.Text = config.Name
     Toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
     Toggle.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
@@ -177,8 +175,6 @@ function Xlib:MakeToggle(config)
             Toggle.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
         end
     end)
-    
-    config.Parent.ToggleContainer.Size = UDim2.new(1, 0, 0, config.Parent.ToggleContainer.Size.Y.Offset + 40)
     
     return Toggle
 end
