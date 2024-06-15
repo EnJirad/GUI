@@ -1,4 +1,4 @@
--- Xlib.lua (https://github.com/EnJirad/GUI/blob/main/Xlib.lua)
+-- Xlib.lua (https://raw.githubusercontent.com/EnJirad/GUI/main/Xlib.lua)
 
 local Xlib = {}
 
