@@ -55,14 +55,14 @@ function Xlib:MakeWindow(config)
     CloseButton.Parent = TitleBar
     
     local TabFrame = Instance.new("Frame")
-    TabFrame.Size = UDim2.new(1, 0, 0, 30)
-    TabFrame.Position = UDim2.new(0, 0, 1, -30)
+    TabFrame.Size = UDim2.new(0, 100, 1, 0)
+    TabFrame.Position = UDim2.new(1, 0, 0, 30)
     TabFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     TabFrame.BorderSizePixel = 0
     TabFrame.Parent = MainFrame
     
     local ContentFrame = Instance.new("Frame")
-    ContentFrame.Size = UDim2.new(1, 0, 1, -60)
+    ContentFrame.Size = UDim2.new(1, -100, 1, -30)
     ContentFrame.Position = UDim2.new(0, 0, 0, 30)
     ContentFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     ContentFrame.BorderSizePixel = 0
@@ -92,7 +92,7 @@ end
 
 function Xlib:MakeTab(config)
     local TabButton = Instance.new("TextButton")
-    TabButton.Size = UDim2.new(0, 100, 1, 0)
+    TabButton.Size = UDim2.new(1, 0, 0, 30)
     TabButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
     TabButton.Text = config.Name
     TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -102,7 +102,6 @@ function Xlib:MakeTab(config)
     
     local ToggleContainer = Instance.new("Frame")
     ToggleContainer.Size = UDim2.new(1, 0, 1, 0)
-    ToggleContainer.Position = UDim2.new(0, 0, 0, 0)
     ToggleContainer.BackgroundTransparency = 1
     ToggleContainer.Parent = config.Parent.ContentFrame
     ToggleContainer.Visible = false
@@ -123,8 +122,8 @@ end
 
 function Xlib:MakeToggle(config)
     local Toggle = Instance.new("TextButton")
-    Toggle.Size = UDim2.new(1, -20, 0, 30)
-    Toggle.Position = UDim2.new(0, 10, 0, (#config.Parent.ToggleContainer:GetChildren() - 1) * 40 + 10)
+    Toggle.Size = UDim2.new(1, 0, 0, 30)
+    Toggle.Position = UDim2.new(0, 0, 1, -30)
     Toggle.Text = config.Name
     Toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
     Toggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
