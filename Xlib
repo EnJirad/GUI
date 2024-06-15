@@ -1,89 +1,123 @@
 local Xlib = {}
 
+function Xlib:CreateShadow(parent)
+    local Shadow = Instance.new("ImageLabel")
+    Shadow.Name = "Shadow"
+    Shadow.Size = UDim2.new(1, 10, 1, 10)
+    Shadow.Position = UDim2.new(0, -5, 0, -5)
+    Shadow.Image = "rbxassetid://1316045217"
+    Shadow.BackgroundTransparency = 1
+    Shadow.BorderSizePixel = 0
+    Shadow.ZIndex = 0
+    Shadow.Parent = parent
+
+    return Shadow
+end
+
+function Xlib:CreateFrame(properties)
+    local frame = Instance.new("Frame")
+    for property, value in pairs(properties) do
+        frame[property] = value
+    end
+    return frame
+end
+
+function Xlib:CreateTextLabel(properties)
+    local textLabel = Instance.new("TextLabel")
+    for property, value in pairs(properties) do
+        textLabel[property] = value
+    end
+    return textLabel
+end
+
+function Xlib:CreateButton(properties)
+    local button = Instance.new("TextButton")
+    for property, value in pairs(properties) do
+        button[property] = value
+    end
+    return button
+end
+
 function Xlib:MakeWindow(config)
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = config.Name or "XlibScreenGui"
     ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
     
-    local MainFrame = Instance.new("Frame")
-    MainFrame.Size = UDim2.new(0, 400, 0, 350)
-    MainFrame.Position = UDim2.new(0.5, -200, 0.5, -175)
-    MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    MainFrame.BorderSizePixel = 0
-    MainFrame.Active = true
-    MainFrame.Draggable = true
-    MainFrame.CornerRadius = UDim.new(0, 10)
-    MainFrame.Parent = ScreenGui
+    local MainFrame = self:CreateFrame({
+        Size = UDim2.new(0, 400, 0, 300),
+        Position = UDim2.new(0.5, -200, 0.5, -150),
+        BackgroundColor3 = Color3.fromRGB(240, 240, 240),
+        BorderSizePixel = 0,
+        Active = true,
+        Draggable = true,
+        Parent = ScreenGui,
+    })
     
-    local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, 10)
-    UICorner.Parent = MainFrame
+    self:CreateShadow(MainFrame)
     
-    local TitleBar = Instance.new("Frame")
-    TitleBar.Size = UDim2.new(1, 0, 0, 30)
-    TitleBar.BackgroundTransparency = 1
-    TitleBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    TitleBar.BorderSizePixel = 0
-    TitleBar.Parent = MainFrame
+    local TitleBar = self:CreateFrame({
+        Size = UDim2.new(1, 0, 0, 30),
+        BackgroundColor3 = Color3.fromRGB(50, 130, 184),
+        BorderSizePixel = 0,
+        Parent = MainFrame,
+    })
     
-    local TitleLabel = Instance.new("TextLabel")
-    TitleLabel.Size = UDim2.new(1, -60, 1, 0)
-    TitleLabel.Position = UDim2.new(0, 10, 0, 0)
-    TitleLabel.Text = config.Name or "Xlib UI"
-    TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    TitleLabel.BackgroundTransparency = 1
-    TitleLabel.Font = Enum.Font.SourceSans
-    TitleLabel.TextSize = 18
-    TitleLabel.Parent = TitleBar
+    local TitleLabel = self:CreateTextLabel({
+        Size = UDim2.new(1, -60, 1, 0),
+        Position = UDim2.new(0, 10, 0, 0),
+        Text = config.Name or "Xlib UI",
+        TextColor3 = Color3.fromRGB(255, 255, 255),
+        BackgroundTransparency = 1,
+        Font = Enum.Font.GothamBold,
+        TextSize = 18,
+        Parent = TitleBar,
+    })
     
-    local MinimizeButton = Instance.new("TextButton")
-    MinimizeButton.Size = UDim2.new(0, 20, 0, 20)
-    MinimizeButton.Position = UDim2.new(1, -55, 0, 5)
-    MinimizeButton.Text = "-"
-    MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    MinimizeButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-    MinimizeButton.Font = Enum.Font.SourceSans
-    MinimizeButton.TextSize = 16
-    MinimizeButton.Parent = TitleBar
+    local MinimizeButton = self:CreateButton({
+        Size = UDim2.new(0, 20, 0, 20),
+        Position = UDim2.new(1, -55, 0, 5),
+        Text = "_",
+        TextColor3 = Color3.fromRGB(255, 255, 255),
+        BackgroundColor3 = Color3.fromRGB(50, 130, 184),
+        Font = Enum.Font.GothamBold,
+        TextSize = 14,
+        Parent = TitleBar,
+    })
     
-    local CloseButton = Instance.new("TextButton")
-    CloseButton.Size = UDim2.new(0, 20, 0, 20)
-    CloseButton.Position = UDim2.new(1, -25, 0, 5)
-    CloseButton.Text = "X"
-    CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    CloseButton.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
-    CloseButton.Font = Enum.Font.SourceSans
-    CloseButton.TextSize = 16
-    CloseButton.Parent = TitleBar
+    local CloseButton = self:CreateButton({
+        Size = UDim2.new(0, 20, 0, 20),
+        Position = UDim2.new(1, -30, 0, 5),
+        Text = "X",
+        TextColor3 = Color3.fromRGB(255, 255, 255),
+        BackgroundColor3 = Color3.fromRGB(244, 67, 54),
+        Font = Enum.Font.GothamBold,
+        TextSize = 14,
+        Parent = TitleBar,
+    })
     
-    local TabFrame = Instance.new("Frame")
-    TabFrame.Size = UDim2.new(1, 0, 0, 30)
-    TabFrame.Position = UDim2.new(0, 0, 1, -30)
-    TabFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    TabFrame.BorderSizePixel = 0
-    TabFrame.Parent = MainFrame
+    local TabFrame = self:CreateFrame({
+        Size = UDim2.new(0, 120, 1, -30),
+        Position = UDim2.new(1, 0, 0, 30),
+        BackgroundColor3 = Color3.fromRGB(240, 240, 240),
+        BorderSizePixel = 0,
+        Parent = MainFrame,
+    })
     
-    local ContentFrame = Instance.new("Frame")
-    ContentFrame.Size = UDim2.new(1, 0, 1, -60)
-    ContentFrame.Position = UDim2.new(0, 0, 0, 30)
-    ContentFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    ContentFrame.BorderSizePixel = 0
-    ContentFrame.Parent = MainFrame
+    local ContentFrame = self:CreateFrame({
+        Size = UDim2.new(1, -120, 1, -30),
+        Position = UDim2.new(0, 0, 0, 30),
+        BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+        BorderSizePixel = 0,
+        Parent = MainFrame,
+    })
     
-    local function minimizeWindow()
-        if MainFrame.Visible then
-            MainFrame.Visible = false
-        else
-            MainFrame.Visible = true
-        end
-    end
+    MinimizeButton.MouseButton1Click:Connect(function()
+        MainFrame.Visible = not MainFrame.Visible
+    end)
     
-    local function closeWindow()
+    CloseButton.MouseButton1Click:Connect(function()
         ScreenGui:Destroy()
-    end
-    
-    MinimizeButton.MouseButton1Click:Connect(minimizeWindow)
-    CloseButton.MouseButton1Click:Connect(closeWindow)
+    end)
     
     return {
         MainFrame = MainFrame,
@@ -93,22 +127,22 @@ function Xlib:MakeWindow(config)
 end
 
 function Xlib:MakeTab(config)
-    local TabButton = Instance.new("TextButton")
-    TabButton.Size = UDim2.new(1, -10, 0, 30)
-    TabButton.Position = UDim2.new(0, 5, 0, (config.Parent.TabFrame:GetChildrenCount() - 1) * 35 + 5)
-    TabButton.Text = config.Name
-    TabButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    TabButton.Font = Enum.Font.SourceSans
-    TabButton.TextSize = 16
-    TabButton.Parent = config.Parent.TabFrame
+    local TabButton = self:CreateButton({
+        Size = UDim2.new(1, 0, 0, 30),
+        BackgroundColor3 = Color3.fromRGB(50, 130, 184),
+        Text = config.Name,
+        TextColor3 = Color3.fromRGB(255, 255, 255),
+        Font = Enum.Font.Gotham,
+        TextSize = 14,
+        Parent = config.Parent.TabFrame,
+    })
     
-    local ToggleContainer = Instance.new("Frame")
-    ToggleContainer.Size = UDim2.new(1, 0, 1, 0)
-    ToggleContainer.Position = UDim2.new(0, 0, 0, 0)
-    ToggleContainer.BackgroundTransparency = 1
-    ToggleContainer.Parent = config.Parent.ContentFrame
-    ToggleContainer.Visible = false
+    local ToggleContainer = self:CreateFrame({
+        Size = UDim2.new(1, 0, 1, 0),
+        BackgroundTransparency = 1,
+        Parent = config.Parent.ContentFrame,
+        Visible = false,
+    })
     
     TabButton.MouseButton1Click:Connect(function()
         for _, child in pairs(config.Parent.ContentFrame:GetChildren()) do
@@ -125,29 +159,27 @@ function Xlib:MakeTab(config)
 end
 
 function Xlib:MakeToggle(config)
-    local Toggle = Instance.new("TextButton")
-    Toggle.Size = UDim2.new(1, -10, 0, 30)
-    Toggle.Position = UDim2.new(0, 5, 0, (config.Parent.ToggleContainer:GetChildrenCount() - 1) * 35 + 5)
-    Toggle.Text = config.Name
-    Toggle.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-    Toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Toggle.Font = Enum.Font.Gotham
-    Toggle.TextSize = 14
-    Toggle.Parent = config.Parent.ToggleContainer
+    local Toggle = self:CreateButton({
+        Size = UDim2.new(1, -20, 0, 30),
+        Position = UDim2.new(0, 10, 0, (#config.Parent.ToggleContainer:GetChildren() - 1) * 40 + 10),
+        Text = config.Name,
+        TextColor3 = Color3.fromRGB(255, 255, 255),
+        BackgroundColor3 = Color3.fromRGB(50, 130, 184),
+        Font = Enum.Font.Gotham,
+        TextSize = 14,
+        Parent = config.Parent.ToggleContainer,
+    })
     
-    local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, 5)
-    UICorner.Parent = Toggle
+    local UICorner = self:CreateFrame({
+        CornerRadius = UDim.new(0, 5),
+        Parent = Toggle,
+    })
     
     local state = config.Default or false
     Toggle.MouseButton1Click:Connect(function()
         state = not state
         config.Callback(state)
-        if state then
-            Toggle.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-        else
-            Toggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-        end
+        Toggle.BackgroundColor3 = state and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(50, 130, 184)
     end)
 end
 
