@@ -132,106 +132,61 @@ function Xlib:MakeWindow(config)
         end
     end)
 
-    return {
-        MainFrame = MainFrame,
-        TabFrame = TabFrame,
-        ContentFrame = ContentFrame,
-    }
-end
+    -- Store tabs and their order
+    local tabs = {}
+    local tabIndex = 0
 
-function Xlib:MakeTab(config)
-    local TabButton = Instance.new("TextButton")
-    TabButton.Size = UDim2.new(1, 0, 0, 30)
-    TabButton.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    TabButton.Text = config.Name
-    TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    TabButton.Font = Enum.Font.Gotham
-    TabButton.TextSize = 14
+    -- Function to make a tab
+    function Xlib:MakeTab(config)
+        tabIndex = tabIndex + 1
+        local TabButton = Instance.new("TextButton")
+        TabButton.Size = UDim2.new(1, 0, 0, 30)
+        TabButton.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+        TabButton.Text = config.Name
+        TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+        TabButton.Font = Enum.Font.Gotham
+        TabButton.TextSize = 14
 
-    -- Calculate the position of the new tab
-    local index = #config.Parent.TabFrame:GetChildren()
-    TabButton.Position = UDim2.new(0, 0, 0, index * 30)
-    TabButton.Parent = config.Parent.TabFrame
+        -- Calculate the position of the new tab
+        TabButton.Position = UDim2.new(0, 0, 0, (tabIndex - 1) * 30)
+        TabButton.Parent = TabFrame
 
-    local ToggleContainer = Instance.new("Frame")
-    ToggleContainer.Size = UDim2.new(1, 0, 1, 0)
-    ToggleContainer.BackgroundTransparency = 1
-    ToggleContainer.Parent = config.Parent.ContentFrame
-    ToggleContainer.Visible = false
+        local ToggleContainer = Instance.new("Frame")
+        ToggleContainer.Size = UDim2.new(1, 0, 1, 0)
+        ToggleContainer.BackgroundTransparency = 1
+        ToggleContainer.Parent = ContentFrame
+        ToggleContainer.Visible = false
 
-    -- Function to switch between tabs
-    TabButton.MouseButton1Click:Connect(function()
-        for _, child in pairs(config.Parent.ContentFrame:GetChildren()) do
-            if child:IsA("Frame") then
-                child.Visible = false
+        -- Function to switch between tabs
+        TabButton.MouseButton1Click:Connect(function()
+            for _, child in pairs(ContentFrame:GetChildren()) do
+                if child:IsA("Frame") then
+                    child.Visible = false
+                end
             end
-        end
-        ToggleContainer.Visible = true
-    end)
+            ToggleContainer.Visible = true
+        end)
 
-    return {
-        ToggleContainer = ToggleContainer
-    }
-end
+        tabs[config.Name] = {
+            TabButton = TabButton,
+            ToggleContainer = ToggleContainer
+        }
 
-function Xlib:MakeToggle(config)
-    local Toggle = Instance.new("Frame")
-    Toggle.Size = UDim2.new(1, -20, 0, 30)
-    Toggle.Position = UDim2.new(0, 10, 0, (#config.Parent.ToggleContainer:GetChildren()) * 40)
-    Toggle.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    Toggle.Parent = config.Parent.ToggleContainer
-
-    local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, 5)
-    UICorner.Parent = Toggle
-
-    local ToggleButton = Instance.new("TextButton")
-    ToggleButton.Size = UDim2.new(0, 20, 0, 20)
-    ToggleButton.Position = UDim2.new(1, -30, 0.5, -10)
-    ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-    ToggleButton.Text = ""
-    ToggleButton.Parent = Toggle
-
-    local ToggleLabel = Instance.new("TextLabel")
-    ToggleLabel.Size = UDim2.new(1, -40, 1, 0)
-    ToggleLabel.Position = UDim2.new(0, 10, 0, 0)
-    ToggleLabel.Text = config.Name
-    ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    ToggleLabel.BackgroundTransparency = 1
-    ToggleLabel.Font = Enum.Font.Gotham
-    ToggleLabel.TextSize = 14
-    ToggleLabel.Parent = Toggle
-
-    local state = config.Default or false
-
-ToggleButton.MouseButton1Click:Connect(function()
-    state = not state
-    config.Callback(state)
-    if state then
-        ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-    else
-        ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+        return ToggleContainer
     end
-end)
 
--- Set initial state of the toggle button
-if state then
-    ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-else
-    ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-end
+    -- Return the tabs for external access
+    function Xlib:GetTabs()
+        return tabs
+    end
 
-return {
-    Toggle = Toggle,
-    ToggleButton = ToggleButton,
-    ToggleLabel = ToggleLabel
-}
+    return self
 end
 
 function Xlib:MakeDropdown(config)
     local Dropdown = Instance.new("Frame")
     Dropdown.Size = UDim2.new(1, -20, 0, 30)
-    Dropdown.Position = UDim2.new(0, 10, 0, (#config.Parent.ToggleContainer:GetChildren() + 1) * 40)
+    Dropdown.Position = UDim2.new(0, 10, 0, (#config.Parent.ToggleContainer:GetChildren()) * 40)
     Dropdown.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     Dropdown.Parent = config.Parent.ToggleContainer
 
@@ -243,67 +198,83 @@ function Xlib:MakeDropdown(config)
     DropdownLabel.Size = UDim2.new(1, -40, 1, 0)
     DropdownLabel.Position = UDim2.new(0, 10, 0, 0)
     DropdownLabel.Text = config.Name
-    DropdownLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    DropdownLabel.BackgroundTransparency = 1
-    DropdownLabel.Font = Enum.Font.Gotham
-    DropdownLabel.TextSize = 14
-    DropdownLabel.Parent = Dropdown
+DropdownLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+DropdownLabel.BackgroundTransparency = 1
+DropdownLabel.Font = Enum.Font.Gotham
+DropdownLabel.TextSize = 14
+DropdownLabel.TextXAlignment = Enum.TextXAlignment.Left
+DropdownLabel.Parent = Dropdown
 
-    local DropdownButton = Instance.new("TextButton")
-    DropdownButton.Size = UDim2.new(0, 20, 0, 20)
-    DropdownButton.Position = UDim2.new(1, -30, 0.5, -10)
-    DropdownButton.Text = "v"
-    DropdownButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    DropdownButton.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    DropdownButton.Parent = Dropdown
+local DropdownArrow = Instance.new("ImageLabel")
+DropdownArrow.Size = UDim2.new(0, 20, 0, 20)
+DropdownArrow.Position = UDim2.new(1, -30, 0.5, -10)
+DropdownArrow.Image = "rbxassetid://207443279"
+DropdownArrow.BackgroundTransparency = 1
+DropdownArrow.Parent = Dropdown
 
-    local OptionsFrame = Instance.new("Frame")
-    OptionsFrame.Name = "OptionsFrame"
-    OptionsFrame.Size = UDim2.new(1, 0, 0, #config.Options * 30)
-    OptionsFrame.Position = UDim2.new(0, 0, 1, 0)
-    OptionsFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    OptionsFrame.Visible = false
-    OptionsFrame.Parent = Dropdown
+local DropdownFrame = Instance.new("Frame")
+DropdownFrame.Size = UDim2.new(1, 0, 0, 80)
+DropdownFrame.Position = UDim2.new(0, 0, 1, 0)
+DropdownFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+DropdownFrame.BorderSizePixel = 0
+DropdownFrame.ClipsDescendants = true
+DropdownFrame.Parent = Dropdown
 
-    local function toggleOptions()
-        OptionsFrame.Visible = not OptionsFrame.Visible
+local OptionFrame = Instance.new("ScrollingFrame")
+OptionFrame.Size = UDim2.new(1, 0, 1, -30)
+OptionFrame.Position = UDim2.new(0, 0, 0, 30)
+OptionFrame.BackgroundTransparency = 1
+OptionFrame.BorderSizePixel = 0
+OptionFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+OptionFrame.Parent = DropdownFrame
+
+local OptionLayout = Instance.new("UIListLayout")
+OptionLayout.Padding = UDim.new(0, 5)
+OptionLayout.SortOrder = Enum.SortOrder.LayoutOrder
+OptionLayout.Parent = OptionFrame
+
+local selectedOption = ""
+
+local function closeDropdown()
+    DropdownFrame:TweenPosition(UDim2.new(0, 0, 1, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
+    wait(0.2)
+    DropdownFrame.Visible = false
+    DropdownArrow.Rotation = 0
+end
+
+local function toggleDropdown()
+    DropdownFrame.Visible = not DropdownFrame.Visible
+    DropdownArrow.Rotation = DropdownFrame.Visible and 180 or 0
+    if DropdownFrame.Visible then
+        DropdownFrame:TweenPosition(UDim2.new(0, 0, 1, -80), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
+    else
+        DropdownFrame:TweenPosition(UDim2.new(0, 0, 1, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
     end
+end
 
-    DropdownButton.MouseButton1Click:Connect(toggleOptions)
+Dropdown.MouseButton1Click:Connect(toggleDropdown)
 
-    for i, option in ipairs(config.Options) do
-        local OptionButton = Instance.new("TextButton")
-        OptionButton.Size = UDim2.new(1, -20, 0, 30)
-        OptionButton.Position = UDim2.new(0, 10, 0, (i - 1) * 30)
-        OptionButton.Text = option
-        OptionButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-        OptionButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-        OptionButton.Parent = OptionsFrame
+for _, optionName in ipairs(config.Options) do
+    local OptionButton = Instance.new("TextButton")
+    OptionButton.Size = UDim2.new(1, 0, 0, 20)
+    OptionButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    OptionButton.Text = optionName
+    OptionButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    OptionButton.Font = Enum.Font.Gotham
+    OptionButton.TextSize = 14
+    OptionButton.Parent = OptionFrame
 
-        OptionButton.MouseButton1Click:Connect(function()
-            config.Callback(option)
-            OptionsFrame.Visible = false
-        end)
-    end
-
-    -- Close the dropdown if user clicks away
-    game:GetService("UserInputService").InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 and OptionsFrame.Visible then
-            local dropdownPos = Dropdown.AbsolutePosition
-            local dropdownSize = Dropdown.AbsoluteSize
-            local mousePos = input.Position
-            if mousePos.X < dropdownPos.X or mousePos.X > dropdownPos.X + dropdownSize.X or
-                mousePos.Y < dropdownPos.Y or mousePos.Y > dropdownPos.Y + dropdownSize.Y then
-                OptionsFrame.Visible = false
-            end
+    OptionButton.MouseButton1Click:Connect(function()
+        DropdownLabel.Text = optionName
+        selectedOption = optionName
+        closeDropdown()
+        if config.Callback then
+            config.Callback(optionName)
         end
     end)
+end
 
-    return {
-        Dropdown = Dropdown,
-        DropdownButton = DropdownButton,
-        OptionsFrame = OptionsFrame
-    }
+return Dropdown
 end
 
 return Xlib
