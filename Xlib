@@ -170,7 +170,6 @@ function Xlib:MakeTab(config)
     end)
 
     return {
-        TabButton = TabButton,
         ToggleContainer = ToggleContainer
     }
 end
@@ -205,14 +204,7 @@ function Xlib:MakeToggle(config)
 
     local state = config.Default or false
 
-    local function updateLayout()
-        local numToggles = #config.Parent.ToggleContainer:GetChildren()
-        Toggle.Position = UDim2.new(0, 10, 0, (numToggles - 1) * 40)
-    end
-
-    updateLayout()
-
-    ToggleButton.MouseButton1Click:Connect(function()
+ToggleButton.MouseButton1Click:Connect(function()
     state = not state
     config.Callback(state)
     if state then
@@ -220,13 +212,98 @@ function Xlib:MakeToggle(config)
     else
         ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
     end
-
-    -- Adjust dropdowns below this toggle
-    local positionY = Toggle.Position.Y.Offset + Toggle.Size.Y.Offset
-    for _, dropdown in ipairs(config.Parent.ToggleContainer:GetChildren()) do
-        if dropdown:IsA("Frame") and dropdown ~= Toggle then
-            dropdown.Position = UDim2.new(0, 10, 0, positionY)
-            positionY = positionY + dropdown.Size.Y.Offset + 10
-        end
-    end
 end)
+
+-- Set initial state of the toggle button
+if state then
+    ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+else
+    ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+end
+
+return {
+    Toggle = Toggle,
+    ToggleButton = ToggleButton,
+    ToggleLabel = ToggleLabel
+}
+end
+
+function Xlib:MakeDropdown(config)
+    local Dropdown = Instance.new("Frame")
+    Dropdown.Size = UDim2.new(1, -20, 0, 30)
+    Dropdown.Position = UDim2.new(0, 10, 0, (#config.Parent.ToggleContainer:GetChildren() + 1) * 40)
+    Dropdown.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    Dropdown.Parent = config.Parent.ToggleContainer
+
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 5)
+    UICorner.Parent = Dropdown
+
+    local DropdownLabel = Instance.new("TextLabel")
+    DropdownLabel.Size = UDim2.new(1, -40, 1, 0)
+    DropdownLabel.Position = UDim2.new(0, 10, 0, 0)
+    DropdownLabel.Text = config.Name
+    DropdownLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    DropdownLabel.BackgroundTransparency = 1
+    DropdownLabel.Font = Enum.Font.Gotham
+    DropdownLabel.TextSize = 14
+    DropdownLabel.Parent = Dropdown
+
+    local DropdownButton = Instance.new("TextButton")
+    DropdownButton.Size = UDim2.new(0, 20, 0, 20)
+    DropdownButton.Position = UDim2.new(1, -30, 0.5, -10)
+    DropdownButton.Text = "v"
+    DropdownButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    DropdownButton.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    DropdownButton.Parent = Dropdown
+
+    local OptionsFrame = Instance.new("Frame")
+    OptionsFrame.Name = "OptionsFrame"
+    OptionsFrame.Size = UDim2.new(1, 0, 0, #config.Options * 30)
+    OptionsFrame.Position = UDim2.new(0, 0, 1, 0)
+    OptionsFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    OptionsFrame.Visible = false
+    OptionsFrame.Parent = Dropdown
+
+    local function toggleOptions()
+        OptionsFrame.Visible = not OptionsFrame.Visible
+    end
+
+    DropdownButton.MouseButton1Click:Connect(toggleOptions)
+
+    for i, option in ipairs(config.Options) do
+        local OptionButton = Instance.new("TextButton")
+        OptionButton.Size = UDim2.new(1, -20, 0, 30)
+        OptionButton.Position = UDim2.new(0, 10, 0, (i - 1) * 30)
+        OptionButton.Text = option
+        OptionButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+        OptionButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        OptionButton.Parent = OptionsFrame
+
+        OptionButton.MouseButton1Click:Connect(function()
+            config.Callback(option)
+            OptionsFrame.Visible = false
+        end)
+    end
+
+    -- Close the dropdown if user clicks away
+    game:GetService("UserInputService").InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 and OptionsFrame.Visible then
+            local dropdownPos = Dropdown.AbsolutePosition
+            local dropdownSize = Dropdown.AbsoluteSize
+            local mousePos = input.Position
+            if mousePos.X < dropdownPos.X or mousePos.X > dropdownPos.X + dropdownSize.X or
+                mousePos.Y < dropdownPos.Y or mousePos.Y > dropdownPos.Y + dropdownSize.Y then
+                OptionsFrame.Visible = false
+            end
+        end
+    end)
+
+    return {
+        Dropdown = Dropdown,
+        DropdownButton = DropdownButton,
+        OptionsFrame = OptionsFrame
+    }
+end
+
+return Xlib
