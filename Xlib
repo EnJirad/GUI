@@ -233,6 +233,7 @@ function Xlib:MakeDropdown(config)
     Dropdown.Size = UDim2.new(1, -20, 0, 30)
     Dropdown.Position = UDim2.new(0, 10, 0, (#config.Parent.ToggleContainer:GetChildren()) * 40)
     Dropdown.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    Dropdown.ZIndex = 1  -- Set ZIndex to 1 to be on top
     Dropdown.Parent = config.Parent.ToggleContainer
 
     local UICorner = Instance.new("UICorner")
@@ -259,10 +260,11 @@ function Xlib:MakeDropdown(config)
 
     local OptionsFrame = Instance.new("Frame")
     OptionsFrame.Size = UDim2.new(1, 0, 0, #config.Options * 30)
-    OptionsFrame.Position = UDim2.new(0, 0, 1, 0)
+    OptionsFrame.Position = UDim2.new(0, 0, -1, -#config.Options * 30)  -- Adjust position to be above
     OptionsFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     OptionsFrame.Visible = false
-    OptionsFrame.Parent = Dropdown
+    OptionsFrame.ZIndex = 2  -- Set ZIndex to 2 to be on top of Dropdown
+    OptionsFrame.Parent = config.Parent.ToggleContainer  -- Parent to the main container to ensure it's on top
 
     local function toggleOptions()
         OptionsFrame.Visible = not OptionsFrame.Visible
@@ -277,6 +279,7 @@ function Xlib:MakeDropdown(config)
         OptionButton.Text = option
         OptionButton.TextColor3 = Color3.fromRGB(255, 255, 255)
         OptionButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        OptionButton.ZIndex = 3  -- Ensure buttons are on top of everything
         OptionButton.Parent = OptionsFrame
 
         OptionButton.MouseButton1Click:Connect(function()
