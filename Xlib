@@ -68,7 +68,7 @@ function Xlib:MakeWindow(config)
     local MinimizedIcon = Instance.new("TextButton")
     MinimizedIcon.Size = UDim2.new(0, 50, 0, 50)
     MinimizedIcon.Position = UDim2.new(0, 10, 0, 10)
-    MinimizedIcon.Text = config.Name or "Xlib"
+    MinimizedIcon.Text = "> XHub <"
     MinimizedIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
     MinimizedIcon.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     MinimizedIcon.Visible = false
