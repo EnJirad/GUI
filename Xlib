@@ -285,6 +285,7 @@ function Xlib:MakeDropdown(config)
         OptionButton.Parent = OptionsFrame
 
         OptionButton.MouseButton1Click:Connect(function()
+            DropdownLabel.Text = option
             config.Callback(option)
             OptionsFrame.Visible = false
         end)
