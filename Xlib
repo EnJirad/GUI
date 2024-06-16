@@ -170,9 +170,62 @@ function Xlib:MakeTab(config)
     end)
 
     return {
-        TabButton = TabButton,
         ToggleContainer = ToggleContainer
     }
+end
+
+function Xlib:MakeToggle(config)
+    local Toggle = Instance.new("Frame")
+    Toggle.Size = UDim2.new(1, -20, 0, 30)
+    Toggle.Position = UDim2.new(0, 10, 0, (#config.Parent.ToggleContainer:GetChildren()) * 40)
+    Toggle.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    Toggle.Parent = config.Parent.ToggleContainer
+
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 5)
+    UICorner.Parent = Toggle
+
+    local ToggleButton = Instance.new("TextButton")
+    ToggleButton.Size = UDim2.new(0, 20, 0, 20)
+    ToggleButton.Position = UDim2.new(1, -30, 0.5, -10)
+    ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    ToggleButton.Text = ""
+    ToggleButton.Parent = Toggle
+
+    local ToggleLabel = Instance.new("TextLabel")
+    ToggleLabel.Size = UDim2.new(1, -40, 1, 0)
+    ToggleLabel.Position = UDim2.new(0, 10, 0, 0)
+    ToggleLabel.Text = config.Name
+    ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ToggleLabel.BackgroundTransparency = 1
+    ToggleLabel.Font = Enum.Font.Gotham
+    ToggleLabel.TextSize = 14
+    ToggleLabel.Parent = Toggle
+
+    local state = config.Default or false
+
+ToggleButton.MouseButton1Click:Connect(function()
+    state = not state
+    config.Callback(state)
+    if state then
+        ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+    else
+        ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    end
+end)
+
+-- Set initial state of the toggle button
+if state then
+    ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+else
+    ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+end
+
+return {
+    Toggle = Toggle,
+    ToggleButton = ToggleButton,
+    ToggleLabel = ToggleLabel
+}
 end
 
 function Xlib:MakeDropdown(config)
@@ -186,10 +239,20 @@ function Xlib:MakeDropdown(config)
     UICorner.CornerRadius = UDim.new(0, 5)
     UICorner.Parent = Dropdown
 
+    local DropdownLabel = Instance.new("TextLabel")
+    DropdownLabel.Size = UDim2.new(1, -40, 1, 0)
+    DropdownLabel.Position = UDim2.new(0, 10, 0, 0)
+    DropdownLabel.Text = config.Name
+    DropdownLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    DropdownLabel.BackgroundTransparency = 1
+    DropdownLabel.Font = Enum.Font.Gotham
+    DropdownLabel.TextSize = 14
+    DropdownLabel.Parent = Dropdown
+
     local DropdownButton = Instance.new("TextButton")
-    DropdownButton.Size = UDim2.new(0, 200, 0, 30)
-    DropdownButton.Position = UDim2.new(0, 0, 0, 0)
-    DropdownButton.Text = config.Name
+    DropdownButton.Size = UDim2.new(0, 20, 0, 20)
+    DropdownButton.Position = UDim2.new(1, -30, 0.5, -10)
+    DropdownButton.Text = "v"
     DropdownButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     DropdownButton.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     DropdownButton.Parent = Dropdown
@@ -201,113 +264,31 @@ function Xlib:MakeDropdown(config)
     OptionsFrame.Visible = false
     OptionsFrame.Parent = Dropdown
 
-    -- Function to toggle options visibility
     local function toggleOptions()
-    OptionsFrame.Visible = not OptionsFrame.Visible
-    if OptionsFrame.Visible then
-        -- Move other tabs down
-        local dropdownIndex = Dropdown:GetAttribute("DropdownIndex") or 0
-        for _, child in pairs(config.Parent.ToggleContainer:GetChildren()) do
-            if child:IsA("Frame") and child.Position.Y.Offset > Dropdown.Position.Y.Offset then
-                local startPos = child.Position.Y.Offset
-                local newYOffset = startPos + OptionsFrame.AbsoluteSize.Y
-                child.Position = UDim2.new(0, 10, 0, newYOffset)
-            end
-        end
-    else
-        -- Move other tabs up
-        local dropdownIndex = Dropdown:GetAttribute("DropdownIndex") or 0
-        for _, child in pairs(config.Parent.ToggleContainer:GetChildren()) do
-            if child:IsA("Frame") and child.Position.Y.Offset > Dropdown.Position.Y.Offset then
-                local startPos = child.Position.Y.Offset
-                local newYOffset = startPos - OptionsFrame.AbsoluteSize.Y
-                child.Position = UDim2.new(0, 10, 0, newYOffset)
-            end
-        end
+        OptionsFrame.Visible = not OptionsFrame.Visible
     end
-end
 
-local function selectOption(option)
-    DropdownButton.Text = option
-    toggleOptions()
-    OptionsFrame.Visible = false
-end
+    DropdownButton.MouseButton1Click:Connect(toggleOptions)
 
-DropdownButton.MouseButton1Click:Connect(toggleOptions)
+    for i, option in ipairs(config.Options) do
+        local OptionButton = Instance.new("TextButton")
+        OptionButton.Size = UDim2.new(1, -20, 0, 30)
+        OptionButton.Position = UDim2.new(0, 10, 0, (i - 1) * 30)
+        OptionButton.Text = option
+        OptionButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+        OptionButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        OptionButton.Parent = OptionsFrame
 
-local yOffset = 30
-for index, option in ipairs(config.Options) do
-    local OptionButton = Instance.new("TextButton")
-    OptionButton.Size = UDim2.new(1, 0, 0, 30)
-    OptionButton.Position = UDim2.new(0, 0, 0, yOffset + (index - 1) * 30)
-    OptionButton.Text = option
-    OptionButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    OptionButton.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    OptionButton.Parent = OptionsFrame
-
-    OptionButton.MouseButton1Click:Connect(function()
-        selectOption(option)
-    end)
-end
-
-Dropdown:GetPropertyChangedSignal("Size"):Connect(function()
-    DropdownButton.Size = Dropdown.Size
-end)
-
-Dropdown:GetPropertyChangedSignal("Position"):Connect(function()
-    DropdownButton.Position = Dropdown.Position
-end)
-
-DropdownButton:GetPropertyChangedSignal("Size"):Connect(function()
-    Dropdown.Size = UDim2.new(0, DropdownButton.Size.X.Offset, 0, 30)
-    OptionsFrame.Position = UDim2.new(0, 0, 1, 0)
-end)
-
-DropdownButton.MouseEnter:Connect(function()
-    DropdownButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-end)
-
-DropdownButton.MouseLeave:Connect(function()
-    DropdownButton.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-end)
-
-DropdownButton.TextScaled = true
-DropdownButton.TextWrapped = true
-
-Dropdown.MouseLeave:Connect(function()
-    OptionsFrame.Visible = false
-end)
-
-Dropdown:SetAttribute("DropdownIndex", #config.Parent.ToggleContainer:GetChildren())
-
-return {
-    DropdownButton = DropdownButton,
-    OptionsFrame = OptionsFrame,
-}
-end
-
-function Xlib:MakeToggle(config)
-    local ToggleButton = Instance.new("TextButton")
-    ToggleButton.Size = UDim2.new(1, 0, 0, 30)
-    ToggleButton.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    ToggleButton.Text = config.Name
-    ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    ToggleButton.Font = Enum.Font.Gotham
-    ToggleButton.TextSize = 14
-    ToggleButton.Parent = config.Parent.ToggleContainer
-
-    local ToggleFrame = Instance.new("Frame")
-    ToggleFrame.Size = UDim2.new(1, 0, 1, 0)
-    ToggleFrame.BackgroundTransparency = 1
-    ToggleFrame.Parent = config.Parent.ContentFrame
-
-    ToggleButton.MouseButton1Click:Connect(function()
-        config.Callback(ToggleButton.Text, not ToggleButton.Text, ToggleButton)
-    end)
+        OptionButton.MouseButton1Click:Connect(function()
+            config.Callback(option)
+            OptionsFrame.Visible = false
+        end)
+    end
 
     return {
-        ToggleButton = ToggleButton,
-        ToggleFrame = ToggleFrame
+        Dropdown = Dropdown,
+        DropdownButton = DropdownButton,
+        OptionsFrame = OptionsFrame
     }
 end
 
