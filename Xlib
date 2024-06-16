@@ -228,13 +228,10 @@ return {
 }
 end
 
--- ในไฟล์ Xlib.lua
-
--- Function to create a dropdown
 function Xlib:MakeDropdown(config)
     local Dropdown = Instance.new("Frame")
     Dropdown.Size = UDim2.new(1, -20, 0, 30)
-    Dropdown.Position = UDim2.new(0, 10, 0, 30)  -- เปลี่ยนจาก (0, 10, 0, (#config.Parent.ToggleContainer:GetChildren()) * 40)
+    Dropdown.Position = UDim2.new(0, 10, 0, (#config.Parent.ToggleContainer:GetChildren()) * 40)
     Dropdown.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     Dropdown.Parent = config.Parent.ToggleContainer
 
@@ -271,7 +268,19 @@ function Xlib:MakeDropdown(config)
         OptionsFrame.Visible = not OptionsFrame.Visible
     end
 
-    DropdownButton.MouseButton1Click:Connect(toggleOptions)
+    -- Close other dropdowns if this one is clicked
+    DropdownButton.MouseButton1Click:Connect(function()
+        for _, dropdown in ipairs(config.Parent:GetChildren()) do
+            if dropdown ~= Dropdown and dropdown:IsA("Frame") then
+                local button = dropdown:FindFirstChild("TextButton")
+                if button then
+                    button.Text = "v"
+                    dropdown.OptionsFrame.Visible = false
+                end
+            end
+        end
+        toggleOptions()
+    end)
 
     for i, option in ipairs(config.Options) do
         local OptionButton = Instance.new("TextButton")
@@ -287,10 +296,6 @@ function Xlib:MakeDropdown(config)
             OptionsFrame.Visible = false
         end)
     end
-
-    -- Adjust Dropdown and OptionsFrame position to be at the top of the Tab
-    Dropdown.Position = UDim2.new(0, 10, 0, 30)  -- กำหนดให้ Dropdown อยู่ที่ด้านบนสุดของแท็บ
-    OptionsFrame.Position = UDim2.new(0, 0, 0, 30)  -- กำหนดให้ OptionsFrame อยู่ที่ด้านบนสุดของแท็บ
 
     return {
         Dropdown = Dropdown,
