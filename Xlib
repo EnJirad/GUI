@@ -64,7 +64,7 @@ function Xlib:MakeWindow(config)
     ContentFrame.BorderSizePixel = 0
     ContentFrame.Parent = MainFrame
 
-    -- สร้างไอคอนย่อเล็กสุด 
+    -- Create minimized icon
     local MinimizedIcon = Instance.new("TextButton")
     MinimizedIcon.Size = UDim2.new(0, 50, 0, 50)
     MinimizedIcon.Position = UDim2.new(0, 10, 0, 10)
@@ -76,19 +76,33 @@ function Xlib:MakeWindow(config)
     MinimizedIcon.Draggable = true
     MinimizedIcon.Parent = ScreenGui
 
-    -- ฟังก์ชั่นย่อหน้าต่างให้เล็กสุด 
+    -- Create single-use fingerprint icon button
+    local FingerprintButton = Instance.new("TextButton")
+    FingerprintButton.Size = UDim2.new(0, 50, 0, 50)
+    FingerprintButton.Position = UDim2.new(1, -60, 1, -60)
+    FingerprintButton.Text = "🔒"
+    FingerprintButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    FingerprintButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    FingerprintButton.Parent = MainFrame
+
+    local function fingerprintAction()
+        print("Fingerprint button pressed!")
+        FingerprintButton:Destroy()
+    end
+
+    FingerprintButton.MouseButton1Click:Connect(fingerprintAction)
+
+    -- Minimize and restore functions
     local function minimizeWindow()
         MainFrame.Visible = false
         MinimizedIcon.Visible = true
     end
 
-    -- ฟังก์ชั่นการคืนค่าหน้าต่าง 
     local function restoreWindow()
         MainFrame.Visible = true
         MinimizedIcon.Visible = false
     end
 
-    -- ฟังก์ชั่นปิดหน้าต่าง
     local function closeWindow()
         ScreenGui:Destroy()
     end
@@ -97,7 +111,7 @@ function Xlib:MakeWindow(config)
     MinimizedIcon.MouseButton1Click:Connect(restoreWindow)
     CloseButton.MouseButton1Click:Connect(closeWindow)
 
-    -- ทำให้ไอคอนย่อเล็กสุดสามารถลากได้
+    -- Make minimized icon draggable
     local dragging
     local dragInput
     local dragStart
@@ -150,7 +164,7 @@ function Xlib:MakeTab(config)
     TabButton.Font = Enum.Font.Gotham
     TabButton.TextSize = 14
 
-    -- คำนวณตำแหน่งของแท็บใหม่
+    -- Calculate new tab position
     local index = #config.Parent.TabFrame:GetChildren()
     TabButton.Position = UDim2.new(0, 0, 0, index * 30)
     TabButton.Parent = config.Parent.TabFrame
@@ -161,7 +175,7 @@ function Xlib:MakeTab(config)
     ToggleContainer.Parent = config.Parent.ContentFrame
     ToggleContainer.Visible = false
 
-    -- ฟังก์ชั่นเพื่อสลับระหว่างแท็บ
+    -- Tab switching function
     TabButton.MouseButton1Click:Connect(function()
         for _, child in pairs(config.Parent.ContentFrame:GetChildren()) do
             if child:IsA("Frame") then
@@ -197,106 +211,61 @@ function Xlib:MakeToggle(config)
     local ToggleLabel = Instance.new("TextLabel")
     ToggleLabel.Size = UDim2.new(1, -40, 1, 0)
     ToggleLabel.Position = UDim2.new(0, 10, 0, 0)
+    ToggleLabel.BackgroundTransparency = 1
     ToggleLabel.Text = config.Name
     ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    ToggleLabel.BackgroundTransparency = 1
     ToggleLabel.Font = Enum.Font.Gotham
     ToggleLabel.TextSize = 14
+    ToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
     ToggleLabel.Parent = Toggle
 
-    local state = config.Default or false
+    local isEnabled = false
 
-ToggleButton.MouseButton1Click:Connect(function()
-    state = not state
-    config.Callback(state)
-    if state then
-        ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-    else
-        ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    local function toggleState()
+        isEnabled = not isEnabled
+        if isEnabled then
+            ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+            if config.Callback then
+                config.Callback(true)
+            end
+        else
+            ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+            if config.Callback then
+                config.Callback(false)
+            end
+        end
     end
-end)
 
--- ตั้งค่าสถานะเริ่มต้นของปุ่มสลับ
-if state then
-    ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-else
-    ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    ToggleButton.MouseButton1Click:Connect(toggleState)
+
+    return {
+        Toggle = Toggle
+    }
 end
 
-return {
-    Toggle = Toggle,
-    ToggleButton = ToggleButton,
-    ToggleLabel = ToggleLabel
-}
-end
-
-function Xlib:MakeDropdown(config)
-    local Dropdown = Instance.new("Frame")
-    Dropdown.Size = UDim2.new(1, -20, 0, 30)
-    Dropdown.Position = UDim2.new(0, 10, 0, (#config.Parent.ToggleContainer:GetChildren()) * 40)
-    Dropdown.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    Dropdown.ZIndex = 1
-    Dropdown.Parent = config.Parent.ToggleContainer
+function Xlib:MakeButton(config)
+    local Button = Instance.new("TextButton")
+    Button.Size = UDim2.new(1, -20, 0, 30)
+    Button.Position = UDim2.new(0, 10, 0, (#config.Parent.ToggleContainer:GetChildren()) * 40)
+    Button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    Button.Text = config.Name
+    Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Button.Font = Enum.Font.Gotham
+    Button.TextSize = 14
+    Button.Parent = config.Parent.ToggleContainer
 
     local UICorner = Instance.new("UICorner")
     UICorner.CornerRadius = UDim.new(0, 5)
-    UICorner.Parent = Dropdown
+    UICorner.Parent = Button
 
-    local DropdownLabel = Instance.new("TextLabel")
-    DropdownLabel.Size = UDim2.new(1, -40, 1, 0)
-    DropdownLabel.Position = UDim2.new(0, 10, 0, 0)
-    DropdownLabel.Text = config.Name
-    DropdownLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    DropdownLabel.BackgroundTransparency = 1
-    DropdownLabel.Font = Enum.Font.Gotham
-    DropdownLabel.TextSize = 14
-    DropdownLabel.ZIndex = 1
-    DropdownLabel.Parent = Dropdown
-
-    local DropdownButton = Instance.new("TextButton")
-    DropdownButton.Size = UDim2.new(0, 20, 0, 20)
-    DropdownButton.Position = UDim2.new(1, -30, 0.5, -10)
-    DropdownButton.Text = "v"
-    DropdownButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    DropdownButton.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    DropdownButton.ZIndex = 1
-    DropdownButton.Parent = Dropdown
-
-    local OptionsFrame = Instance.new("Frame")
-    OptionsFrame.Size = UDim2.new(1, 0, 0, #config.Options * 30)
-    OptionsFrame.Position = UDim2.new(0, 0, 1, 0)
-    OptionsFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    OptionsFrame.Visible = false
-    OptionsFrame.ZIndex = 2
-    OptionsFrame.Parent = Dropdown
-
-    local function toggleOptions()
-        OptionsFrame.Visible = not OptionsFrame.Visible
-    end
-
-    DropdownButton.MouseButton1Click:Connect(toggleOptions)
-
-    for i, option in ipairs(config.Options) do
-        local OptionButton = Instance.new("TextButton")
-        OptionButton.Size = UDim2.new(1, -20, 0, 30)
-        OptionButton.Position = UDim2.new(0, 10, 0, (i - 1) * 30)
-        OptionButton.Text = option
-        OptionButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-        OptionButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-        OptionButton.ZIndex = 2
-        OptionButton.Parent = OptionsFrame
-
-        OptionButton.MouseButton1Click:Connect(function()
-            DropdownLabel.Text = option
-            config.Callback(option)
-            OptionsFrame.Visible = false
-        end)
-    end
+    Button.MouseButton1Click:Connect(function()
+        if config.Callback then
+            config.Callback()
+        end
+    end)
 
     return {
-        Dropdown = Dropdown,
-        DropdownButton = DropdownButton,
-        OptionsFrame = OptionsFrame
+        Button = Button
     }
 end
 
