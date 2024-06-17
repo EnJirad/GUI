@@ -253,4 +253,32 @@ function Xlib:MakeButton(config)
     }
 end
 
+function Xlib:MakeSection(config)
+    local SectionFrame = Instance.new("Frame")
+    SectionFrame.Size = UDim2.new(1, -20, 0, 50)
+    SectionFrame.Position = UDim2.new(0, 10, 0, (#config.Parent.ToggleContainer:GetChildren()) * 60)
+    SectionFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    SectionFrame.Parent = config.Parent.ToggleContainer
+
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 5)
+    UICorner.Parent = SectionFrame
+
+    local SectionLabel = Instance.new("TextLabel")
+    SectionLabel.Size = UDim2.new(1, -20, 1, 0)
+    SectionLabel.Position = UDim2.new(0, 10, 0, 0)
+    SectionLabel.BackgroundTransparency = 1
+    SectionLabel.Text = config.Name
+    SectionLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    SectionLabel.Font = Enum.Font.GothamBold
+    SectionLabel.TextSize = 18
+    SectionLabel.TextXAlignment = Enum.TextXAlignment.Left
+    SectionLabel.Parent = SectionFrame
+
+    return {
+        SectionFrame = SectionFrame
+    }
+end
+
+
 return Xlib
