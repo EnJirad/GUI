@@ -76,22 +76,6 @@ function Xlib:MakeWindow(config)
     MinimizedIcon.Draggable = true
     MinimizedIcon.Parent = ScreenGui
 
-    -- Create single-use fingerprint icon button
-    local FingerprintButton = Instance.new("TextButton")
-    FingerprintButton.Size = UDim2.new(0, 50, 0, 50)
-    FingerprintButton.Position = UDim2.new(1, -60, 1, -60)
-    FingerprintButton.Text = "🔒"
-    FingerprintButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    FingerprintButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    FingerprintButton.Parent = MainFrame
-
-    local function fingerprintAction()
-        print("Fingerprint button pressed!")
-        FingerprintButton:Destroy()
-    end
-
-    FingerprintButton.MouseButton1Click:Connect(fingerprintAction)
-
     -- Minimize and restore functions
     local function minimizeWindow()
         MainFrame.Visible = false
