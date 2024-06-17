@@ -64,7 +64,7 @@ function Xlib:MakeWindow(config)
     ContentFrame.BorderSizePixel = 0
     ContentFrame.Parent = MainFrame
 
-    -- Create minimized icon
+    -- สร้างไอคอนย่อเล็กสุด 
     local MinimizedIcon = Instance.new("TextButton")
     MinimizedIcon.Size = UDim2.new(0, 50, 0, 50)
     MinimizedIcon.Position = UDim2.new(0, 10, 0, 10)
@@ -72,21 +72,23 @@ function Xlib:MakeWindow(config)
     MinimizedIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
     MinimizedIcon.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     MinimizedIcon.Visible = false
+    MinimizedIcon.Active = true
+    MinimizedIcon.Draggable = true
     MinimizedIcon.Parent = ScreenGui
 
-    -- Function to minimize the window
+    -- ฟังก์ชั่นย่อหน้าต่างให้เล็กสุด 
     local function minimizeWindow()
         MainFrame.Visible = false
         MinimizedIcon.Visible = true
     end
 
-    -- Function to restore the window
+    -- ฟังก์ชั่นการคืนค่าหน้าต่าง 
     local function restoreWindow()
         MainFrame.Visible = true
         MinimizedIcon.Visible = false
     end
 
-    -- Function to close the window
+    -- ฟังก์ชั่นปิดหน้าต่าง
     local function closeWindow()
         ScreenGui:Destroy()
     end
@@ -95,23 +97,23 @@ function Xlib:MakeWindow(config)
     MinimizedIcon.MouseButton1Click:Connect(restoreWindow)
     CloseButton.MouseButton1Click:Connect(closeWindow)
 
-    -- Make the minimized icon draggable
+    -- ทำให้ไอคอนย่อเล็กสุดสามารถลากได้
     local dragging
     local dragInput
     local dragStart
     local startPos
-    
+
     local function update(input)
         local delta = input.Position - dragStart
         MinimizedIcon.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
     end
-    
+
     MinimizedIcon.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = true
             dragStart = input.Position
             startPos = MinimizedIcon.Position
-    
+
             input.Changed:Connect(function()
                 if input.UserInputState == Enum.UserInputState.End then
                     dragging = false
@@ -119,13 +121,13 @@ function Xlib:MakeWindow(config)
             end)
         end
     end)
-    
+
     MinimizedIcon.InputChanged:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseMovement then
             dragInput = input
         end
     end)
-    
+
     game:GetService("UserInputService").InputChanged:Connect(function(input)
         if input == dragInput and dragging then
             update(input)
@@ -148,7 +150,7 @@ function Xlib:MakeTab(config)
     TabButton.Font = Enum.Font.Gotham
     TabButton.TextSize = 14
 
-    -- Calculate the position of the new tab
+    -- คำนวณตำแหน่งของแท็บใหม่
     local index = #config.Parent.TabFrame:GetChildren()
     TabButton.Position = UDim2.new(0, 0, 0, index * 30)
     TabButton.Parent = config.Parent.TabFrame
@@ -159,7 +161,7 @@ function Xlib:MakeTab(config)
     ToggleContainer.Parent = config.Parent.ContentFrame
     ToggleContainer.Visible = false
 
-    -- Function to switch between tabs
+    -- ฟังก์ชั่นเพื่อสลับระหว่างแท็บ
     TabButton.MouseButton1Click:Connect(function()
         for _, child in pairs(config.Parent.ContentFrame:GetChildren()) do
             if child:IsA("Frame") then
@@ -214,7 +216,7 @@ ToggleButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- Set initial state of the toggle button
+-- ตั้งค่าสถานะเริ่มต้นของปุ่มสลับ
 if state then
     ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
 else
