@@ -2,8 +2,8 @@ local Xlib = {}
 
 function Xlib:MakeWindow(config)
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "XlibScreenGui"
-    ScreenGui.Parent = game:GetService("ReplicatedStorage")
+    ScreenGui.Name = "Xlib_Gui"
+    ScreenGui.Parent = game:GetService("CoreGui")
     
     local MainFrame = Instance.new("Frame")
     MainFrame.Size = UDim2.new(0, 400, 0, 350)
