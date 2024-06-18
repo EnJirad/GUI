@@ -55,24 +55,18 @@ function Xlib:MakeWindow(config)
     TabFrame.Position = UDim2.new(0, 0, 0, 30)
     TabFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     TabFrame.BorderSizePixel = 0
+    TabFrame.CanvasSize = UDim2.new(0, 0, 10, 0)
     TabFrame.ScrollBarThickness = 5
-    TabFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
     TabFrame.Parent = MainFrame
-
-    local TabLayout = Instance.new("UIListLayout")
-    TabLayout.Parent = TabFrame
 
     local ContentFrame = Instance.new("ScrollingFrame")
     ContentFrame.Size = UDim2.new(1, -100, 1, -30)
     ContentFrame.Position = UDim2.new(0, 100, 0, 30)
     ContentFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     ContentFrame.BorderSizePixel = 0
+    ContentFrame.CanvasSize = UDim2.new(0, 0, 10, 0)
     ContentFrame.ScrollBarThickness = 5
-    ContentFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
     ContentFrame.Parent = MainFrame
-
-    local ContentLayout = Instance.new("UIListLayout")
-    ContentLayout.Parent = ContentFrame
 
     -- Create minimized icon
     local MinimizedIcon = Instance.new("TextButton")
@@ -149,6 +143,7 @@ function Xlib:MakeWindow(config)
     }
 end
 
+-- ฟังชั่น สร้าง Tab
 function Xlib:MakeTab(config)
     local TabButton = Instance.new("TextButton")
     TabButton.Size = UDim2.new(1, 0, 0, 30)
@@ -158,6 +153,9 @@ function Xlib:MakeTab(config)
     TabButton.Font = Enum.Font.Gotham
     TabButton.TextSize = 14
 
+    -- Calculate new tab position
+    local index = #config.Parent.TabFrame:GetChildren()
+    TabButton.Position = UDim2.new(0, 0, 0, index * 30)
     TabButton.Parent = config.Parent.TabFrame
 
     local ToggleContainer = Instance.new("Frame")
@@ -165,9 +163,6 @@ function Xlib:MakeTab(config)
     ToggleContainer.BackgroundTransparency = 1
     ToggleContainer.Parent = config.Parent.ContentFrame
     ToggleContainer.Visible = false
-
-    local UIListLayout = Instance.new("UIListLayout")
-    UIListLayout.Parent = ToggleContainer
 
     -- Tab switching function
     TabButton.MouseButton1Click:Connect(function()
@@ -177,7 +172,6 @@ function Xlib:MakeTab(config)
             end
         end
         ToggleContainer.Visible = true
-        config.Parent.ContentFrame.CanvasSize = UDim2.new(0, 0, 0, ToggleContainer.UIListLayout.AbsoluteContentSize.Y)
     end)
 
     return {
@@ -185,6 +179,7 @@ function Xlib:MakeTab(config)
     }
 end
 
+-- ฟังชั่น สร้าง Toggle
 function Xlib:MakeToggle(config)
     local Toggle = Instance.new("Frame")
     Toggle.Size = UDim2.new(1, -20, 0, 30)
@@ -201,9 +196,6 @@ function Xlib:MakeToggle(config)
     ToggleButton.Position = UDim2.new(1, -30, 0.5, -10)
     ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
     ToggleButton.Text = ""
-    ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    ToggleButton.Font = Enum.Font.Gotham
-    ToggleButton.TextSize = 14
     ToggleButton.Parent = Toggle
 
     local ToggleLabel = Instance.new("TextLabel")
@@ -214,28 +206,47 @@ function Xlib:MakeToggle(config)
     ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     ToggleLabel.Font = Enum.Font.Gotham
     ToggleLabel.TextSize = 14
-    ToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
     ToggleLabel.Parent = Toggle
 
-    local function updateToggleButtonState()
-        if ToggleButton.BackgroundColor3 == Color3.fromRGB(255, 0, 0) then
+    local toggled = false
+
+    ToggleButton.MouseButton1Click:Connect(function()
+        toggled = not toggled
+        if toggled then
             ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+            if config.Callback then
+                config.Callback(true)
+            end
         else
             ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+            if config.Callback then
+                config.Callback(false)
+            end
         end
-        if config.Callback then
-            config.Callback(ToggleButton.BackgroundColor3 == Color3.fromRGB(0, 255, 0))
-        end
-    end
-
-    ToggleButton.MouseButton1Click:Connect(updateToggleButtonState)
-
-    -- Update canvas size for scrolling frame
-    config.Parent.ToggleContainer.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-        config.Parent.ToggleContainer.Parent.CanvasSize = UDim2.new(0, 0, 0, config.Parent.ToggleContainer.UIListLayout.AbsoluteContentSize.Y)
     end)
+end
 
-    return Toggle
+-- ฟังชั่น สร้างปุ่ม
+function Xlib:MakeButton(config)
+    local Button = Instance.new("TextButton")
+    Button.Size = UDim2.new(1, -20, 0, 30)
+    Button.Position = UDim2.new(0, 10, 0, (#config.Parent.ToggleContainer:GetChildren()) * 40)
+    Button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    Button.Text = config.Name
+    Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Button.Font = Enum.Font.Gotham
+    Button.TextSize = 14
+    Button.Parent = config.Parent.ToggleContainer
+
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 5)
+    UICorner.Parent = Button
+
+    Button.MouseButton1Click:Connect(function()
+        if config.Callback then
+            config.Callback()
+        end
+    end)
 end
 
 return Xlib
