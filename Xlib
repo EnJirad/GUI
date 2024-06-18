@@ -150,11 +150,13 @@ function Xlib:MakeTab(config)
     TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     TabButton.Font = Enum.Font.Gotham
     TabButton.TextSize = 14
-
-    -- Calculate new tab position
-    local index = #config.Parent.TabFrame:GetChildren()
-    TabButton.Position = UDim2.new(0, 0, 0, index * 30)
     TabButton.Parent = config.Parent.TabFrame
+
+    local UIListLayout = config.Parent.TabFrame:FindFirstChildOfClass("UIListLayout")
+    if not UIListLayout then
+        UIListLayout = Instance.new("UIListLayout")
+        UIListLayout.Parent = config.Parent.TabFrame
+    end
 
     local ToggleContainer = Instance.new("Frame")
     ToggleContainer.Size = UDim2.new(1, 0, 1, 0)
@@ -162,7 +164,6 @@ function Xlib:MakeTab(config)
     ToggleContainer.Parent = config.Parent.ContentFrame
     ToggleContainer.Visible = false
 
-    -- Tab switching function
     TabButton.MouseButton1Click:Connect(function()
         for _, child in pairs(config.Parent.ContentFrame:GetChildren()) do
             if child:IsA("Frame") then
@@ -171,7 +172,6 @@ function Xlib:MakeTab(config)
         end
         ToggleContainer.Visible = true
 
-        -- Adjust ContentFrame CanvasSize based on ToggleContainer size
         local numChildren = #ToggleContainer:GetChildren()
         local contentHeight = numChildren * 40
         config.Parent.ContentFrame.CanvasSize = UDim2.new(0, 0, 0, contentHeight)
