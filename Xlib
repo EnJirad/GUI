@@ -258,6 +258,7 @@ function Xlib:MakeDropdown(config)
     Dropdown.Position = UDim2.new(0, 10, 0, (#config.Parent.ToggleContainer:GetChildren()) * 40)
     Dropdown.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     Dropdown.ZIndex = 1
+    Dropdown.ClipsDescendants = true  -- ให้เฟรมของ Dropdown มีการตัดส่วนที่เกินพื้นที่ที่กำหนด
     Dropdown.Parent = config.Parent.ToggleContainer
 
     local UICorner = Instance.new("UICorner")
@@ -284,13 +285,15 @@ function Xlib:MakeDropdown(config)
     DropdownButton.ZIndex = 1
     DropdownButton.Parent = Dropdown
 
-    local OptionsFrame = Instance.new("Frame")
+    local OptionsFrame = Instance.new("ScrollingFrame")
     OptionsFrame.Size = UDim2.new(1, 0, 0, 0)
     OptionsFrame.Position = UDim2.new(0, 0, 1, 0)
     OptionsFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     OptionsFrame.Visible = false
     OptionsFrame.ZIndex = 2
-    OptionsFrame.Parent = config.Parent.ToggleContainer
+    OptionsFrame.ScrollBarThickness = 5
+    OptionsFrame.CanvasSize = UDim2.new(0, 0, 0, #config.Options * 30)
+    OptionsFrame.Parent = Dropdown
 
     local UIListLayout = Instance.new("UIListLayout")
     UIListLayout.Parent = OptionsFrame
@@ -317,6 +320,25 @@ function Xlib:MakeDropdown(config)
             OptionsFrame.Visible = false
         end)
     end
+
+    -- Update the CanvasSize based on the number of options
+    OptionsFrame.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y)
+
+    -- ให้ Dropdown อยู่ในกรอบของแถบหลัก
+    local function updateDropdownPosition()
+        local toggleContainerSize = config.Parent.ToggleContainer.AbsoluteSize
+        local dropdownPosition = Dropdown.Position.Y.Offset
+        local dropdownHeight = Dropdown.Size.Y.Offset
+
+        if dropdownPosition + dropdownHeight > toggleContainerSize.Y then
+            Dropdown.Position = UDim2.new(0, 10, 0, toggleContainerSize.Y - dropdownHeight)
+        end
+    end
+
+    -- เรียกใช้ฟังก์ชันเพื่ออัปเดตตำแหน่ง Dropdown เมื่อมีการเปิดปิดตัวเลือก
+    OptionsFrame:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        updateDropdownPosition()
+    end)
 
     return {
         Dropdown = Dropdown,
