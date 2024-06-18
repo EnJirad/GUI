@@ -252,4 +252,75 @@ function Xlib:MakeButton(config)
     end)
 end
 
+function Xlib:MakeDropdown(config)
+    local Dropdown = Instance.new("Frame")
+    Dropdown.Size = UDim2.new(1, -20, 0, 30)
+    Dropdown.Position = UDim2.new(0, 10, 0, (#config.Parent.ToggleContainer:GetChildren()) * 40)
+    Dropdown.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    Dropdown.ZIndex = 1
+    Dropdown.Parent = config.Parent.ToggleContainer
+
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 5)
+    UICorner.Parent = Dropdown
+
+    local DropdownLabel = Instance.new("TextLabel")
+    DropdownLabel.Size = UDim2.new(1, -40, 1, 0)
+    DropdownLabel.Position = UDim2.new(0, 10, 0, 0)
+    DropdownLabel.Text = config.Name
+    DropdownLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    DropdownLabel.BackgroundTransparency = 1
+    DropdownLabel.Font = Enum.Font.Gotham
+    DropdownLabel.TextSize = 14
+    DropdownLabel.ZIndex = 1
+    DropdownLabel.Parent = Dropdown
+
+    local DropdownButton = Instance.new("TextButton")
+    DropdownButton.Size = UDim2.new(0, 20, 0, 20)
+    DropdownButton.Position = UDim2.new(1, -30, 0.5, -10)
+    DropdownButton.Text = "v"
+    DropdownButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    DropdownButton.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    DropdownButton.ZIndex = 1
+    DropdownButton.Parent = Dropdown
+
+    local OptionsFrame = Instance.new("Frame")
+    OptionsFrame.Size = UDim2.new(1, 0, 0, #config.Options * 30)
+    OptionsFrame.Position = UDim2.new(0, 0, 1, 0)
+    OptionsFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    OptionsFrame.Visible = false
+    OptionsFrame.ZIndex = 2
+    OptionsFrame.Parent = Dropdown
+
+    local function toggleOptions()
+        OptionsFrame.Visible = not OptionsFrame.Visible
+    end
+
+    DropdownButton.MouseButton1Click:Connect(toggleOptions)
+
+    for i, option in ipairs(config.Options) do
+        local OptionButton = Instance.new("TextButton")
+        OptionButton.Size = UDim2.new(1, -20, 0, 30)
+        OptionButton.Position = UDim2.new(0, 10, 0, (i - 1) * 30)
+        OptionButton.Text = option
+        OptionButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+        OptionButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        OptionButton.ZIndex = 2
+        OptionButton.Parent = OptionsFrame
+
+        OptionButton.MouseButton1Click:Connect(function()
+            DropdownLabel.Text = option
+            config.Callback(option)
+            OptionsFrame.Visible = false
+        end)
+    end
+
+    return {
+        Dropdown = Dropdown,
+        DropdownButton = DropdownButton,
+        OptionsFrame = OptionsFrame
+    }
+end
+
+
 return Xlib
