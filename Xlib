@@ -55,7 +55,6 @@ function Xlib:MakeWindow(config)
     TabFrame.Position = UDim2.new(0, 0, 0, 30)
     TabFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     TabFrame.BorderSizePixel = 0
-    TabFrame.CanvasSize = UDim2.new(0, 0, 10, 0)
     TabFrame.ScrollBarThickness = 5
     TabFrame.Parent = MainFrame
 
@@ -64,7 +63,6 @@ function Xlib:MakeWindow(config)
     ContentFrame.Position = UDim2.new(0, 100, 0, 30)
     ContentFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     ContentFrame.BorderSizePixel = 0
-    ContentFrame.CanvasSize = UDim2.new(0, 0, 10, 0)
     ContentFrame.ScrollBarThickness = 5
     ContentFrame.Parent = MainFrame
 
@@ -143,7 +141,7 @@ function Xlib:MakeWindow(config)
     }
 end
 
--- ฟังชั่น สร้าง Tab
+-- Function to create tabs
 function Xlib:MakeTab(config)
     local TabButton = Instance.new("TextButton")
     TabButton.Size = UDim2.new(1, 0, 0, 30)
@@ -172,6 +170,11 @@ function Xlib:MakeTab(config)
             end
         end
         ToggleContainer.Visible = true
+
+        -- Adjust ContentFrame CanvasSize based on ToggleContainer size
+        local numChildren = #ToggleContainer:GetChildren()
+        local contentHeight = numChildren * 40
+        config.Parent.ContentFrame.CanvasSize = UDim2.new(0, 0, 0, contentHeight)
     end)
 
     return {
@@ -179,7 +182,7 @@ function Xlib:MakeTab(config)
     }
 end
 
--- ฟังชั่น สร้าง Toggle
+-- Function to create toggles
 function Xlib:MakeToggle(config)
     local Toggle = Instance.new("Frame")
     Toggle.Size = UDim2.new(1, -20, 0, 30)
@@ -226,7 +229,7 @@ function Xlib:MakeToggle(config)
     end)
 end
 
--- ฟังชั่น สร้างปุ่ม
+-- Function to create buttons
 function Xlib:MakeButton(config)
     local Button = Instance.new("TextButton")
     Button.Size = UDim2.new(1, -20, 0, 30)
