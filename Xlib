@@ -60,7 +60,7 @@ function Xlib:MakeWindow(config)
 
     local ContentFrame = Instance.new("ScrollingFrame")
     ContentFrame.Size = UDim2.new(1, -100, 1, -30)
-    ContentFrame.Position = UDim2.new(0, 0, 0, 30)
+    ContentFrame.Position = UDim2.new(0, 100, 0, 30)
     ContentFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     ContentFrame.BorderSizePixel = 0
     ContentFrame.ScrollBarThickness = 5
@@ -172,9 +172,8 @@ function Xlib:MakeTab(config)
         end
         ToggleContainer.Visible = true
 
-        local numChildren = #ToggleContainer:GetChildren()
-        local contentHeight = numChildren * 40
-        config.Parent.ContentFrame.CanvasSize = UDim2.new(0, 0, 0, contentHeight)
+        -- Reset the UIListLayout to update with new children
+        UIListLayout:Apply(config.Parent.ContentFrame:GetChildren())
     end)
 
     return {
