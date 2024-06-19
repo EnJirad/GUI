@@ -284,12 +284,14 @@ function Xlib:MakeDropdown(config)
     DropdownButton.ZIndex = 1
     DropdownButton.Parent = Dropdown
 
-    local OptionsFrame = Instance.new("Frame")
-    OptionsFrame.Size = UDim2.new(1, 0, 0, #config.Options * 30)
+    local OptionsFrame = Instance.new("ScrollingFrame")
+    OptionsFrame.Size = UDim2.new(1, 0, 0, math.min(#config.Options * 30, 150)) -- Limit height to 150 pixels
     OptionsFrame.Position = UDim2.new(0, 0, 1, 0)
     OptionsFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     OptionsFrame.Visible = false
     OptionsFrame.ZIndex = 2
+    OptionsFrame.CanvasSize = UDim2.new(0, 0, 0, #config.Options * 30)
+    OptionsFrame.ScrollBarThickness = 5
     OptionsFrame.Parent = Dropdown
 
     local function toggleOptions()
