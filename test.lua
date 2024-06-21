@@ -781,16 +781,28 @@ local MonsterToggle = Xlib:MakeToggle({
 checkFolder()
 
 
-
-
-
-
-
-
 local BowAttack = true
 local Mon = true
-local HumanoidRootPart = game.Players.LocalPlayer.Character.HumanoidRootPart
-local TweenService = game:GetService("TweenService")
+local AirParts = {}
+
+local function createAirPart()
+    local airPart = Instance.new("Part", Workspace)
+    airPart.Size = Vector3.new(5, 0.5, 5)
+    airPart.Transparency = 0
+    airPart.Anchored = true
+    airPart.Name = "AirPart"
+    table.insert(AirParts, airPart)
+    return airPart
+end
+
+local function removeAirParts()
+    for _, part in ipairs(AirParts) do
+        if part then
+            part:Destroy()
+        end
+    end
+    AirParts = {}
+end
 
 local function moveTo(destination)
     local distance = (destination.Position - HumanoidRootPart.Position).Magnitude
@@ -804,451 +816,25 @@ local function moveTo(destination)
 end
 
 local All_Monster = {
-    Tanzaknite = function()
-        local MobName = "Tanzaknite"
-        moveTo(CFrame.new(5091.7236328125, 130.20970153808594, 5569.03369140625))
-        wait(1)
-        spawn(function()
-            while BowAttack do
-                for _, v in ipairs(workspace.Mobs:GetChildren()) do
-                    if string.match(v.Name, MobName) and v:FindFirstChild("HumanoidRootPart") and v.HumanoidRootPart.Position.Z - HumanoidRootPart.Position.Z <= 500 then
-                        spawn(function()
-                            while Mon and v.Humanoid.Health > 0 do
-                                local TweenInfoClose = TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
-                                TweenService:Create(game.Players.LocalPlayer.Character.HumanoidRootPart, TweenInfoClose, {CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0, 0, 30)}):Play()
-                                wait(0.5)
-                            end
-                        end)
-                        
-                        spawn(function()
-                            while Mon and v.Humanoid and v.Humanoid.Health > 0 do
-                                game.Players.LocalPlayer.Character.Bow.SwordScript.Shoot:FireServer(v.HumanoidRootPart.Position, 21)
-                                wait(0.3)
-                            end
-                        end)
-                        
-                        repeat wait() until v.Humanoid.Health <= 0
-                        moveTo(v.HumanoidRootPart.CFrame)
-                        wait(4)
-                    end
-                end
-                wait(0.5)
-            end
-        end)
-    end,
-    
-    Ronin = function()
-        local MobName = "Ronin"
-        moveTo(CFrame.new(514.5203857421875, 19.46990966796875, -383.6240234375))
-        wait(1)
-        spawn(function()
-            while BowAttack do
-                for _, v in ipairs(workspace.Mobs:GetChildren()) do
-                    if string.match(v.Name, MobName) and v:FindFirstChild("HumanoidRootPart") and v.HumanoidRootPart.Position.Z - HumanoidRootPart.Position.Z <= 500 then
-                        spawn(function()
-                            while Mon and v.Humanoid.Health > 0 do
-                                local TweenInfoClose = TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
-                                TweenService:Create(game.Players.LocalPlayer.Character.HumanoidRootPart, TweenInfoClose, {CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0, 0, 30)}):Play()
-                                wait(0.5)
-                            end
-                        end)
-                        
-                        spawn(function()
-                            while Mon and v.Humanoid and v.Humanoid.Health > 0 do
-                                game.Players.LocalPlayer.Character.Bow.SwordScript.Shoot:FireServer(v.HumanoidRootPart.Position, 21)
-                                wait(0.3)
-                            end
-                        end)
-                        
-                        repeat wait() until v.Humanoid.Health <= 0
-                        moveTo(v.HumanoidRootPart.CFrame)
-                        wait(4)
-                    end
-                end
-                wait(0.5)
-            end
-        end)
-    end,
-    
-    Pharaoh = function()
-        local MobName = "Pharaoh"
-        moveTo(CFrame.new(-5994.7265625, 1852.7735595703125, 4024.900146484375))
-        wait(1)
-        spawn(function()
-            while BowAttack do
-                for i, v in ipairs(Workspace.Mobs:GetChildren()) do
-                    if string.match(v.Name, MobName) and v:FindFirstChild("HumanoidRootPart") and v.HumanoidRootPart.Position.Z - char.HumanoidRootPart.Position.Z <= 500 then
-                        spawn(function()
-                            while Mon and v.Humanoid.Health > 0 do
-                                TweenService:Create(player.Character.HumanoidRootPart, TweenInfoClose, {CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0,0,30)}):Play()
-                                wait(0.5)
-                            end
-                        end)
-                        
-                        spawn(function()
-                            while Mon and v.Humanoid and v.Humanoid.Health > 0 do
-                                char.Bow.SwordScript.Shoot:FireServer(v.HumanoidRootPart.Position, 21)
-                                wait(0.3)
-                            end
-                        end)
-
-                        repeat wait() until v.Humanoid.Health <= 0
-                        moveTo(v.HumanoidRootPart.CFrame)
-                        wait(4)
-                    end
-                end
-                wait(0.5)
-            end
-        end)
-    end,
-    
-    MimicChest = function()
-        local MobName = "MimicChest"
-        moveTo(CFrame.new(694.2025756835938, 145.73423767089844, 532.7348022460938))
-        wait(1)
-        spawn(function()
-            while BowAttack do
-                for i, v in ipairs(Workspace.Mobs:GetChildren()) do
-                    if string.match(v.Name, MobName) and v:FindFirstChild("HumanoidRootPart") and v.HumanoidRootPart.Position.Z - char.HumanoidRootPart.Position.Z <= 5 then
-                        spawn(function()
-                            while Mon and v.Humanoid.Health > 0 do
-                                TweenService:Create(player.Character.HumanoidRootPart, TweenInfoClose, {CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0,0,40)}):Play()
-                                wait(0.5)
-                            end
-                        end)
-                                
-                        spawn(function()
-                            while Mon and v.Humanoid and v.Humanoid.Health > 0 do
-                                char.Bow.SwordScript.Shoot:FireServer(v.HumanoidRootPart.Position, 21)
-                                wait(0.3)
-                            end
-                        end)
-
-                        repeat wait() until v.Humanoid.Health <= 0
-                        moveTo(v.HumanoidRootPart.CFrame)
-                        wait(4)
-                    end
-                end
-                wait(0.5)
-            end
-        end)
-    end,
-    
-    SeaKing = function()
-        local MobName = "SeaKing"
-        moveTo(CFrame.new(863.7012329101562, 98.45106506347656, 3254.254150390625))
-        wait(1)
-        spawn(function()
-            while BowAttack do
-                for i, v in ipairs(Workspace.Mobs:GetChildren()) do
-                    if string.match(v.Name, MobName) and v:FindFirstChild("HumanoidRootPart") and v.HumanoidRootPart.Position.Z - char.HumanoidRootPart.Position.Z <= 300 then
-                        spawn(function()
-                            while Mon and v.Humanoid.Health > 0 do
-                                TweenService:Create(player.Character.HumanoidRootPart, TweenInfoClose, {CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0,0,50)}):Play()
-                                wait(0.5)
-                            end
-                        end)
-                            
-                        spawn(function()
-                            while Mon and v.Humanoid and v.Humanoid.Health > 0 do
-                                char.Bow.SwordScript.Shoot:FireServer(v.HumanoidRootPart.Position, 21)
-                                wait(0.3)
-                            end
-                        end)
-    
-                        repeat wait() until v.Humanoid.Health <= 0
-                        moveTo(v.HumanoidRootPart.CFrame)
-                        wait(4)
-                    end
-                end
-                wait(0.5)
-            end
-        end)
-    end,
-    
-    AbyssKnight = function()
-        local MobName = "AbyssKnight"
-        local air = Instance.new("Part", workspace)
-        air.Size = Vector3.new(5, 0.5, 5)
-        air.CFrame = CFrame.new(4483.31982421875, -684.4680786132812, 6372.4453125)
-        air.Transparency = 0
-        air.Anchored = true
-        air.Name = "Airwalk"
-        
-        moveTo(CFrame.new(4483.171875, -681.2482299804688, 6372.15478515625))
-        wait(1)
-        moveTo(CFrame.new(4483.171875, -681.2482299804688, 6372.15478515625))
-
-        spawn(function()
-            while BowAttack do
-                for i, v in ipairs(Workspace.Mobs:GetChildren()) do
-                    if string.match(v.Name, MobName) and v:FindFirstChild("HumanoidRootPart") and v.HumanoidRootPart.Position.Z - char.HumanoidRootPart.Position.Z <= 5000 then
-                        spawn(function()
-                            while BowAttack and v.Humanoid and v.Humanoid.Health > 0 do
-                                char.Bow.SwordScript.Shoot:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
-                                wait(0.3)
-                            end
-                        end)
-                        
-                        repeat wait() until v.Humanoid.Health <= 0
-                        moveTo(v.HumanoidRootPart.CFrame)
-                        wait(4)
-                        moveTo(CFrame.new(4541.29052734375, -718.9581298828125, 6137.08740234375))
-                        wait(4)
-                        moveTo(CFrame.new(4483.171875, -681.2482299804688, 6372.15478515625))
-                        wait(2)
-                    end
-                end
-                wait(0.5)
-            end
-        end)
-    end,
-    
-    Hiraglacir = function()
-        local MobName = "Hiraglacir"
-        moveTo(CFrame.new(-42.54088592529297, 29.167022705078125, 8418.783203125))
-        wait(1)
-        spawn(function()
-            while BowAttack do
-                for i, v in ipairs(Workspace.Mobs:GetChildren()) do
-                    if string.match(v.Name, MobName) and v:FindFirstChild("HumanoidRootPart") and v.HumanoidRootPart.Position.Z - char.HumanoidRootPart.Position.Z <= 300 then
-                        spawn(function()
-                            while Mon and v.Humanoid.Health > 0 do
-                                TweenService:Create(player.Character.HumanoidRootPart, TweenInfoClose, {CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0,0,50)}):Play()
-                                wait(0.5)
-                            end
-                        end)
-                        
-                        spawn(function()
-                            while Mon and v.Humanoid and v.Humanoid.Health > 0 do
-                                char.Bow.SwordScript.Shoot:FireServer(v.HumanoidRootPart.Position, 21)
-                                wait(0.3)
-                            end
-                        end)
-
-                        repeat wait() until v.Humanoid.Health <= 0
-                        moveTo(v.HumanoidRootPart.CFrame)
-                        wait(4)
-                    end
-                end
-                wait(0.5)
-            end
-        end)
-    end,
-    
-    LightningGod = function()
-        local MobName = "LightningGod"
-        local air = Instance.new("Part", workspace)
-        air.Size = Vector3.new(5, 0.5, 5)
-        air.CFrame = CFrame.new(-6189.068359375, 1864.80615234375, 4068.8701171875)
-        air.Transparency = 0
-        air.Anchored = true
-        air.Name = "Airwalk"
-        
-        moveTo(CFrame.new(-6189.068359375, 1867.80615234375, 4068.8701171875))
-        wait(1)
-        moveTo(CFrame.new(-6189.068359375, 1867.80615234375, 4068.8701171875))
-
-        spawn(function()
-            while BowAttack do
-                for i, v in ipairs(Workspace.Mobs:GetChildren()) do
-                    if string.match(v.Name, MobName) and v:FindFirstChild("HumanoidRootPart") and v.HumanoidRootPart.Position.Z - char.HumanoidRootPart.Position.Z <= 5000 then
-
-                        spawn(function()
-                            while BowAttack and v.Humanoid and v.Humanoid.Health > 0 do
-                                char.Bow.SwordScript.Shoot:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
-                                wait(0.3)
-                            end
-                        end)
-                        
-                        repeat wait() until v.Humanoid.Health <= 0
-                        moveTo(v.HumanoidRootPart.CFrame)
-                        wait(4)
-                        moveTo(CFrame.new(-6519.38134765625, 1640.769775390625, 4021.671142578125))
-                        wait(4)
-                        moveTo(CFrame.new(-6189.068359375, 1867.80615234375, 4068.8701171875))
-                        wait(2)
-                    end
-                end
-                wait(0.5)
-            end
-        end)
-    end,
-    
-    ChainUser = function()
-        local MobName = "Chain User"
-        local air = Instance.new("Part", workspace)
-        air.Size = Vector3.new(5, 0.5, 5)
-        air.CFrame = CFrame.new(4726.03466796875, 335.33660888671875, 6837.7578125)
-        air.Transparency = 0
-        air.Anchored = true
-        air.Name = "Airwalk"
-        
-        moveTo(CFrame.new(4726.03466796875, 338.33660888671875, 6837.7578125))
-        wait(1)
-        moveTo(CFrame.new(4726.03466796875, 338.33660888671875, 6837.7578125))
-
-        spawn(function()
-            while BowAttack do
-                for i, v in ipairs(Workspace.Mobs:GetChildren()) do
-                    if string.match(v.Name, MobName) and v:FindFirstChild("HumanoidRootPart") and v.HumanoidRootPart.Position.Z - char.HumanoidRootPart.Position.Z <= 5000 then
-
-                        spawn(function()
-                            while BowAttack and v.Humanoid and v.Humanoid.Health > 0 do
-                                char.Bow.SwordScript.Shoot:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
-                                wait(0.3)
-                            end
-                        end)
-                        
-                        repeat wait() until v.Humanoid.Health <= 0
-                        moveTo(v.HumanoidRootPart.CFrame)
-                        wait(4)
-                        moveTo(CFrame.new(4869.6298828125, 33.57052230834961, 7219.00439453125))
-                        wait(4)
-                        moveTo(CFrame.new(4726.03466796875, 338.33660888671875, 6837.7578125))
-                        wait(2)
-                    end
-                end
-                wait(0.5)
-            end
-        end)
-    end,
-    
-    Law = function()
-        local MobName = "Law"
-        local air = Instance.new("Part", workspace)
-        air.Size = Vector3.new(5, 0.5, 5)
-        air.CFrame = CFrame.new(1088.350830078125, 332.9471435546875, -788.2487182617188)
-        air.Transparency = 0
-        air.Anchored = true
-        air.Name = "Airwalk"
-        
-        moveTo(CFrame.new(1088.350830078125, 335.9471435546875, -788.2487182617188))
-        wait(1)
-        moveTo(CFrame.new(1088.350830078125, 335.9471435546875, -788.2487182617188))
-
-        spawn(function()
-            while BowAttack do
-                for i, v in ipairs(Workspace.Mobs:GetChildren()) do
-                    if string.match(v.Name, MobName) and v:FindFirstChild("HumanoidRootPart") and v.HumanoidRootPart.Position.Z - char.HumanoidRootPart.Position.Z <= 5000 then
-
-                        spawn(function()
-                            while BowAttack and v.Humanoid and v.Humanoid.Health > 0 do
-                                char.Bow.SwordScript.Shoot:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
-                                wait(0.1)
-                            end
-                        end)
-                        
-                        repeat wait() until v.Humanoid.Health <= 0
-                        moveTo(v.HumanoidRootPart.CFrame)
-                        wait(4)
-                        moveTo(CFrame.new(834.67138671875, 19.46990966796875, -861.7884521484375))
-                        wait(4)
-                        moveTo(CFrame.new(1088.350830078125, 335.9471435546875, -788.2487182617188))
-                        wait(2)
-                    end
-                end
-                wait(0.5)
-            end
-        end)
-    end,
-    
-    RottedKnight = function()
-        local MobName = "RottedKnight"
-        moveTo(CFrame.new(-4468.2265625, 72.93830871582031, 1339.0042724609375))
-        wait(1)
-        moveTo(CFrame.new(-4468.2265625, 72.93830871582031, 1339.0042724609375))
-        
-        spawn(function()
-            while BowAttack do
-                for i, v in ipairs(Workspace.Mobs:GetChildren()) do
-                    if string.match(v.Name, MobName) and v:FindFirstChild("HumanoidRootPart") and v.HumanoidRootPart.Position.Z - char.HumanoidRootPart.Position.Z <= 500 then
-
-                        spawn(function()
-                            while Mon and v.Humanoid.Health > 0 do
-                                TweenService:Create(player.Character.HumanoidRootPart, TweenInfoClose, {CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0,0,30)}):Play()
-                                wait(0.5)
-                            end
-                        end)
-                            
-                        spawn(function()
-                            while Mon and v.Humanoid and v.Humanoid.Health > 0 do
-                                char.Bow.SwordScript.Shoot:FireServer(v.HumanoidRootPart.Position, 21)
-                                wait(0.3)
-                            end
-                        end)
-                            
-
-                        repeat wait() until v.Humanoid.Health <= 0
-                            moveTo(v.HumanoidRootPart.CFrame)
-                            wait(4)
-                            moveTo(CFrame.new(-4468.2265625, 72.93830871582031, 1339.0042724609375))
-                            wait(2)
-                        end
-                    end
-                wait(0.5)
-            end
-        end)
-    end,
-
-    MasterSwordsman = function()
-        local MobName = "MasterSwordsman"
-        local air = Instance.new("Part", workspace)
-        air.Size = Vector3.new(5, 0.5, 5)
-        air.CFrame = CFrame.new(-2191.16796875, 365.0719909667969, 4462.98828125)
-        air.Transparency = 0
-        air.Anchored = true
-        air.Name = "Airwalk"
-        
-        moveTo(CFrame.new(-2191.16796875, 368.0719909667969, 4462.98828125))
-        wait(1)
-        
-        spawn(function()
-            while BowAttack do
-                for i, v in ipairs(Workspace.Mobs:GetChildren()) do
-                    if string.match(v.Name, MobName) and v:FindFirstChild("HumanoidRootPart") and v.HumanoidRootPart.Position.Z - char.HumanoidRootPart.Position.Z <= 5000 then
-
-                        spawn(function()
-                            while BowAttack and v.Humanoid and v.Humanoid.Health > 0 do
-                                char.Bow.SwordScript.Shoot:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
-                                wait(0.3)
-                            end
-                        end)
-                        
-                        repeat wait() until v.Humanoid.Health <= 0
-                        moveTo(v.HumanoidRootPart.CFrame)
-                        wait(4)
-                        moveTo(CFrame.new(-1961.22314453125, 169.16986083984375, 4805.2177734375))
-                        wait(4)
-                        moveTo(CFrame.new(-2191.16796875, 368.0719909667969, 4462.98828125))
-                        wait(2)
-                    end
-                end
-                wait(0.5)
-            end
-        end)
-    end,
-    
     Nightmare = function()
         local MobName = "Nightmare"
-        local air = Instance.new("Part", workspace)
-        air.Size = Vector3.new(5, 0.5, 5)
-        air.CFrame = CFrame.new(515.275146484375, 1054.561767578125, 2525.274658203125)
-        air.Transparency = 0
-        air.Anchored = true
-        air.Name = "Airwalk"
-        
-        moveTo(CFrame.new(515.275146484375, 1057.561767578125, 2525.274658203125))
-        wait(1)
-        moveTo(CFrame.new(515.275146484375, 1057.561767578125, 2525.274658203125))
+        local distance = 400
+        local height = 100
+
+        local airPart = createAirPart()
 
         spawn(function()
             while BowAttack do
+                local found = false
                 for i, v in ipairs(Workspace.Mobs:GetChildren()) do
                     if string.match(v.Name, MobName) and v:FindFirstChild("HumanoidRootPart") and v.HumanoidRootPart.Position.Z - char.HumanoidRootPart.Position.Z <= 5000 then
-
+                        found = true
                         spawn(function()
                             while BowAttack and v.Humanoid and v.Humanoid.Health > 0 do
+                                local targetPosition = v.HumanoidRootPart.CFrame.Position + v.HumanoidRootPart.CFrame.LookVector * -distance + Vector3.new(0, height, 0)
+                                airPart.CFrame = CFrame.new(targetPosition) * CFrame.new(0, -5, 0)
+                                moveTo(airPart.CFrame)
+
                                 char.Bow.SwordScript.Shoot:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
                                 wait(0.3)
                             end
@@ -1256,38 +842,40 @@ local All_Monster = {
                         
                         repeat wait() until v.Humanoid.Health <= 0
                         moveTo(v.HumanoidRootPart.CFrame)
-                        wait(4)
-                        moveTo(CFrame.new(256.6656799316406, 893.0773315429688, 2806.488525390625))
-                        wait(4)
-                        moveTo(CFrame.new(515.275146484375, 1057.561767578125, 2525.274658203125))
                         wait(2)
                     end
+                end
+                if not found then
+                    StarterGui:SetCore("SendNotification", {
+                        Title = "Check Spawn Boss";
+                        Text = "Boss Nightmare has not spawned.";
+                        Duration = 5;
+                    })
                 end
                 wait(0.5)
             end
         end)
     end,
     
-    PirateHunter = function()
-        local MobName = "Pirate Hunter"
-        local air = Instance.new("Part", workspace)
-        air.Size = Vector3.new(5, 0.5, 5)
-        air.CFrame = CFrame.new(-6214.0126953125, 1898.8837890625, 4040.933349609375)
-        air.Transparency = 0
-        air.Anchored = true
-        air.Name = "Airwalk"
-        
-        moveTo(CFrame.new(-6213.615234375, 1902.1033935546875, 4040.85302734375))
-        wait(1)
-        moveTo(CFrame.new(-6213.615234375, 1902.1033935546875, 4040.85302734375))
+    SorcererSlayer = function()
+        local MobName = "Sorcerer Slayer"
+        local distance = 400
+        local height = 100
+
+        local airPart = createAirPart()
 
         spawn(function()
             while BowAttack do
+                local found = false
                 for i, v in ipairs(Workspace.Mobs:GetChildren()) do
-                    if string.match(v.Name, MobName) and v:FindFirstChild("HumanoidRootPart") and v.HumanoidRootPart.Position.Z - char.HumanoidRootPart.Position.Z <= 5000 then
-
+                    if string.match(v.Name, MobName) and v:FindFirstChild("HumanoidRootPart") and v.HumanoidRootPart.Position.Z - char.HumanoidRootPart.Position.Z <= 10000 then
+                        found = true
                         spawn(function()
                             while BowAttack and v.Humanoid and v.Humanoid.Health > 0 do
+                                local targetPosition = v.HumanoidRootPart.CFrame.Position + v.HumanoidRootPart.CFrame.LookVector * -distance + Vector3.new(0, height, 0)
+                                airPart.CFrame = CFrame.new(targetPosition) * CFrame.new(0, -5, 0)
+                                moveTo(airPart.CFrame)
+
                                 char.Bow.SwordScript.Shoot:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
                                 wait(0.3)
                             end
@@ -1295,29 +883,76 @@ local All_Monster = {
                         
                         repeat wait() until v.Humanoid.Health <= 0
                         moveTo(v.HumanoidRootPart.CFrame)
-                        wait(4)
-                        moveTo(CFrame.new(-6527.1220703125, 1640.77734375, 4023.134033203125))
-                        wait(4)
-                        moveTo(CFrame.new(-6213.615234375, 1902.1033935546875, 4040.85302734375))
                         wait(2)
                     end
+                end
+                if not found then
+                    StarterGui:SetCore("SendNotification", {
+                        Title = "Check Spawn Boss";
+                        Text = "Boss Sorcerer Slayer has not spawned.";
+                        Duration = 5;
+                    })
                 end
                 wait(0.5)
             end
         end)
-    end
+    end,
+    
+    VolcanoCurse = function()
+        local MobName = "Volcano Curse"
+        local distance = 400
+        local height = 100
+
+        local airPart = createAirPart()
+
+        spawn(function()
+            while BowAttack do
+                local found = false
+                for i, v in ipairs(Workspace.Mobs:GetChildren()) do
+                    if string.match(v.Name, MobName) and v:FindFirstChild("HumanoidRootPart") and v.HumanoidRootPart.Position.Z - char.HumanoidRootPart.Position.Z <= 5000 then
+                        found = true
+                        spawn(function()
+                            while BowAttack and v.Humanoid and v.Humanoid.Health > 0 do
+                                local targetPosition = v.HumanoidRootPart.CFrame.Position + v.HumanoidRootPart.CFrame.LookVector * -distance + Vector3.new(0, height, 0)
+                                airPart.CFrame = CFrame.new(targetPosition) * CFrame.new(0, -5, 0)
+                                moveTo(airPart.CFrame)
+
+                                char.Bow.SwordScript.Shoot:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+                                wait(0.3)
+                            end
+                        end)
+                        
+                        repeat wait() until v.Humanoid.Health <= 0
+                        moveTo(v.HumanoidRootPart.CFrame)
+                        wait(2)
+                    end
+                end
+                if not found then
+                    StarterGui:SetCore("SendNotification", {
+                        Title = "Check Spawn Boss";
+                        Text = "Boss Volcano Curse has not spawned.";
+                        Duration = 5;
+                    })
+                end
+                wait(0.5)
+            end
+        end)
+    end,
 }
 
 local M_Monster
 
-Xlib:MakeDropdown({
+local Dropdown = Xlib:MakeDropdown({
     Name = "Select Monsters",
     Parent = Tab2,
-    Options = {"Tanzaknite", "Ronin", "Pharaoh", 
-                "MimicChest", "SeaKing", "AbyssKnight", 
-                "Hiraglacir", "LightningGod", "ChainUser", 
-                "Law", "RottedKnight", "MasterSwordsman",
-                "Nightmare", "PirateHunter"},
+    Options = {
+        "Tanzaknite", "Ronin", "Pharaoh", 
+        "MimicChest", "SeaKing", "AbyssKnight", 
+        "Hiraglacir", "LightningGod", "ChainUser", 
+        "Law", "RottedKnight", "MasterSwordsman",
+        "Nightmare", "PirateHunter", "SorcererSlayer", 
+        "VolcanoCurse"
+    },
     Callback = function(option)
         M_Monster = All_Monster[option]
     end
@@ -1329,9 +964,10 @@ Xlib:MakeToggle({
     Default = false,
     Callback = function(value)
         BowAttack = value
-        Mon = value
         if value and M_Monster then
             M_Monster()
+        else
+            removeAirParts()
         end
     end
 })
