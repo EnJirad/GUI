@@ -549,6 +549,249 @@ Xlib:MakeToggle({
 })
 
 
+-- ฟังก์ชั่นเพื่อรับชื่อมอนสเตอร์ที่ไม่ซ้ำทั้งหมดจาก Workspace.Mobs
+local function getAllMonsterNames()
+    local monsterNames = {}
+
+    for _, monster in pairs(Workspace.Mobs:GetChildren()) do
+        local name = monster.Name
+        table.insert(monsterNames, name)
+    end
+
+    return monsterNames
+end
+
+-- Function to get monster names and count
+local function getMonsterNameCount()
+    local monsterCount = {}
+
+    for _, monster in pairs(Workspace.Mobs:GetChildren()) do
+        local name = monster.Name
+        local baseName = name:gsub("%d+$", "")
+
+        if not monsterCount[baseName] then
+            monsterCount[baseName] = {count = 0, names = {}}
+        end
+
+        monsterCount[baseName].count = monsterCount[baseName].count + 1
+        table.insert(monsterCount[baseName].names, name)
+    end
+
+    return monsterCount
+end
+
+local function createSpawnBossUI(monsterNames, tabName)
+    local ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.Name = "SpawnBossUI_" .. tabName
+    ScreenGui.Parent = game:GetService("CoreGui")
+
+    local Frame = Instance.new("Frame")
+    Frame.Name = "SpawnBossFrame_" .. tabName
+    Frame.Size = UDim2.new(0, 220, 0, 320)
+    Frame.Position = UDim2.new(0.5, -110, 0.5, -160)
+    Frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    Frame.BorderSizePixel = 2
+    Frame.BorderColor3 = Color3.fromRGB(50, 50, 50)
+    Frame.Active = true
+    Frame.Draggable = true
+    Frame.Parent = ScreenGui
+
+    local Title = Instance.new("TextLabel")
+    Title.Name = "Title"
+    Title.Text = tabName
+    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Title.TextSize = 18
+    Title.Font = Enum.Font.SourceSansBold
+    Title.Size = UDim2.new(1, 0, 0, 30)
+    Title.BackgroundTransparency = 1
+    Title.Parent = Frame
+
+    local ScrollFrame = Instance.new("ScrollingFrame")
+    ScrollFrame.Name = "ScrollFrame"
+    ScrollFrame.Size = UDim2.new(1, 0, 1, -30)
+    ScrollFrame.Position = UDim2.new(0, 0, 0, 30)
+    ScrollFrame.BackgroundTransparency = 1
+    ScrollFrame.Parent = Frame
+    ScrollFrame.ScrollBarThickness = 6
+
+    local Container = Instance.new("Frame")
+    Container.Name = "Container"
+    Container.Size = UDim2.new(1, 0, 0, 0)
+    Container.BackgroundTransparency = 1
+    Container.Parent = ScrollFrame
+
+    local UIListLayout = Instance.new("UIListLayout")
+    UIListLayout.Parent = Container
+    UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    UIListLayout.Padding = UDim.new(0, 5)
+
+    -- Sort and display monster names
+    table.sort(monsterNames)
+
+    for i, name in ipairs(monsterNames) do
+        local Frame = Instance.new("Frame")
+        Frame.Name = "MonsterFrame"
+        Frame.Size = UDim2.new(1, 0, 0, 24)
+        Frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        Frame.BorderSizePixel = 0
+        Frame.Parent = Container
+
+        local TextLabel = Instance.new("TextLabel")
+        TextLabel.Name = "MonsterName"
+        TextLabel.Text = name
+        TextLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+        TextLabel.TextSize = 16
+        TextLabel.Font = Enum.Font.SourceSans
+        TextLabel.BackgroundTransparency = 1
+        TextLabel.Size = UDim2.new(1, 0, 1, 0)
+        TextLabel.Parent = Frame
+
+        local Divider = Instance.new("Frame")
+        Divider.Name = "Divider"
+        Divider.Size = UDim2.new(1, 0, 0, 1)
+        Divider.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+        Divider.BorderSizePixel = 0
+        Divider.Position = UDim2.new(0, 0, 1, 0)
+        Divider.Parent = Frame
+
+        -- Update container size
+        Container.Size = UDim2.new(1, 0, 0, Container.Size.Y.Offset + UIListLayout.Padding.Offset + 24)
+    end
+
+    -- Adjust scrolling to show last monster
+    local lastMonster = Container:FindFirstChild("MonsterFrame", true)
+    if lastMonster then
+        ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, Container.Size.Y.Offset)
+        ScrollFrame.CanvasPosition = Vector2.new(0, lastMonster.Position.Y.Offset)
+    end
+end
+
+local function refreshUI()
+    local monsterCount = getMonsterNameCount()
+    local bossMonsterNames = {}
+    local allMonsterNames = {}
+
+    for baseName, data in pairs(monsterCount) do
+        if data.count == 1 then
+            table.insert(bossMonsterNames, data.names[1])
+        else
+            for _, name in ipairs(data.names) do
+                table.insert(allMonsterNames, name)
+            end
+        end
+    end
+
+    local bossToggleValue = false
+    local monsterToggleValue = false
+
+    local bossToggle = game:GetService("CoreGui"):FindFirstChild("SpawnBossUI_Boss Monsters")
+    if bossToggle then
+        bossToggleValue = bossToggle.Visible
+    end
+
+    local monsterToggle = game:GetService("CoreGui"):FindFirstChild("SpawnBossUI_Monster")
+    if monsterToggle then
+        monsterToggleValue = monsterToggle.Visible
+    end
+
+    if bossToggleValue then
+        createSpawnBossUI(bossMonsterNames, "Boss Monsters")
+    end
+
+    if monsterToggleValue then
+        createSpawnBossUI(allMonsterNames, "Monster")
+    end
+end
+
+local function checkFolder()
+    while true do
+        refreshUI()
+        wait(0.5)
+    end
+end
+
+local Tab2 = Xlib:MakeTab({
+    Name = "Farm Ore",
+    Parent = Window
+})
+
+local BossToggle = Xlib:MakeToggle({
+    Name = "Boss Monsters",
+    Parent = Tab2,
+    Default = false,
+    Callback = function(value)
+        if value then
+            local bossToggle = game:GetService("CoreGui"):FindFirstChild("SpawnBossUI_Boss Monsters")
+            if not bossToggle then
+                local monsterCount = getMonsterNameCount()
+                local bossMonsterNames = {}
+
+                for baseName, data in pairs(monsterCount) do
+                    if data.count == 1 then
+                        table.insert(bossMonsterNames, data.names[1])
+                    end
+                end
+
+                createSpawnBossUI(bossMonsterNames, "Boss Monsters")
+            end
+        else
+            local existingGui = game:GetService("CoreGui"):FindFirstChild("SpawnBossUI_Boss Monsters")
+            if existingGui then
+                existingGui:Destroy()
+            end
+        end
+    end
+})
+
+local MonsterToggle = Xlib:MakeToggle({
+    Name = "Monster",
+    Parent = Tab2,
+    Default = false,
+    Callback = function(value)
+        if value then
+            local monsterToggle = game:GetService("CoreGui"):FindFirstChild("SpawnBossUI_Monster")
+            if not monsterToggle then
+                local monsterCount = getMonsterNameCount()
+                local allMonsterNames = {}
+
+                for baseName, data in pairs(monsterCount) do
+                    if data.count > 1 then
+                        -- Sort names with numbers at the end
+                        table.sort(data.names, function(a, b)
+                            local numA = tonumber(a:match("%d+$")) or 0
+                            local numB = tonumber(b:match("%d+$")) or 0
+                            if numA == numB then
+                                return a < b
+                            else
+                                return numA < numB
+                            end
+                        end)
+
+                        for _, name in ipairs(data.names) do
+                            table.insert(allMonsterNames, name)
+                        end
+                    end
+                end
+
+                createSpawnBossUI(allMonsterNames, "Monster")
+            end
+        else
+            local existingGui = game:GetService("CoreGui"):FindFirstChild("SpawnBossUI_Monster")
+            if existingGui then
+                existingGui:Destroy()
+            end
+        end
+    end
+})
+checkFolder()
+
+
+
+
+
+
+
+
 local BowAttack = true
 local Mon = true
 local HumanoidRootPart = game.Players.LocalPlayer.Character.HumanoidRootPart
@@ -952,7 +1195,7 @@ local All_Monster = {
             end
         end)
     end,
-    
+
     MasterSwordsman = function()
         local MobName = "MasterSwordsman"
         local air = Instance.new("Part", workspace)
