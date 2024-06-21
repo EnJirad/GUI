@@ -164,7 +164,7 @@ Xlib:MakeButton({
 
 -- Tab for Ore Farming
 local Tab2 = Xlib:MakeTab({
-    Name = "Farm Ore",
+    Name = "Farm",
     Parent = Window
 })
 
@@ -778,8 +778,6 @@ local MonsterToggle = Xlib:MakeToggle({
         end
     end
 })
-checkFolder()
-
 
 local BowAttack = true
 local Mon = true
