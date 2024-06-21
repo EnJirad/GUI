@@ -710,11 +710,6 @@ local function checkFolder()
     end
 end
 
-local Tab2 = Xlib:MakeTab({
-    Name = "Farm Ore",
-    Parent = Window
-})
-
 local BossToggle = Xlib:MakeToggle({
     Name = "Boss Monsters",
     Parent = Tab2,
