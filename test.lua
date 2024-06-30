@@ -1,21 +1,28 @@
 local Xlib = loadstring(game:HttpGet('https://raw.githubusercontent.com/EnJirad/GUI/main/Xlib'))()
+local Window = Xlib:MakeWindow({Name = "Legends Re:Written World 1"})
 
-local Window = Xlib:MakeWindow({Name = "Legends Re:Written World 2"})
+--local TweenService
+local TweenService = game:GetService("TweenService")
+local TweenInfoClose = TweenInfo.new(0.5, Enum.EasingStyle.Linear)
+local Character = game.Players.LocalPlayer.Character
+local StarterGui = game:GetService("StarterGui")
 
--- Tab for Player functionalities
+--local Players
+local Players = game:GetService("Players")
+local player = game:GetService("Players").LocalPlayer
+local char = Players.LocalPlayer.Character
+local HumanoidRootPart = Character.HumanoidRootPart
+
+--local WSH
+local Workspace = game:GetService("Workspace")
+game:GetService("ReplicatedStorage").Remotes.DailyLogin:InvokeServer()
+
+
+
 local Tab1 = Xlib:MakeTab({
     Name = "Player",
     Parent = Window
 })
-
--- Services and Player Variables
-local TweenService = game:GetService("TweenService")
-local TweenInfoClose = TweenInfo.new(0.5, Enum.EasingStyle.Linear)
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local Character = player.Character
-local HumanoidRootPart = Character.HumanoidRootPart
-local Workspace = game:GetService("Workspace")
 
 -- Infinite Jump Toggle
 local InfJump = false
@@ -36,20 +43,20 @@ end
 
 game:GetService("UserInputService").JumpRequest:connect(onJumpRequest)
 
--- Hide Water Toggle
-local originalWaterTextures = Workspace:FindFirstChild("WaterTextures")
-local isWaterHidden = false
-
+local AntiAFK = false
 Xlib:MakeToggle({
-    Name = "Hide Water",
+    Name = "Anti AFK",
     Parent = Tab1,
     Default = false,
     Callback = function(value)
-        isWaterHidden = value
-        if originalWaterTextures then
-            for _, child in ipairs(originalWaterTextures:GetChildren()) do
-                child.Transparency = isWaterHidden and 1 or 0
-            end
+        AntiAFK = value
+        if AntiAFK then
+            wait(3)
+            local VirtualUser=game:service'VirtualUser'
+            game:service('Players').LocalPlayer.Idled:connect(function()
+            VirtualUser:CaptureController()
+            VirtualUser:ClickButton2(Vector2.new())
+            end)
         end
     end
 })
@@ -59,7 +66,7 @@ local originalSpeed = Character.Humanoid.WalkSpeed
 local Speed = 85
 
 Xlib:MakeToggle({
-    Name = "Up Speed",
+    Name = "Up Speed 85%",
     Parent = Tab1,
     Default = false,
     Callback = function(value)
@@ -67,53 +74,29 @@ Xlib:MakeToggle({
     end
 })
 
--- Auto Fish Toggle
-local AutoFish = false
+local Get_Drop = false
 Xlib:MakeToggle({
-    Name = "Auto Fish",
+    Name = "Get Item Drop",
     Parent = Tab1,
     Default = false,
     Callback = function(value)
-        AutoFish = value
-        spawn(function()
-            while AutoFish do
-                local ohInstance1 = workspace.FishingSpawns.Fishing
-                player.PlayerGui.Fish.Ado.catch:FireServer(ohInstance1)
-                wait(5)
-            end
-        end)
-    end
-})
-
--- Dash Toggle
-local Dash = false
-Xlib:MakeToggle({
-    Name = "Farm Speed",
-    Parent = Tab1,
-    Default = false,
-    Callback = function(value)
-        Dash = value
-        spawn(function()
-            while Dash do
-                player.PlayerGui.Parkour.Script.Dash:FireServer()
-                wait(0.5)
-            end
-        end)
-    end
-})
-
--- Buy RuneArrows Button
-local RuneArrows = true
-local Amount_RuneArrows = 10000
-Xlib:MakeButton({
-    Name = "Buy RuneArrows 10000",
-    Parent = Tab1,
-    Callback = function()
-        if RuneArrows then
-            local ohString1 = "RuneArrows"
-            local ohString2 = "Bows"
-            local ohNumber3 = Amount_RuneArrows
-            game:GetService("ReplicatedStorage").Remotes.BuyItem:FireServer(ohString1, ohString2, ohNumber3)
+        Get_Drop = value
+        if value then
+            spawn(function()
+                while Get_Drop do
+                    for _, model in ipairs(Workspace.Drops:GetChildren()) do
+                        if model:IsA("Model") then
+                            for _, item in ipairs(model:GetChildren()) do
+                                if item:IsA("Part") then
+                                    item.CFrame = HumanoidRootPart.CFrame
+                                    wait(0.00001)
+                                end
+                            end
+                        end
+                    end
+                    wait(0.00001)
+                end
+            end)
         end
     end
 })
@@ -160,11 +143,10 @@ Xlib:MakeButton({
     end
 })
 
---------------------------------------------------------------------------------------------------------------------------------------
 
--- Tab for Ore Farming
+
 local Tab2 = Xlib:MakeTab({
-    Name = "Farm",
+    Name = "Farm Other",
     Parent = Window
 })
 
@@ -522,7 +504,6 @@ local Farm_All_Ore = {
     end
 }
 
-
 local F_Ore
 Xlib:MakeDropdown({
     Name = "Select Ore",
@@ -548,6 +529,50 @@ Xlib:MakeToggle({
     end
 })
 
+-- Auto Fish Toggle
+local AutoFish = false
+Xlib:MakeToggle({
+    Name = "Auto Fish",
+    Parent = Tab2,
+    Default = false,
+    Callback = function(value)
+        AutoFish = value
+        spawn(function()
+            while AutoFish do
+                local ohInstance1 = workspace.FishingSpawns.Fishing
+                player.PlayerGui.Fish.Ado.catch:FireServer(ohInstance1)
+                wait(5)
+            end
+        end)
+    end
+})
+
+-- Dash Toggle
+local Dash = false
+Xlib:MakeToggle({
+    Name = "Farm Speed",
+    Parent = Tab2,
+    Default = false,
+    Callback = function(value)
+        Dash = value
+        spawn(function()
+            while Dash do
+                player.PlayerGui.Parkour.Script.Dash:FireServer()
+                wait(0.5)
+            end
+        end)
+    end
+})
+
+
+
+
+
+
+local Tab3 = Xlib:MakeTab({
+    Name = "Farm Mobs",
+    Parent = Window
+})
 
 -- ฟังก์ชั่นเพื่อรับชื่อมอนสเตอร์ที่ไม่ซ้ำทั้งหมดจาก Workspace.Mobs
 local function getAllMonsterNames()
@@ -711,8 +736,8 @@ local function checkFolder()
 end
 
 local BossToggle = Xlib:MakeToggle({
-    Name = "Boss Monsters",
-    Parent = Tab2,
+    Name = "Show Boss Spawns",
+    Parent = Tab3,
     Default = false,
     Callback = function(value)
         if value then
@@ -739,8 +764,8 @@ local BossToggle = Xlib:MakeToggle({
 })
 
 local MonsterToggle = Xlib:MakeToggle({
-    Name = "Monster",
-    Parent = Tab2,
+    Name = "Show Gigy Spawns",
+    Parent = Tab3,
     Default = false,
     Callback = function(value)
         if value then
@@ -779,13 +804,31 @@ local MonsterToggle = Xlib:MakeToggle({
     end
 })
 
-local BowAttack = true
-local Mon = true
+local Attack = false
+local Equip_Weapon = ""
+local Secret_Monster
+
+local function moveTo(destination)
+    if not destination then return end
+    local distance = (destination.Position - HumanoidRootPart.Position).Magnitude
+    local speed = 400
+    local time = distance / speed
+    
+    local tweenInfo = TweenInfo.new(time, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+    local tween = TweenService:Create(HumanoidRootPart, tweenInfo, {CFrame = destination})
+    tween:Play()
+    tween.Completed:Wait()
+end
+
 local AirParts = {}
+local airCF = CFrame.new(0, 0, 0)
+-- airCF = CFrame.new(-4416.50048828125, -77.86909484863281, -827.60693359375) ใช้งาน
+-- createAirPart() สร้าง
 
 local function createAirPart()
     local airPart = Instance.new("Part", Workspace)
     airPart.Size = Vector3.new(5, 0.5, 5)
+    airPart.CFrame = airCF
     airPart.Transparency = 0
     airPart.Anchored = true
     airPart.Name = "AirPart"
@@ -802,168 +845,1754 @@ local function removeAirParts()
     AirParts = {}
 end
 
-local function moveTo(destination)
-    local distance = (destination.Position - HumanoidRootPart.Position).Magnitude
-    local speed = 500
-    local time = distance / speed
-    
-    local tweenInfo = TweenInfo.new(time, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
-    local tween = TweenService:Create(HumanoidRootPart, tweenInfo, {CFrame = destination})
-    tween:Play()
-    tween.Completed:Wait()
+local function Get_Item()
+	spawn(function()
+	    while Attack do
+	        for _, model in ipairs(Workspace.Drops:GetChildren()) do
+	            if model:IsA("Model") then
+	                for _, item in ipairs(model:GetChildren()) do
+	                    if item:IsA("Part") then
+	                        item.CFrame = HumanoidRootPart.CFrame
+	                        wait(0.00001)
+	                    end
+	                end
+	            end
+	        end
+	        wait(0.00001)
+	    end
+	end)
 end
 
+local My_Position = player.Character.HumanoidRootPart.Position
+local function checkAndMoveTo(destination)
+    local moving = true
+    spawn(function()
+        while Attack and moving do
+            local currentPos = HumanoidRootPart.Position
+            if (currentPos - destination.Position).Magnitude > 1 then
+                moveTo(destination)
+            else
+                moving = false
+            end
+            wait(2)
+        end
+    end)
+end
+
+
 local All_Monster = {
-    Nightmare = function()
-        local MobName = "Nightmare"
-        local distance = 400
-        local height = 100
-
-        local airPart = createAirPart()
-
-        spawn(function()
-            while BowAttack do
-                local found = false
-                for i, v in ipairs(Workspace.Mobs:GetChildren()) do
-                    if string.match(v.Name, MobName) and v:FindFirstChild("HumanoidRootPart") and v.HumanoidRootPart.Position.Z - char.HumanoidRootPart.Position.Z <= 5000 then
-                        found = true
+    ["Bandit Level:2"] = function()
+        local MobName = "Bandit"
+        if Equip_Weapon == "Bow Farm" then
+            airCF = CFrame.new(-813.4490356445312, 111.51054382324219, 121.87625885009766)
+            createAirPart()
+            local destination = CFrame.new(-813.4490356445312, 114.51054382324219, 121.87625885009766)
+            checkAndMoveTo(destination)
+            wait(0.5)
+            
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                    if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
                         spawn(function()
-                            while BowAttack and v.Humanoid and v.Humanoid.Health > 0 do
-                                local targetPosition = v.HumanoidRootPart.CFrame.Position + v.HumanoidRootPart.CFrame.LookVector * -distance + Vector3.new(0, height, 0)
-                                airPart.CFrame = CFrame.new(targetPosition) * CFrame.new(0, -5, 0)
-                                moveTo(airPart.CFrame)
-
-                                char.Bow.SwordScript.Shoot:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
-                                wait(0.3)
+                            for _, tool in ipairs(Character:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    for _, script in ipairs(tool:GetChildren()) do
+                                        if script:IsA("Script") and script.Name ~= "Client" then
+                                            for _, Remote in ipairs(script:GetChildren()) do
+                                                if Remote:IsA("RemoteEvent") or Remote.Name == "Shoot" or Remote.Name ~= "Charge" then
+                                                    spawn(function()
+                                                        while Attack do
+                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+                                                                end
+                                                            end        
+                                                            wait(0.1)
+                                                            repeat wait() until v.Humanoid.Health <= 0
+                                                        end
+                                                    end)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
                             end
                         end)
-                        
-                        repeat wait() until v.Humanoid.Health <= 0
-                        moveTo(v.HumanoidRootPart.CFrame)
-                        wait(2)
                     end
                 end
-                if not found then
-                    StarterGui:SetCore("SendNotification", {
-                        Title = "Check Spawn Boss";
-                        Text = "Boss Nightmare has not spawned.";
-                        Duration = 5;
-                    })
-                end
-                wait(0.5)
+                wait(0.1)
             end
-        end)
+        elseif Equip_Weapon == "Sword Farm" then
+            moveTo(CFrame.new(-685.0829467773438, 12.567567825317383, 275.410888671875))
+            wait(0.5)
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                    if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                        spawn(function()
+                            while Attack and v.Humanoid.Health > 0 do
+                                TweenService:Create(player.Character.HumanoidRootPart, TweenInfoClose, {CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)}):Play()
+                                wait(0.1)
+                                repeat wait() until v.Humanoid.Health <= 0
+                            end
+                        end)
+                        spawn(function()
+                            for _, tool in ipairs(Character:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    for _, script in ipairs(tool:GetChildren()) do
+                                        if script:IsA("Script") and script.Name ~= "Client" then
+                                            for _, Remote in ipairs(script:GetChildren()) do
+                                                if Remote:IsA("RemoteEvent") then
+                                                    spawn(function()
+                                                        while Attack do
+                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+                                                                end    
+                                                            end        
+                                                            wait(0.1)
+                                                            repeat wait() until v.Humanoid.Health <= 0
+                                                        end
+                                                    end)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                end
+                wait(0.1)
+            end
+        end
+    end,
+
+	["Goblin & HobGoblin Level:3-5"] = function()
+    	local MobNames = {"Goblin", "HobGoblin"}
+        if Equip_Weapon == "Bow Farm" then
+            airCF = CFrame.new(-1235.182861328125, 171.1309814453125, -412.7290954589844)
+ 			createAirPart()
+	        local destination = CFrame.new(-1235.182861328125, 174.1309814453125, -412.7290954589844)
+            checkAndMoveTo(destination)
+            wait(0.5)
+            
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                	for _, name in ipairs(MobNames) do
+	                    if v.Name:match("^" .. name) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+	                        spawn(function()
+	                            for _, tool in ipairs(Character:GetChildren()) do
+	                                if tool:IsA("Tool") then
+	                                    for _, script in ipairs(tool:GetChildren()) do
+	                                        if script:IsA("Script") and script.Name ~= "Client" then
+	                                            for _, Remote in ipairs(script:GetChildren()) do
+	                                                if Remote:IsA("RemoteEvent") or Remote.Name == "Shoot" or Remote.Name ~= "Charge" then
+	                                                    spawn(function()
+	                                                        while Attack do
+	                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+	                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+	                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+	                                                                end
+	                                                            end        
+	                                                            wait(0.1)
+	                                                            repeat wait() until v.Humanoid.Health <= 0
+	                                                        end
+	                                                    end)
+	                                                end
+	                                            end
+	                                        end
+	                                    end
+	                                end
+	                            end
+	                        end)
+	                    end
+	                end
+                end
+                wait(0.1)
+            end
+        elseif Equip_Weapon == "Sword Farm" then
+            moveTo(CFrame.new(-1131.2349853515625, 4.969914436340332, -317.134521484375))
+            wait(0.5)
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                	for _, name in ipairs(MobNames) do
+	                    if v.Name:match("^" .. name) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+	                        spawn(function()
+	                            while Attack and v.Humanoid.Health > 0 do
+	                                TweenService:Create(player.Character.HumanoidRootPart, TweenInfoClose, {CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)}):Play()
+	                                wait(0.1)
+	                                repeat wait() until v.Humanoid.Health <= 0
+	                            end
+	                        end)
+	                        spawn(function()
+	                            for _, tool in ipairs(Character:GetChildren()) do
+	                                if tool:IsA("Tool") then
+	                                    for _, script in ipairs(tool:GetChildren()) do
+	                                        if script:IsA("Script") and script.Name ~= "Client" then
+	                                            for _, Remote in ipairs(script:GetChildren()) do
+	                                                if Remote:IsA("RemoteEvent") then
+	                                                    spawn(function()
+	                                                        while Attack do
+	                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+	                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+	                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+	                                                                end    
+	                                                            end        
+	                                                            wait(0.1)
+	                                                            repeat wait() until v.Humanoid.Health <= 0
+	                                                        end
+	                                                    end)
+	                                                end
+	                                            end
+	                                        end
+	                                    end
+	                                end
+	                            end
+	                        end)
+	                    end
+	                end
+                end
+                wait(0.1)
+            end
+        end
+    end,
+
+    ["Skeleton Level:15"] = function()
+        local MobName = "Skeleton"
+        if Equip_Weapon == "Bow Farm" then
+            airCF = CFrame.new(-2391.349853515625, -148.20631408691406, -1054.1842041015625)
+ 			createAirPart()
+        	local destination = CFrame.new(-2391.349853515625, -145.20631408691406, -1054.1842041015625)
+            checkAndMoveTo(destination)
+            wait(0.5)
+            
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                    if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                        spawn(function()
+                            for _, tool in ipairs(Character:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    for _, script in ipairs(tool:GetChildren()) do
+                                        if script:IsA("Script") and script.Name ~= "Client" then
+                                            for _, Remote in ipairs(script:GetChildren()) do
+                                                if Remote:IsA("RemoteEvent") or Remote.Name == "Shoot" or Remote.Name ~= "Charge" then
+                                                    spawn(function()
+                                                        while Attack do
+                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+                                                                end
+                                                            end        
+                                                            wait(0.1)
+                                                            repeat wait() until v.Humanoid.Health <= 0
+                                                        end
+                                                    end)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                end
+                wait(0.1)
+            end
+        elseif Equip_Weapon == "Sword Farm" then
+            moveTo(CFrame.new(-2548.013427734375, -278.6241149902344, -1076.99072265625))
+            wait(0.5)
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                    if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                        spawn(function()
+                            while Attack and v.Humanoid.Health > 0 do
+                                TweenService:Create(player.Character.HumanoidRootPart, TweenInfoClose, {CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)}):Play()
+                                wait(0.1)
+                                repeat wait() until v.Humanoid.Health <= 0
+                            end
+                        end)
+                        spawn(function()
+                            for _, tool in ipairs(Character:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    for _, script in ipairs(tool:GetChildren()) do
+                                        if script:IsA("Script") and script.Name ~= "Client" then
+                                            for _, Remote in ipairs(script:GetChildren()) do
+                                                if Remote:IsA("RemoteEvent") then
+                                                    spawn(function()
+                                                        while Attack do
+                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+                                                                end    
+                                                            end        
+                                                            wait(0.1)
+                                                            repeat wait() until v.Humanoid.Health <= 0
+                                                        end
+                                                    end)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                end
+                wait(0.1)
+            end
+        end
     end,
     
-    SorcererSlayer = function()
-        local MobName = "Sorcerer Slayer"
-        local distance = 400
-        local height = 100
-
-        local airPart = createAirPart()
-
-        spawn(function()
-            while BowAttack do
-                local found = false
-                for i, v in ipairs(Workspace.Mobs:GetChildren()) do
-                    if string.match(v.Name, MobName) and v:FindFirstChild("HumanoidRootPart") and v.HumanoidRootPart.Position.Z - char.HumanoidRootPart.Position.Z <= 10000 then
-                        found = true
+    ["DarkStoneKnight Level:25"] = function()
+		local MobName = "DarkStoneKnight"
+        if Equip_Weapon == "Bow Farm" then
+            airCF = CFrame.new(-3401.236572265625, 375.4302673339844, -439.8885192871094)
+ 			createAirPart()
+        	local destination = CFrame.new(-3401.236572265625, 378.4302673339844, -439.8885192871094)
+            checkAndMoveTo(destination)
+            wait(0.5)
+            
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                    if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
                         spawn(function()
-                            while BowAttack and v.Humanoid and v.Humanoid.Health > 0 do
-                                local targetPosition = v.HumanoidRootPart.CFrame.Position + v.HumanoidRootPart.CFrame.LookVector * -distance + Vector3.new(0, height, 0)
-                                airPart.CFrame = CFrame.new(targetPosition) * CFrame.new(0, -5, 0)
-                                moveTo(airPart.CFrame)
-
-                                char.Bow.SwordScript.Shoot:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
-                                wait(0.3)
+                            for _, tool in ipairs(Character:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    for _, script in ipairs(tool:GetChildren()) do
+                                        if script:IsA("Script") and script.Name ~= "Client" then
+                                            for _, Remote in ipairs(script:GetChildren()) do
+                                                if Remote:IsA("RemoteEvent") or Remote.Name == "Shoot" or Remote.Name ~= "Charge" then
+                                                    spawn(function()
+                                                        while Attack do
+                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+                                                                end
+                                                            end        
+                                                            wait(0.1)
+                                                            repeat wait() until v.Humanoid.Health <= 0
+                                                        end
+                                                    end)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
                             end
                         end)
-                        
-                        repeat wait() until v.Humanoid.Health <= 0
-                        moveTo(v.HumanoidRootPart.CFrame)
-                        wait(2)
                     end
                 end
-                if not found then
-                    StarterGui:SetCore("SendNotification", {
-                        Title = "Check Spawn Boss";
-                        Text = "Boss Sorcerer Slayer has not spawned.";
-                        Duration = 5;
-                    })
-                end
-                wait(0.5)
+                wait(0.1)
             end
-        end)
+        elseif Equip_Weapon == "Sword Farm" then
+            moveTo(CFrame.new(-3307.340576171875, 117.6991195678711, -1105.55908203125))
+            wait(0.5)
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                    if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                        spawn(function()
+                            while Attack and v.Humanoid.Health > 0 do
+                                TweenService:Create(player.Character.HumanoidRootPart, TweenInfoClose, {CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)}):Play()
+                                wait(0.1)
+                                repeat wait() until v.Humanoid.Health <= 0
+                            end
+                        end)
+                        spawn(function()
+                            for _, tool in ipairs(Character:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    for _, script in ipairs(tool:GetChildren()) do
+                                        if script:IsA("Script") and script.Name ~= "Client" then
+                                            for _, Remote in ipairs(script:GetChildren()) do
+                                                if Remote:IsA("RemoteEvent") then
+                                                    spawn(function()
+                                                        while Attack do
+                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+                                                                end    
+                                                            end        
+                                                            wait(0.1)
+                                                            repeat wait() until v.Humanoid.Health <= 0
+                                                        end
+                                                    end)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                end
+                wait(0.1)
+            end
+        end
     end,
     
-    VolcanoCurse = function()
-        local MobName = "Volcano Curse"
-        local distance = 400
-        local height = 100
-
-        local airPart = createAirPart()
-
-        spawn(function()
-            while BowAttack do
-                local found = false
-                for i, v in ipairs(Workspace.Mobs:GetChildren()) do
-                    if string.match(v.Name, MobName) and v:FindFirstChild("HumanoidRootPart") and v.HumanoidRootPart.Position.Z - char.HumanoidRootPart.Position.Z <= 5000 then
-                        found = true
+    ["Witch Level:35"] = function()
+        local MobName = "Witch"
+        if Equip_Weapon == "Bow Farm" then
+            airCF = CFrame.new(-124.02674102783203, 239.83639526367188, -483.43310546875)
+ 			createAirPart()
+        	local destination = CFrame.new(-124.02674102783203, 242.83639526367188, -483.43310546875)
+            checkAndMoveTo(destination)
+            wait(0.5)
+            
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                    if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
                         spawn(function()
-                            while BowAttack and v.Humanoid and v.Humanoid.Health > 0 do
-                                local targetPosition = v.HumanoidRootPart.CFrame.Position + v.HumanoidRootPart.CFrame.LookVector * -distance + Vector3.new(0, height, 0)
-                                airPart.CFrame = CFrame.new(targetPosition) * CFrame.new(0, -5, 0)
-                                moveTo(airPart.CFrame)
-
-                                char.Bow.SwordScript.Shoot:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
-                                wait(0.3)
+                            for _, tool in ipairs(Character:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    for _, script in ipairs(tool:GetChildren()) do
+                                        if script:IsA("Script") and script.Name ~= "Client" then
+                                            for _, Remote in ipairs(script:GetChildren()) do
+                                                if Remote:IsA("RemoteEvent") or Remote.Name == "Shoot" or Remote.Name ~= "Charge" then
+                                                    spawn(function()
+                                                        while Attack do
+                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+                                                                end
+                                                            end        
+                                                            wait(0.1)
+                                                            repeat wait() until v.Humanoid.Health <= 0
+                                                        end
+                                                    end)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
                             end
                         end)
-                        
-                        repeat wait() until v.Humanoid.Health <= 0
-                        moveTo(v.HumanoidRootPart.CFrame)
-                        wait(2)
                     end
                 end
-                if not found then
-                    StarterGui:SetCore("SendNotification", {
-                        Title = "Check Spawn Boss";
-                        Text = "Boss Volcano Curse has not spawned.";
-                        Duration = 5;
-                    })
-                end
-                wait(0.5)
+                wait(0.1)
             end
-        end)
+        elseif Equip_Weapon == "Sword Farm" then
+            moveTo(CFrame.new(-269.5739440917969, 4.813971996307373, -503.3072204589844))
+            wait(0.5)
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                    if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                        spawn(function()
+                            while Attack and v.Humanoid.Health > 0 do
+                                TweenService:Create(player.Character.HumanoidRootPart, TweenInfoClose, {CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)}):Play()
+                                wait(0.1)
+                                repeat wait() until v.Humanoid.Health <= 0
+                            end
+                        end)
+                        spawn(function()
+                            for _, tool in ipairs(Character:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    for _, script in ipairs(tool:GetChildren()) do
+                                        if script:IsA("Script") and script.Name ~= "Client" then
+                                            for _, Remote in ipairs(script:GetChildren()) do
+                                                if Remote:IsA("RemoteEvent") then
+                                                    spawn(function()
+                                                        while Attack do
+                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+                                                                end    
+                                                            end        
+                                                            wait(0.1)
+                                                            repeat wait() until v.Humanoid.Health <= 0
+                                                        end
+                                                    end)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                end
+                wait(0.1)
+            end
+        end
     end,
+
+    ["Boar King Level:40"] = function()
+        local MobName = "Boar King"
+        if Equip_Weapon == "Bow Farm" then
+            airCF = CFrame.new(-3882.43505859375, 629.5661010742188, -858.0487670898438)
+ 			createAirPart()
+            local destination = CFrame.new(-3882.43505859375, 632.5661010742188, -858.0487670898438)
+            checkAndMoveTo(destination)
+            wait(0.5)
+            
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                    if v.Name == MobName and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                        spawn(function()
+                            for _, tool in ipairs(Character:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    for _, script in ipairs(tool:GetChildren()) do
+                                        if script:IsA("Script") and script.Name ~= "Client" then
+                                            for _, Remote in ipairs(script:GetChildren()) do
+                                                if Remote:IsA("RemoteEvent") or Remote.Name == "Shoot" or Remote.Name ~= "Charge" then
+                                                    spawn(function()
+                                                        while Attack do
+                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+                                                                end
+                                                            end        
+                                                            wait(0.1)
+                                                            repeat wait() until v.Humanoid.Health <= 0
+                                                        end
+                                                    end)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                end
+                wait(0.1)
+            end
+        elseif Equip_Weapon == "Sword Farm" then
+            moveTo(CFrame.new(-3893.636962890625, 398.9500427246094, -861.0621948242188))
+            wait(0.5)
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                    if v.Name == MobName and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                        spawn(function()
+                            while Attack and v.Humanoid.Health > 0 do
+                                TweenService:Create(player.Character.HumanoidRootPart, TweenInfoClose, {CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)}):Play()
+                                wait(0.1)
+                                repeat wait() until v.Humanoid.Health <= 0
+                            end
+                        end)
+                        spawn(function()
+                            for _, tool in ipairs(Character:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    for _, script in ipairs(tool:GetChildren()) do
+                                        if script:IsA("Script") and script.Name ~= "Client" then
+                                            for _, Remote in ipairs(script:GetChildren()) do
+                                                if Remote:IsA("RemoteEvent") then
+                                                    spawn(function()
+                                                        while Attack do
+                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+                                                                end    
+                                                            end        
+                                                            wait(0.1)
+                                                            repeat wait() until v.Humanoid.Health <= 0
+                                                        end
+                                                    end)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                end
+                wait(0.1)
+            end
+        end
+    end,
+
+    ["Golem Level:50"] = function()
+        local MobName = "Golem"
+        if Equip_Weapon == "Bow Farm" then
+            airCF = CFrame.new(-1072.201904296875, 423.0378112792969, -215.87530517578125)
+ 			createAirPart()
+            local destination = CFrame.new(-1072.201904296875, 426.0378112792969, -215.87530517578125)
+            checkAndMoveTo(destination)
+            wait(0.5)
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                    if v.Name == MobName and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                        spawn(function()
+                            for _, tool in ipairs(Character:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    for _, script in ipairs(tool:GetChildren()) do
+                                        if script:IsA("Script") and script.Name ~= "Client" then
+                                            for _, Remote in ipairs(script:GetChildren()) do
+                                                if Remote:IsA("RemoteEvent") or Remote.Name == "Shoot" or Remote.Name ~= "Charge" then
+                                                    spawn(function()
+                                                        while Attack do
+                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+                                                                end
+                                                            end        
+                                                            wait(0.1)
+                                                            repeat wait() until v.Humanoid.Health <= 0
+                                                        end
+                                                    end)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                end
+                wait(0.1)
+            end
+        elseif Equip_Weapon == "Sword Farm" then
+            moveTo(CFrame.new(-843.4234619140625, 288.68218994140625, -189.60377502441406))
+            wait(0.5)
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                    if v.Name == MobName and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                        spawn(function()
+                            while Attack and v.Humanoid.Health > 0 do
+                         		-- TweenService:Create(v.HumanoidRootPart, TweenInfoClose, {CFrame = HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)}):Play() มอนสเตอร์วาปมาหาเรา
+                                TweenService:Create(player.Character.HumanoidRootPart, TweenInfoClose, {CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)}):Play()
+                                wait(0.1)
+                                repeat wait() until v.Humanoid.Health <= 0
+                            end
+                        end)
+                        spawn(function()
+                            for _, tool in ipairs(Character:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    for _, script in ipairs(tool:GetChildren()) do
+                                        if script:IsA("Script") and script.Name ~= "Client" then
+                                            for _, Remote in ipairs(script:GetChildren()) do
+                                                if Remote:IsA("RemoteEvent") then
+                                                    spawn(function()
+                                                        while Attack do
+                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+                                                                end    
+                                                            end        
+                                                            wait(0.1)
+                                                            repeat wait() until v.Humanoid.Health <= 0
+                                                        end
+                                                    end)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                end
+                wait(0.1)
+            end
+        end
+    end,
+
+    ["Plant Beast Level:65"] = function()
+        local MobName = "PlantBeast"
+        if Equip_Weapon == "Bow Farm" then
+            airCF = CFrame.new(-941.6878051757812, 171.4872589111328, -1666.0322265625)
+ 			createAirPart()
+        	local destination = CFrame.new(-941.6878051757812, 174.4872589111328, -1666.0322265625)
+            checkAndMoveTo(destination)
+            wait(0.5)
+            
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                    if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                        spawn(function()
+                            for _, tool in ipairs(Character:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    for _, script in ipairs(tool:GetChildren()) do
+                                        if script:IsA("Script") and script.Name ~= "Client" then
+                                            for _, Remote in ipairs(script:GetChildren()) do
+                                                if Remote:IsA("RemoteEvent") or Remote.Name == "Shoot" or Remote.Name ~= "Charge" then
+                                                    spawn(function()
+                                                        while Attack do
+                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+                                                                end
+                                                            end        
+                                                            wait(0.1)
+                                                            repeat wait() until v.Humanoid.Health <= 0
+                                                        end
+                                                    end)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                end
+                wait(0.1)
+            end
+        elseif Equip_Weapon == "Sword Farm" then
+            moveTo(CFrame.new(-1101.629150390625, 185.9998321533203, -1735.87451171875))
+            wait(0.5)
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                    if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                        spawn(function()
+                            while Attack and v.Humanoid.Health > 0 do
+                                TweenService:Create(player.Character.HumanoidRootPart, TweenInfoClose, {CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)}):Play()
+                                wait(0.1)
+                                repeat wait() until v.Humanoid.Health <= 0
+                            end
+                        end)
+                        spawn(function()
+                            for _, tool in ipairs(Character:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    for _, script in ipairs(tool:GetChildren()) do
+                                        if script:IsA("Script") and script.Name ~= "Client" then
+                                            for _, Remote in ipairs(script:GetChildren()) do
+                                                if Remote:IsA("RemoteEvent") then
+                                                    spawn(function()
+                                                        while Attack do
+                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+                                                                end    
+                                                            end        
+                                                            wait(0.1)
+                                                            repeat wait() until v.Humanoid.Health <= 0
+                                                        end
+                                                    end)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                end
+                wait(0.1)
+            end
+        end
+    end,
+
+    ["Elsa Level:75"] = function()
+        local MobName = "Elsa"
+        if Equip_Weapon == "Bow Farm" then
+            airCF = CFrame.new(931.5955810546875, -181.04214477539062, -484.5388488769531)
+ 			createAirPart()
+        	local destination = CFrame.new(931.5955810546875, -178.04214477539062, -484.5388488769531)
+            checkAndMoveTo(destination)
+            wait(0.5)
+            
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                    if v.Name == MobName and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                        spawn(function()
+                            for _, tool in ipairs(Character:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    for _, script in ipairs(tool:GetChildren()) do
+                                        if script:IsA("Script") and script.Name ~= "Client" then
+                                            for _, Remote in ipairs(script:GetChildren()) do
+                                                if Remote:IsA("RemoteEvent") or Remote.Name == "Shoot" or Remote.Name ~= "Charge" then
+                                                    spawn(function()
+                                                        while Attack do
+                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+                                                                end
+                                                            end        
+                                                            wait(0.1)
+                                                            repeat wait() until v.Humanoid.Health <= 0
+                                                        end
+                                                    end)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                end
+                wait(0.1)
+            end
+        elseif Equip_Weapon == "Sword Farm" then
+            moveTo(CFrame.new(957.4970092773438, -225.63124084472656, -518.5598754882812))
+            wait(0.5)
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                    if v.Name == MobName and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                        spawn(function()
+                            while Attack and v.Humanoid.Health > 0 do
+                                TweenService:Create(player.Character.HumanoidRootPart, TweenInfoClose, {CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)}):Play()
+                                wait(0.1)
+                                repeat wait() until v.Humanoid.Health <= 0
+                            end
+                        end)
+                        spawn(function()
+                            for _, tool in ipairs(Character:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    for _, script in ipairs(tool:GetChildren()) do
+                                        if script:IsA("Script") and script.Name ~= "Client" then
+                                            for _, Remote in ipairs(script:GetChildren()) do
+                                                if Remote:IsA("RemoteEvent") then
+                                                    spawn(function()
+                                                        while Attack do
+                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+                                                                end    
+                                                            end        
+                                                            wait(0.1)
+                                                            repeat wait() until v.Humanoid.Health <= 0
+                                                        end
+                                                    end)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                end
+                wait(0.1)
+            end
+        end
+    end,
+    
+    ["Rouge Paladin Level:80"] = function()
+        local MobName = "RougePaladin"
+        if Equip_Weapon == "Bow Farm" then
+            airCF = CFrame.new(-4289.1083984375, -185.9418487548828, -685.239501953125) 
+	   		createAirPart()
+            local destination = CFrame.new(-4289.1083984375, -182.9418487548828, -685.239501953125)
+            checkAndMoveTo(destination)
+            wait(0.5)
+            
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                    if v.Name == MobName and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                        spawn(function()
+                            for _, tool in ipairs(Character:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    for _, script in ipairs(tool:GetChildren()) do
+                                        if script:IsA("Script") and script.Name ~= "Client" then
+                                            for _, Remote in ipairs(script:GetChildren()) do
+                                                if Remote:IsA("RemoteEvent") or Remote.Name == "Shoot" or Remote.Name ~= "Charge" then
+                                                    spawn(function()
+                                                        while Attack do
+                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+                                                                end
+                                                            end        
+                                                            wait(0.1)
+                                                            repeat wait() until v.Humanoid.Health <= 0
+                                                        end
+                                                    end)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                end
+                wait(0.1)
+            end
+        elseif Equip_Weapon == "Sword Farm" then
+            moveTo(CFrame.new(-4290.62109375, -339.9622802734375, -680.96923828125))
+            wait(0.5)
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                    if v.Name == MobName and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                        spawn(function()
+                            while Attack and v.Humanoid.Health > 0 do
+                                TweenService:Create(player.Character.HumanoidRootPart, TweenInfoClose, {CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)}):Play()
+                                wait(0.1)
+                                repeat wait() until v.Humanoid.Health <= 0
+                            end
+                        end)
+                        spawn(function()
+                            for _, tool in ipairs(Character:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    for _, script in ipairs(tool:GetChildren()) do
+                                        if script:IsA("Script") and script.Name ~= "Client" then
+                                            for _, Remote in ipairs(script:GetChildren()) do
+                                                if Remote:IsA("RemoteEvent") then
+                                                    spawn(function()
+                                                        while Attack do
+                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+                                                                end    
+                                                            end        
+                                                            wait(0.1)
+                                                            repeat wait() until v.Humanoid.Health <= 0
+                                                        end
+                                                    end)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                end
+                wait(0.1)
+            end
+        end
+    end,
+    
+    ["Ruined Knight Level:85"] = function()
+        local MobName = "RuinedKnight"
+        if Equip_Weapon == "Bow Farm" then
+            airCF = CFrame.new(-3347.35595703125, -339.0802001953125, -911.8562622070312) 
+	   		createAirPart()
+            local destination = CFrame.new(-3347.35595703125, -339.0802001953125, -911.8562622070312)
+            checkAndMoveTo(destination)
+            wait(0.5)
+            
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                    if v.Name == MobName and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                        spawn(function()
+                            for _, tool in ipairs(Character:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    for _, script in ipairs(tool:GetChildren()) do
+                                        if script:IsA("Script") and script.Name ~= "Client" then
+                                            for _, Remote in ipairs(script:GetChildren()) do
+                                                if Remote:IsA("RemoteEvent") or Remote.Name == "Shoot" or Remote.Name ~= "Charge" then
+                                                    spawn(function()
+                                                        while Attack do
+                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+                                                                end
+                                                            end        
+                                                            wait(0.1)
+                                                            repeat wait() until v.Humanoid.Health <= 0
+                                                        end
+                                                    end)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                end
+                wait(0.1)
+            end
+        elseif Equip_Weapon == "Sword Farm" then
+            moveTo(CFrame.new(-3347.35595703125, -339.0802001953125, -911.8562622070312))
+            wait(0.5)
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                    if v.Name == MobName and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                        spawn(function()
+                            while Attack and v.Humanoid.Health > 0 do
+                                TweenService:Create(player.Character.HumanoidRootPart, TweenInfoClose, {CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)}):Play()
+                                wait(0.1)
+                                repeat wait() until v.Humanoid.Health <= 0
+                            end
+                        end)
+                        spawn(function()
+                            for _, tool in ipairs(Character:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    for _, script in ipairs(tool:GetChildren()) do
+                                        if script:IsA("Script") and script.Name ~= "Client" then
+                                            for _, Remote in ipairs(script:GetChildren()) do
+                                                if Remote:IsA("RemoteEvent") then
+                                                    spawn(function()
+                                                        while Attack do
+                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+                                                                end    
+                                                            end        
+                                                            wait(0.1)
+                                                            repeat wait() until v.Humanoid.Health <= 0
+                                                        end
+                                                    end)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                end
+                wait(0.1)
+            end
+        end
+    end,
+    
+    ["Hiyay Level:90"] = function()
+        local MobName = "Hiei"
+        if Equip_Weapon == "Bow Farm" then
+            airCF = CFrame.new(-3368.590576171875, -170.43431091308594, -981.81591796875) 
+	   		createAirPart()
+            local destination = CFrame.new(-3368.590576171875, -167.43431091308594, -981.81591796875)
+            checkAndMoveTo(destination)
+            wait(0.5)
+            
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                    if v.Name == MobName and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                        spawn(function()
+                            for _, tool in ipairs(Character:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    for _, script in ipairs(tool:GetChildren()) do
+                                        if script:IsA("Script") and script.Name ~= "Client" then
+                                            for _, Remote in ipairs(script:GetChildren()) do
+                                                if Remote:IsA("RemoteEvent") or Remote.Name == "Shoot" or Remote.Name ~= "Charge" then
+                                                    spawn(function()
+                                                        while Attack do
+                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+                                                                end
+                                                            end        
+                                                            wait(0.1)
+                                                            repeat wait() until v.Humanoid.Health <= 0
+                                                        end
+                                                    end)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                end
+                wait(0.1)
+            end
+        elseif Equip_Weapon == "Sword Farm" then
+            moveTo(CFrame.new(-3119.896484375, 463.95001220703125, -1144.848876953125))
+            wait(0.5)
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                    if v.Name == MobName and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                        spawn(function()
+                            while Attack and v.Humanoid.Health > 0 do
+                                TweenService:Create(player.Character.HumanoidRootPart, TweenInfoClose, {CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)}):Play()
+                                wait(0.1)
+                                repeat wait() until v.Humanoid.Health <= 0
+                            end
+                        end)
+                        spawn(function()
+                            for _, tool in ipairs(Character:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    for _, script in ipairs(tool:GetChildren()) do
+                                        if script:IsA("Script") and script.Name ~= "Client" then
+                                            for _, Remote in ipairs(script:GetChildren()) do
+                                                if Remote:IsA("RemoteEvent") then
+                                                    spawn(function()
+                                                        while Attack do
+                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+                                                                end    
+                                                            end        
+                                                            wait(0.1)
+                                                            repeat wait() until v.Humanoid.Health <= 0
+                                                        end
+                                                    end)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                end
+                wait(0.1)
+            end
+        end
+    end,
+    
+    ["Kaze Level:100"] = function()
+        local MobName = "Kaze"
+        if Equip_Weapon == "Bow Farm" then
+            airCF = CFrame.new(-3368.590576171875, -170.43431091308594, -981.81591796875) 
+	   		createAirPart()
+            local destination = CFrame.new(-3368.590576171875, -167.43431091308594, -981.81591796875)
+            checkAndMoveTo(destination)
+            wait(0.5)
+            
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                    if v.Name == MobName and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                        spawn(function()
+                            for _, tool in ipairs(Character:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    for _, script in ipairs(tool:GetChildren()) do
+                                        if script:IsA("Script") and script.Name ~= "Client" then
+                                            for _, Remote in ipairs(script:GetChildren()) do
+                                                if Remote:IsA("RemoteEvent") or Remote.Name == "Shoot" or Remote.Name ~= "Charge" then
+                                                    spawn(function()
+                                                        while Attack do
+                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+                                                                end
+                                                            end        
+                                                            wait(0.1)
+                                                            repeat wait() until v.Humanoid.Health <= 0
+                                                        end
+                                                    end)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                end
+                wait(0.1)
+            end
+        elseif Equip_Weapon == "Sword Farm" then
+            moveTo(CFrame.new(-3393.783447265625, -339.6742248535156, -1576.4881591796875))
+            wait(0.5)
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                    if v.Name == MobName and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                        spawn(function()
+                            while Attack and v.Humanoid.Health > 0 do
+                                TweenService:Create(player.Character.HumanoidRootPart, TweenInfoClose, {CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)}):Play()
+                                wait(0.1)
+                                repeat wait() until v.Humanoid.Health <= 0
+                            end
+                        end)
+                        spawn(function()
+                            for _, tool in ipairs(Character:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    for _, script in ipairs(tool:GetChildren()) do
+                                        if script:IsA("Script") and script.Name ~= "Client" then
+                                            for _, Remote in ipairs(script:GetChildren()) do
+                                                if Remote:IsA("RemoteEvent") then
+                                                    spawn(function()
+                                                        while Attack do
+                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+                                                                end    
+                                                            end        
+                                                            wait(0.1)
+                                                            repeat wait() until v.Humanoid.Health <= 0
+                                                        end
+                                                    end)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                end
+                wait(0.1)
+            end
+        end
+    end,
+    
+    ["Nodryre Level:100"] = function()
+        local MobName = "Nodryre"
+        if Equip_Weapon == "Bow Farm" then
+            airCF = CFrame.new(-3368.590576171875, -170.43431091308594, -981.81591796875) 
+	   		createAirPart()
+            local destination = CFrame.new(-3368.590576171875, -167.43431091308594, -981.81591796875)
+            checkAndMoveTo(destination)
+            wait(0.5)
+            
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                    if v.Name == MobName and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                        spawn(function()
+                            for _, tool in ipairs(Character:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    for _, script in ipairs(tool:GetChildren()) do
+                                        if script:IsA("Script") and script.Name ~= "Client" then
+                                            for _, Remote in ipairs(script:GetChildren()) do
+                                                if Remote:IsA("RemoteEvent") or Remote.Name == "Shoot" or Remote.Name ~= "Charge" then
+                                                    spawn(function()
+                                                        while Attack do
+                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+                                                                end
+                                                            end        
+                                                            wait(0.1)
+                                                            repeat wait() until v.Humanoid.Health <= 0
+                                                        end
+                                                    end)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                end
+                wait(0.1)
+            end
+        elseif Equip_Weapon == "Sword Farm" then
+            moveTo(CFrame.new(231.00592041015625, 120.15098571777344, -203.12843322753906))
+            wait(0.5)
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                    if v.Name == MobName and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                        spawn(function()
+                            while Attack and v.Humanoid.Health > 0 do
+                                TweenService:Create(player.Character.HumanoidRootPart, TweenInfoClose, {CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)}):Play()
+                                wait(0.1)
+                                repeat wait() until v.Humanoid.Health <= 0
+                            end
+                        end)
+                        spawn(function()
+                            for _, tool in ipairs(Character:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    for _, script in ipairs(tool:GetChildren()) do
+                                        if script:IsA("Script") and script.Name ~= "Client" then
+                                            for _, Remote in ipairs(script:GetChildren()) do
+                                                if Remote:IsA("RemoteEvent") then
+                                                    spawn(function()
+                                                        while Attack do
+                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+                                                                end    
+                                                            end        
+                                                            wait(0.1)
+                                                            repeat wait() until v.Humanoid.Health <= 0
+                                                        end
+                                                    end)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                end
+                wait(0.1)
+            end
+        end
+    end,
+    
+    ["Dragon Level:105"] = function()
+        local MobName = "Dragon"
+        if Equip_Weapon == "Bow Farm" then
+            airCF = CFrame.new(-3368.590576171875, -170.43431091308594, -981.81591796875) 
+	   		createAirPart()
+            local destination = CFrame.new(-3368.590576171875, -167.43431091308594, -981.81591796875)
+            checkAndMoveTo(destination)
+            wait(0.5)
+            
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                    if v.Name == MobName and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                        spawn(function()
+                            for _, tool in ipairs(Character:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    for _, script in ipairs(tool:GetChildren()) do
+                                        if script:IsA("Script") and script.Name ~= "Client" then
+                                            for _, Remote in ipairs(script:GetChildren()) do
+                                                if Remote:IsA("RemoteEvent") or Remote.Name == "Shoot" or Remote.Name ~= "Charge" then
+                                                    spawn(function()
+                                                        while Attack do
+                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+                                                                end
+                                                            end        
+                                                            wait(0.1)
+                                                            repeat wait() until v.Humanoid.Health <= 0
+                                                        end
+                                                    end)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                end
+                wait(0.1)
+            end
+        elseif Equip_Weapon == "Sword Farm" then
+            moveTo(CFrame.new(-3228.85302734375, 491.5760192871094, -581.2042846679688))
+            wait(0.5)
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                    if v.Name == MobName and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                        spawn(function()
+                            while Attack and v.Humanoid.Health > 0 do
+                                TweenService:Create(player.Character.HumanoidRootPart, TweenInfoClose, {CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)}):Play()
+                                wait(0.1)
+                                repeat wait() until v.Humanoid.Health <= 0
+                            end
+                        end)
+                        spawn(function()
+                            for _, tool in ipairs(Character:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    for _, script in ipairs(tool:GetChildren()) do
+                                        if script:IsA("Script") and script.Name ~= "Client" then
+                                            for _, Remote in ipairs(script:GetChildren()) do
+                                                if Remote:IsA("RemoteEvent") then
+                                                    spawn(function()
+                                                        while Attack do
+                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+                                                                end    
+                                                            end        
+                                                            wait(0.1)
+                                                            repeat wait() until v.Humanoid.Health <= 0
+                                                        end
+                                                    end)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                end
+                wait(0.1)
+            end
+        end
+    end,
+    
+    ["MichKal Level:150"] = function()
+        local MobName = "Michkal"
+        if Equip_Weapon == "Bow Farm" then
+            airCF = CFrame.new(-3368.590576171875, -170.43431091308594, -981.81591796875) 
+	   		createAirPart()
+            local destination = CFrame.new(-3368.590576171875, -167.43431091308594, -981.81591796875)
+            checkAndMoveTo(destination)
+            wait(0.5)
+            
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                    if v.Name == MobName and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                        spawn(function()
+                            for _, tool in ipairs(Character:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    for _, script in ipairs(tool:GetChildren()) do
+                                        if script:IsA("Script") and script.Name ~= "Client" then
+                                            for _, Remote in ipairs(script:GetChildren()) do
+                                                if Remote:IsA("RemoteEvent") or Remote.Name == "Shoot" or Remote.Name ~= "Charge" then
+                                                    spawn(function()
+                                                        while Attack do
+                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+                                                                end
+                                                            end        
+                                                            wait(0.1)
+                                                            repeat wait() until v.Humanoid.Health <= 0
+                                                        end
+                                                    end)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                end
+                wait(0.1)
+            end
+        elseif Equip_Weapon == "Sword Farm" then
+            moveTo(CFrame.new(-902.2942504882812, 155.3244171142578, -1599.96484375))
+            wait(0.5)
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                    if v.Name == MobName and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                        spawn(function()
+                            while Attack and v.Humanoid.Health > 0 do
+                                TweenService:Create(player.Character.HumanoidRootPart, TweenInfoClose, {CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)}):Play()
+                                wait(0.1)
+                                repeat wait() until v.Humanoid.Health <= 0
+                            end
+                        end)
+                        spawn(function()
+                            for _, tool in ipairs(Character:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    for _, script in ipairs(tool:GetChildren()) do
+                                        if script:IsA("Script") and script.Name ~= "Client" then
+                                            for _, Remote in ipairs(script:GetChildren()) do
+                                                if Remote:IsA("RemoteEvent") then
+                                                    spawn(function()
+                                                        while Attack do
+                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+                                                                end    
+                                                            end        
+                                                            wait(0.1)
+                                                            repeat wait() until v.Humanoid.Health <= 0
+                                                        end
+                                                    end)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                end
+                wait(0.1)
+            end
+        end
+    end,
+    
+    ["Melioofus Level:200"] = function()
+        local MobName = "Melioofus"
+        if Equip_Weapon == "Bow Farm" then
+            airCF = CFrame.new(-3368.590576171875, -170.43431091308594, -981.81591796875) 
+	   		createAirPart()
+            local destination = CFrame.new(-3368.590576171875, -167.43431091308594, -981.81591796875)
+            checkAndMoveTo(destination)
+            wait(0.5)
+            
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                    if v.Name == MobName and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                        spawn(function()
+                            for _, tool in ipairs(Character:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    for _, script in ipairs(tool:GetChildren()) do
+                                        if script:IsA("Script") and script.Name ~= "Client" then
+                                            for _, Remote in ipairs(script:GetChildren()) do
+                                                if Remote:IsA("RemoteEvent") or Remote.Name == "Shoot" or Remote.Name ~= "Charge" then
+                                                    spawn(function()
+                                                        while Attack do
+                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+                                                                end
+                                                            end        
+                                                            wait(0.1)
+                                                            repeat wait() until v.Humanoid.Health <= 0
+                                                        end
+                                                    end)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                end
+                wait(0.1)
+            end
+        elseif Equip_Weapon == "Sword Farm" then
+            moveTo(CFrame.new(-1004.2633056640625, 339.01983642578125, 175.7955322265625))
+            wait(0.5)
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                    if v.Name == MobName and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                        spawn(function()
+                            while Attack and v.Humanoid.Health > 0 do
+                                TweenService:Create(player.Character.HumanoidRootPart, TweenInfoClose, {CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)}):Play()
+                                wait(0.1)
+                                repeat wait() until v.Humanoid.Health <= 0
+                            end
+                        end)
+                        spawn(function()
+                            for _, tool in ipairs(Character:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    for _, script in ipairs(tool:GetChildren()) do
+                                        if script:IsA("Script") and script.Name ~= "Client" then
+                                            for _, Remote in ipairs(script:GetChildren()) do
+                                                if Remote:IsA("RemoteEvent") then
+                                                    spawn(function()
+                                                        while Attack do
+                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+                                                                end    
+                                                            end        
+                                                            wait(0.1)
+                                                            repeat wait() until v.Humanoid.Health <= 0
+                                                        end
+                                                    end)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                end
+                wait(0.1)
+            end
+        end
+    end,
+    
+    ["Kurito Level:333"] = function()
+        local MobName = "Kurito"
+        if Equip_Weapon == "Bow Farm" then
+            airCF = CFrame.new(-3368.590576171875, -170.43431091308594, -981.81591796875) 
+	   		createAirPart()
+            local destination = CFrame.new(-3368.590576171875, -167.43431091308594, -981.81591796875)
+            checkAndMoveTo(destination)
+            wait(0.5)
+            
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                    if v.Name == MobName and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                        spawn(function()
+                            for _, tool in ipairs(Character:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    for _, script in ipairs(tool:GetChildren()) do
+                                        if script:IsA("Script") and script.Name ~= "Client" then
+                                            for _, Remote in ipairs(script:GetChildren()) do
+                                                if Remote:IsA("RemoteEvent") or Remote.Name == "Shoot" or Remote.Name ~= "Charge" then
+                                                    spawn(function()
+                                                        while Attack do
+                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+                                                                end
+                                                            end        
+                                                            wait(0.1)
+                                                            repeat wait() until v.Humanoid.Health <= 0
+                                                        end
+                                                    end)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                end
+                wait(0.1)
+            end
+        elseif Equip_Weapon == "Sword Farm" then
+            moveTo(CFrame.new(-2838.8486328125, -339.6742248535156, -388.2934875488281))
+            wait(0.5)
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                    if v.Name == MobName and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                        spawn(function()
+                            while Attack and v.Humanoid.Health > 0 do
+                                TweenService:Create(player.Character.HumanoidRootPart, TweenInfoClose, {CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)}):Play()
+                                wait(0.1)
+                                repeat wait() until v.Humanoid.Health <= 0
+                            end
+                        end)
+                        spawn(function()
+                            for _, tool in ipairs(Character:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    for _, script in ipairs(tool:GetChildren()) do
+                                        if script:IsA("Script") and script.Name ~= "Client" then
+                                            for _, Remote in ipairs(script:GetChildren()) do
+                                                if Remote:IsA("RemoteEvent") then
+                                                    spawn(function()
+                                                        while Attack do
+                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+                                                                end    
+                                                            end        
+                                                            wait(0.1)
+                                                            repeat wait() until v.Humanoid.Health <= 0
+                                                        end
+                                                    end)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                end
+                wait(0.1)
+            end
+        end
+    end,
+    
+    ["Regulus Level:???"] = function()
+        local MobName = "Regulus"
+        if Equip_Weapon == "Bow Farm" then
+            airCF = CFrame.new(-3368.590576171875, -170.43431091308594, -981.81591796875) 
+	   		createAirPart()
+            local destination = CFrame.new(-3368.590576171875, -167.43431091308594, -981.81591796875)
+            checkAndMoveTo(destination)
+            wait(0.5)
+            
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                    if v.Name == MobName and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                        spawn(function()
+                            for _, tool in ipairs(Character:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    for _, script in ipairs(tool:GetChildren()) do
+                                        if script:IsA("Script") and script.Name ~= "Client" then
+                                            for _, Remote in ipairs(script:GetChildren()) do
+                                                if Remote:IsA("RemoteEvent") or Remote.Name == "Shoot" or Remote.Name ~= "Charge" then
+                                                    spawn(function()
+                                                        while Attack do
+                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+                                                                end
+                                                            end        
+                                                            wait(0.1)
+                                                            repeat wait() until v.Humanoid.Health <= 0
+                                                        end
+                                                    end)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                end
+                wait(0.1)
+            end
+        elseif Equip_Weapon == "Sword Farm" then
+            moveTo(CFrame.new(-2980.464599609375, -339.6742248535156, -396.0430908203125))
+            wait(0.5)
+            while Attack do
+                Get_Item()
+                for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                    if v.Name == MobName and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                        spawn(function()
+                            while Attack and v.Humanoid.Health > 0 do
+                                TweenService:Create(player.Character.HumanoidRootPart, TweenInfoClose, {CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)}):Play()
+                                wait(0.1)
+                                repeat wait() until v.Humanoid.Health <= 0
+                            end
+                        end)
+                        spawn(function()
+                            for _, tool in ipairs(Character:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    for _, script in ipairs(tool:GetChildren()) do
+                                        if script:IsA("Script") and script.Name ~= "Client" then
+                                            for _, Remote in ipairs(script:GetChildren()) do
+                                                if Remote:IsA("RemoteEvent") then
+                                                    spawn(function()
+                                                        while Attack do
+                                                            for _, v in ipairs(Workspace.Mobs:GetChildren()) do
+                                                                if v.Name:match("^" .. MobName) and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                                                                    game:GetService("Players").LocalPlayer.Character[tool.Name][script.Name][Remote.Name]:FireServer(v.HumanoidRootPart.CFrame.Position, 21)
+                                                                end    
+                                                            end        
+                                                            wait(0.1)
+                                                            repeat wait() until v.Humanoid.Health <= 0
+                                                        end
+                                                    end)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                end
+                wait(0.1)
+            end
+        end
+    end,
+    
 }
 
-local M_Monster
+Xlib:MakeDropdown({
+    Name = "Select Weapon",
+    Parent = Tab3,
+    Options = {"Bow Farm", "Sword Farm"},
+    Callback = function(option)
+        Equip_Weapon = option
+    end
+})
 
-local Dropdown = Xlib:MakeDropdown({
+Xlib:MakeDropdown({
     Name = "Select Monsters",
-    Parent = Tab2,
+    Parent = Tab3,
     Options = {
-        "Tanzaknite", "Ronin", "Pharaoh", 
-        "MimicChest", "SeaKing", "AbyssKnight", 
-        "Hiraglacir", "LightningGod", "ChainUser", 
-        "Law", "RottedKnight", "MasterSwordsman",
-        "Nightmare", "PirateHunter", "SorcererSlayer", 
-        "VolcanoCurse"
+        "Bandit Level:2", "Goblin & HobGoblin Level:3-5",
+        "Skeleton Level:15", "DarkStoneKnight Level:25", 
+        "Witch Level:35", "Boar King Level:40", "Golem Level:50",
+        "Plant Beast Level:65", "Elsa Level:75", "Rouge Paladin Level:80",
+        "Ruined Knight Level:85", "Hiyay Level:90", "Kaze Level:100",
+        "Nodryre Level:100", "Dragon Level:105", "MichKal Level:150",
+        "Melioofus Level:200", "Kurito Level:333", "Regulus Level:???"
     },
     Callback = function(option)
-        M_Monster = All_Monster[option]
+        Secret_Monster = All_Monster[option]
     end
 })
 
 Xlib:MakeToggle({
-    Name = "Auto Farm Monsters",
-    Parent = Tab2,
+    Name = "Start Auto Farm",
+    Parent = Tab3,
     Default = false,
     Callback = function(value)
-        BowAttack = value
-        if value and M_Monster then
-            M_Monster()
+        Attack = value
+        if value and Secret_Monster then
+            Secret_Monster()
         else
             removeAirParts()
         end
