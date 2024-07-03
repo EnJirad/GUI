@@ -101,6 +101,17 @@ Xlib:MakeToggle({
     end
 })
 
+local DailyLogin = false
+Xlib:MakeButton({
+    Name = "Daily Login",
+    Parent = Tab1,
+    Callback = function()
+        if DailyLogin then
+            game:GetService("ReplicatedStorage").Remotes.DailyLogin:InvokeServer()
+        end
+    end
+})
+
 -- Teleport Function
 local function TPSMB(destination)
     HumanoidRootPart.Anchored = true
@@ -142,7 +153,6 @@ Xlib:MakeButton({
         end
     end
 })
-
 
 local Tab2 = Xlib:MakeTab({
     Name = "Farm Other",
