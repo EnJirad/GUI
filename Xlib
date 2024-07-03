@@ -1,219 +1,5 @@
 local Xlib = {}
-function Xlib:MakeWindow(config)
-    local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "Xlib_Gui"
-    ScreenGui.Parent = game:GetService("CoreGui")
 
-    local MainFrame = Instance.new("Frame")
-    MainFrame.Size = UDim2.new(0, 400, 0, 350)
-    MainFrame.Position = UDim2.new(0.5, -200, 0.5, -175)
-    MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    MainFrame.BorderSizePixel = 0
-    MainFrame.Active = true
-    MainFrame.Draggable = true
-    MainFrame.Parent = ScreenGui
-
-    local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, 10)
-    UICorner.Parent = MainFrame
-
-    local TitleBar = Instance.new("Frame")
-    TitleBar.Size = UDim2.new(1, 0, 0, 30)
-    TitleBar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    TitleBar.BorderSizePixel = 0
-    TitleBar.Parent = MainFrame
-
-    local TitleLabel = Instance.new("TextLabel")
-    TitleLabel.Size = UDim2.new(1, -60, 1, 0)
-    TitleLabel.Position = UDim2.new(0, 10, 0, 0)
-    TitleLabel.Text = config.Name or "Xlib UI"
-    TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    TitleLabel.BackgroundTransparency = 1
-    TitleLabel.Font = Enum.Font.GothamBold
-    TitleLabel.TextSize = 18
-    TitleLabel.Parent = TitleBar
-
-    local MinimizeButton = Instance.new("TextButton")
-    MinimizeButton.Size = UDim2.new(0, 20, 0, 20)
-    MinimizeButton.Position = UDim2.new(1, -55, 0, 5)
-    MinimizeButton.Text = "<"
-    MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    MinimizeButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-    MinimizeButton.Parent = TitleBar
-
-    local CloseButton = Instance.new("TextButton")
-    CloseButton.Size = UDim2.new(0, 20, 0, 20)
-    CloseButton.Position = UDim2.new(1, -30, 0, 5)
-    CloseButton.Text = "X"
-    CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    CloseButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-    CloseButton.Parent = TitleBar
-
-    local TabFrame = Instance.new("ScrollingFrame")
-    TabFrame.Size = UDim2.new(0, 100, 1, -30)
-    TabFrame.Position = UDim2.new(0, 0, 0, 30)
-    TabFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    TabFrame.BorderSizePixel = 0
-    TabFrame.ScrollBarThickness = 5
-    TabFrame.Parent = MainFrame
-
-    local ContentFrame = Instance.new("ScrollingFrame")
-    ContentFrame.Size = UDim2.new(1, -100, 1, -30)
-    ContentFrame.Position = UDim2.new(0, 100, 0, 30)
-    ContentFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    ContentFrame.BorderSizePixel = 0
-    ContentFrame.ScrollBarThickness = 5
-    ContentFrame.Parent = MainFrame
-
-    -- Create minimized icon
-    local MinimizedIcon = Instance.new("ImageButton")
-    MinimizedIcon.Size = UDim2.new(0, 50, 0, 50)
-    MinimizedIcon.Position = UDim2.new(0, 10, 0, 10)
-    MinimizedIcon.Image = "rbxassetid://18313239545"
-    MinimizedIcon.Visible = false
-    MinimizedIcon.Active = true
-    MinimizedIcon.Draggable = true
-    MinimizedIcon.Parent = ScreenGui
-    
-    -- Minimize and restore functions
-    local function minimizeWindow()
-        MainFrame.Visible = false
-        MinimizedIcon.Visible = true
-    end
-
-    local function restoreWindow()
-        MainFrame.Visible = true
-        MinimizedIcon.Visible = false
-    end
-
-    local function closeWindow()
-        ScreenGui:Destroy()
-    end
-
-    MinimizeButton.MouseButton1Click:Connect(minimizeWindow)
-    MinimizedIcon.MouseButton1Click:Connect(restoreWindow)
-    CloseButton.MouseButton1Click:Connect(closeWindow)
-
-    -- Make minimized icon draggable
-    local dragging
-    local dragInput
-    local dragStart
-    local startPos
-
-    local function update(input)
-        local delta = input.Position - dragStart
-        MinimizedIcon.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-
-    MinimizedIcon.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true
-            dragStart = input.Position
-            startPos = MinimizedIcon.Position
-
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragging = false
-                end
-            end)
-        end
-    end)
-
-    MinimizedIcon.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement then
-            dragInput = input
-        end
-    end)
-
-    game:GetService("UserInputService").InputChanged:Connect(function(input)
-        if input == dragInput and dragging then
-            update(input)
-        end
-    end)
-
-    return {
-        MainFrame = MainFrame,
-        TabFrame = TabFrame,
-        ContentFrame = ContentFrame,
-    }
-end
-
--- Function to create tabs
-function Xlib:MakeTab(config)
-    local TabButton = Instance.new("TextButton")
-    TabButton.Size = UDim2.new(1, 0, 0, 30)
-    TabButton.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    TabButton.Text = config.Name
-    TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    TabButton.Font = Enum.Font.Gotham
-    TabButton.TextSize = 14
-    TabButton.Parent = config.Parent.TabFrame
-
-    local UIListLayout = config.Parent.TabFrame:FindFirstChildOfClass("UIListLayout")
-    if not UIListLayout then
-        UIListLayout = Instance.new("UIListLayout")
-        UIListLayout.Parent = config.Parent.TabFrame
-    end
-
-    local ToggleContainer = Instance.new("Frame")
-    ToggleContainer.Size = UDim2.new(1, 0, 1, 0)
-    ToggleContainer.BackgroundTransparency = 1
-    ToggleContainer.Parent = config.Parent.ContentFrame
-    ToggleContainer.Visible = false
-
-    TabButton.MouseButton1Click:Connect(function()
-        for _, child in pairs(config.Parent.ContentFrame:GetChildren()) do
-            if child:IsA("Frame") then
-                child.Visible = false
-            end
-        end
-        ToggleContainer.Visible = true
-
-        -- Reset the UIListLayout to update with new children
-        UIListLayout:Apply(config.Parent.ContentFrame:GetChildren())
-    end)
-
-    return {
-        ToggleContainer = ToggleContainer
-    }
-end
-
--- Function to create toggles
-function Xlib:MakeToggle(config)
-    local Toggle = Instance.new("Frame")
-    Toggle.Size = UDim2.new(1, -20, 0, 30)
-    Toggle.Position = UDim2.new(0, 10, 0, (#config.Parent.ToggleContainer:GetChildren()) * 40)
-    Toggle.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    Toggle.Parent = config.Parent.ToggleContainer
-
-    local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, 5)
-    UICorner.Parent = Toggle
-    
-    local ToggleButton = Instance.new("ImageButton")
-    ToggleButton.Size = UDim2.new(0, 20, 0, 20)
-    ToggleButton.Position = UDim2.new(1, -30, 0.5, -10)
-    ToggleButton.BackgroundTransparency = 1
-    ToggleButton.Image = "rbxassetid://1831323758" -- Initial icon for off state (assuming white)
-    ToggleButton.Parent = Toggle
-
-    local ToggleLabel = Instance.new("TextLabel")
-    ToggleLabel.Size = UDim2.new(1, -40, 1, 0)
-    ToggleLabel.Position = UDim2.new(0, 10, 0, 0)
-    ToggleLabel.BackgroundTransparency = 1
-    ToggleLabel.Text = config.Name
-    ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    ToggleLabel.Font = Enum.Font.Gotham
-    ToggleLabel.TextSize = 14
-    ToggleLabel.Parent = Toggle
-
-    local toggled = false
-
-    local function updateButtonImage()
-        if toggled then
-            ToggleButton.Image = "rbxassetid://18313244171" -- Icon for on state
-        else
-local Xlib = {}
 function Xlib:MakeWindow(config)
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = "Xlib_Gui"
@@ -251,13 +37,13 @@ function Xlib:MakeWindow(config)
     local MinimizeButton = Instance.new("ImageButton")
     MinimizeButton.Size = UDim2.new(0, 20, 0, 20)
     MinimizeButton.Position = UDim2.new(1, -55, 0, 5)
-    MinimizedIcon.Image = "rbxassetid://18313246206"
+    MinimizeButton.Image = "rbxassetid://18313246206"  -- Placeholder image ID
     MinimizeButton.Parent = TitleBar
     
     local CloseButton = Instance.new("ImageButton")
     CloseButton.Size = UDim2.new(0, 20, 0, 20)
     CloseButton.Position = UDim2.new(1, -30, 0, 5)
-    CloseButton.Image = "rbxassetid://18313234883"
+    CloseButton.Image = "rbxassetid://18313234883"  -- Placeholder image ID
     CloseButton.Parent = TitleBar
     
     local TabFrame = Instance.new("ScrollingFrame")
@@ -280,7 +66,7 @@ function Xlib:MakeWindow(config)
     local MinimizedIcon = Instance.new("ImageButton")
     MinimizedIcon.Size = UDim2.new(0, 50, 0, 50)
     MinimizedIcon.Position = UDim2.new(0, 10, 0, 10)
-    MinimizedIcon.Image = "rbxassetid://18313239545"
+    MinimizedIcon.Image = "rbxassetid://18313239545"  -- Placeholder image ID
     MinimizedIcon.Visible = false
     MinimizedIcon.Active = true
     MinimizedIcon.Draggable = true
@@ -414,121 +200,98 @@ function Xlib:MakeToggle(config)
     ToggleLabel.BackgroundTransparency = 1
     ToggleLabel.Text = config.Name
     ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    ToggleLabel.Font = Enum.Font.Gotham
     ToggleLabel.TextSize = 14
     ToggleLabel.Parent = Toggle
 
-    local toggled = false
+    local function toggle()
+        config.ToggleState = not config.ToggleState
+        ToggleButton.BackgroundColor3 = config.ToggleState and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+        config.Callback(config.ToggleState)
+    end
 
-    ToggleButton.MouseButton1Click:Connect(function()
-        toggled = not toggled
-        if toggled then
-            ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-            if config.Callback then
-                config.Callback(true)
-            end
-        else
-            ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-            if config.Callback then
-                config.Callback(false)
-            end
-        end
-    end)
+    ToggleButton.MouseButton1Click:Connect(toggle)
+
+    return Toggle
 end
 
 -- Function to create buttons
 function Xlib:MakeButton(config)
     local Button = Instance.new("TextButton")
     Button.Size = UDim2.new(1, -20, 0, 30)
-    Button.Position = UDim2.new(0, 10, 0, (#config.Parent.ToggleContainer:GetChildren()) * 40)
-    Button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    Button.Text = config.Name
+    Button.Position = UDim2.new(0, 10, 0, (#config.Parent:GetChildren()) * 40)
+    Button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    Button.Text = config.Name or "Button"
     Button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Button.Font = Enum.Font.Gotham
+    Button.Font = Enum.Font.GothamBold
     Button.TextSize = 14
-    Button.Parent = config.Parent.ToggleContainer
+    Button.Parent = config.Parent
 
     local UICorner = Instance.new("UICorner")
     UICorner.CornerRadius = UDim.new(0, 5)
     UICorner.Parent = Button
 
     Button.MouseButton1Click:Connect(function()
-        if config.Callback then
-            config.Callback()
-        end
+        config.Callback()
     end)
+
+    return Button
 end
 
+-- Function to create dropdowns
 function Xlib:MakeDropdown(config)
-    local Dropdown = Instance.new("Frame")
+    local Dropdown = Instance.new("TextButton")
     Dropdown.Size = UDim2.new(1, -20, 0, 30)
-    Dropdown.Position = UDim2.new(0, 10, 0, (#config.Parent.ToggleContainer:GetChildren()) * 40)
-    Dropdown.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    Dropdown.ZIndex = 1
-    Dropdown.Parent = config.Parent.ToggleContainer
+    Dropdown.Position = UDim2.new(0, 10, 0, (#config.Parent:GetChildren()) * 40)
+    Dropdown.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    Dropdown.Text = config.Name or "Dropdown"
+    Dropdown.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Dropdown.Font = Enum.Font.Gotham
+    Dropdown.TextSize = 14
+    Dropdown.Parent = config.Parent
 
     local UICorner = Instance.new("UICorner")
     UICorner.CornerRadius = UDim.new(0, 5)
     UICorner.Parent = Dropdown
 
-    local DropdownLabel = Instance.new("TextLabel")
-    DropdownLabel.Size = UDim2.new(1, -40, 1, 0)
-    DropdownLabel.Position = UDim2.new(0, 10, 0, 0)
-    DropdownLabel.Text = config.Name
-    DropdownLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    DropdownLabel.BackgroundTransparency = 1
-    DropdownLabel.Font = Enum.Font.Gotham
-    DropdownLabel.TextSize = 14
-    DropdownLabel.ZIndex = 1
-    DropdownLabel.Parent = Dropdown
+    local DropdownIcon = Instance.new("ImageLabel")
+    DropdownIcon.Size = UDim2.new(0, 20, 0, 20)
+    DropdownIcon.Position = UDim2.new(1, -30, 0.5, -10)
+    DropdownIcon.Image = "rbxassetid://18313225342"  -- Placeholder image ID
+    DropdownIcon.Parent = Dropdown
 
-    local DropdownButton = Instance.new("TextButton")
-    DropdownButton.Size = UDim2.new(0, 20, 0, 20)
-    DropdownButton.Position = UDim2.new(1, -30, 0.5, -10)
-    DropdownButton.Text = "v"
-    DropdownButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    DropdownButton.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    DropdownButton.ZIndex = 1
-    DropdownButton.Parent = Dropdown
+    local DropdownMenu = Instance.new("Frame")
+    DropdownMenu.Size = UDim2.new(1, 0, 0, 0)
+    DropdownMenu.Position = UDim2.new(0, 0, 1, 0)
+    DropdownMenu.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+    DropdownMenu.BorderSizePixel = 0
+    DropdownMenu.Parent = Dropdown
 
-    local OptionsFrame = Instance.new("ScrollingFrame")
-    OptionsFrame.Size = UDim2.new(1, 0, 0, math.min(#config.Options * 30, 150)) -- Limit height to 150 pixels
-    OptionsFrame.Position = UDim2.new(0, 0, 1, 0)
-    OptionsFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    OptionsFrame.Visible = false
-    OptionsFrame.ZIndex = 2
-    OptionsFrame.CanvasSize = UDim2.new(0, 0, 0, #config.Options * 30)
-    OptionsFrame.ScrollBarThickness = 5
-    OptionsFrame.Parent = Dropdown
+    local UIListLayout = Instance.new("UIListLayout")
+    UIListLayout.Parent = DropdownMenu
 
-    local function toggleOptions()
-        OptionsFrame.Visible = not OptionsFrame.Visible
+    local function toggleDropdown()
+        DropdownMenu.Size = DropdownMenu.Size.Y.Scale == 0 and UDim2.new(1, 0, 0, UIListLayout.AbsoluteContentSize.Y) or UDim2.new(1, 0, 0, 0)
     end
 
-    DropdownButton.MouseButton1Click:Connect(toggleOptions)
+    Dropdown.MouseButton1Click:Connect(toggleDropdown)
 
-    for i, option in ipairs(config.Options) do
+    for _, option in ipairs(config.Options or {}) do
         local OptionButton = Instance.new("TextButton")
-        OptionButton.Size = UDim2.new(1, -20, 0, 30)
-        OptionButton.Position = UDim2.new(0, 10, 0, (i - 1) * 30)
+        OptionButton.Size = UDim2.new(1, 0, 0, 30)
+        OptionButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
         OptionButton.Text = option
         OptionButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-        OptionButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-        OptionButton.ZIndex = 2
-        OptionButton.Parent = OptionsFrame
+        OptionButton.Font = Enum.Font.Gotham
+        OptionButton.TextSize = 14
+        OptionButton.Parent = DropdownMenu
 
         OptionButton.MouseButton1Click:Connect(function()
-            DropdownLabel.Text = option
             config.Callback(option)
-            OptionsFrame.Visible = false
+            toggleDropdown()
         end)
     end
 
-    return {
-        Dropdown = Dropdown,
-        DropdownButton = DropdownButton,
-        OptionsFrame = OptionsFrame
-    }
+    return Dropdown
 end
 
 return Xlib
