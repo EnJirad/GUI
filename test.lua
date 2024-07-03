@@ -144,7 +144,6 @@ Xlib:MakeButton({
 })
 
 
-
 local Tab2 = Xlib:MakeTab({
     Name = "Farm Other",
     Parent = Window
@@ -564,44 +563,32 @@ Xlib:MakeToggle({
     end
 })
 
-
-
-
-
-
 local Tab3 = Xlib:MakeTab({
     Name = "Farm Mobs",
     Parent = Window
 })
 
--- ฟังก์ชั่นเพื่อรับชื่อมอนสเตอร์ที่ไม่ซ้ำทั้งหมดจาก Workspace.Mobs
 local function getAllMonsterNames()
     local monsterNames = {}
-
     for _, monster in pairs(Workspace.Mobs:GetChildren()) do
         local name = monster.Name
         table.insert(monsterNames, name)
     end
-
     return monsterNames
 end
 
 -- Function to get monster names and count
 local function getMonsterNameCount()
     local monsterCount = {}
-
     for _, monster in pairs(Workspace.Mobs:GetChildren()) do
         local name = monster.Name
         local baseName = name:gsub("%d+$", "")
-
         if not monsterCount[baseName] then
             monsterCount[baseName] = {count = 0, names = {}}
         end
-
         monsterCount[baseName].count = monsterCount[baseName].count + 1
         table.insert(monsterCount[baseName].names, name)
     end
-
     return monsterCount
 end
 
@@ -683,7 +670,6 @@ local function createSpawnBossUI(monsterNames, tabName)
         Container.Size = UDim2.new(1, 0, 0, Container.Size.Y.Offset + UIListLayout.Padding.Offset + 24)
     end
 
-    -- Adjust scrolling to show last monster
     local lastMonster = Container:FindFirstChild("MonsterFrame", true)
     if lastMonster then
         ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, Container.Size.Y.Offset)
@@ -695,7 +681,6 @@ local function refreshUI()
     local monsterCount = getMonsterNameCount()
     local bossMonsterNames = {}
     local allMonsterNames = {}
-
     for baseName, data in pairs(monsterCount) do
         if data.count == 1 then
             table.insert(bossMonsterNames, data.names[1])
@@ -705,24 +690,19 @@ local function refreshUI()
             end
         end
     end
-
     local bossToggleValue = false
     local monsterToggleValue = false
-
     local bossToggle = game:GetService("CoreGui"):FindFirstChild("SpawnBossUI_Boss Monsters")
     if bossToggle then
         bossToggleValue = bossToggle.Visible
     end
-
     local monsterToggle = game:GetService("CoreGui"):FindFirstChild("SpawnBossUI_Monster")
     if monsterToggle then
         monsterToggleValue = monsterToggle.Visible
     end
-
     if bossToggleValue then
         createSpawnBossUI(bossMonsterNames, "Boss Monsters")
     end
-
     if monsterToggleValue then
         createSpawnBossUI(allMonsterNames, "Monster")
     end
@@ -845,6 +825,27 @@ local function removeAirParts()
     AirParts = {}
 end
 
+local AirParts_1 = {}
+local function createAirPart_1()
+    local airPart = Instance.new("Part", Workspace)
+    airPart.Size = Vector3.new(5, 0.5, 5)
+    airPart.Transparency = 0
+    airPart.Anchored = true
+    airPart.Name = "AirPart"
+    table.insert(AirParts, airPart)
+    return airPart
+end
+
+local function removeAirParts_1()
+    for _, part in ipairs(AirParts) do
+        if part then
+            part:Destroy()
+        end
+    end
+    AirParts_1 = {}
+end
+
+
 local function Get_Item()
 	spawn(function()
 	    while Attack do
@@ -878,7 +879,6 @@ local function checkAndMoveTo(destination)
         end
     end)
 end
-
 
 local All_Monster = {
     ["Bandit Level:2"] = function()
@@ -967,7 +967,7 @@ local All_Monster = {
                 wait(0.1)
             end
         end
-    end,
+	end,
 
 	["Goblin & HobGoblin Level:3-5"] = function()
     	local MobNames = {"Goblin", "HobGoblin"}
@@ -1324,7 +1324,7 @@ local All_Monster = {
             end
         end
     end,
-
+    
     ["Boar King Level:40"] = function()
         local MobName = "Boar King"
         if Equip_Weapon == "Bow Farm" then
@@ -1768,9 +1768,9 @@ local All_Monster = {
     ["Ruined Knight Level:85"] = function()
         local MobName = "RuinedKnight"
         if Equip_Weapon == "Bow Farm" then
-            airCF = CFrame.new(-3347.35595703125, -339.0802001953125, -911.8562622070312) 
+            airCF = CFrame.new(-3362.32080078125, -201.86561584472656, -906.3529663085938) 
 	   		createAirPart()
-            local destination = CFrame.new(-3347.35595703125, -339.0802001953125, -911.8562622070312)
+            local destination = CFrame.new(-3362.32080078125, -198.86561584472656, -906.3529663085938)
             checkAndMoveTo(destination)
             wait(0.5)
             
@@ -1808,7 +1808,7 @@ local All_Monster = {
                 wait(0.1)
             end
         elseif Equip_Weapon == "Sword Farm" then
-            moveTo(CFrame.new(-3347.35595703125, -339.0802001953125, -911.8562622070312))
+            moveTo(CFrame.new(-3359.1982421875, -339.08013916015625, -904.0843505859375))
             wait(0.5)
             while Attack do
                 Get_Item()
@@ -1856,9 +1856,9 @@ local All_Monster = {
     ["Hiyay Level:90"] = function()
         local MobName = "Hiei"
         if Equip_Weapon == "Bow Farm" then
-            airCF = CFrame.new(-3368.590576171875, -170.43431091308594, -981.81591796875) 
+            airCF = CFrame.new(-3119.896484375, 463.95001220703125, -1144.848876953125) 
 	   		createAirPart()
-            local destination = CFrame.new(-3368.590576171875, -167.43431091308594, -981.81591796875)
+            local destination = CFrame.new(-3119.896484375, 466.95001220703125, -1144.848876953125)
             checkAndMoveTo(destination)
             wait(0.5)
             
@@ -1944,9 +1944,9 @@ local All_Monster = {
     ["Kaze Level:100"] = function()
         local MobName = "Kaze"
         if Equip_Weapon == "Bow Farm" then
-            airCF = CFrame.new(-3368.590576171875, -170.43431091308594, -981.81591796875) 
+            airCF = CFrame.new(-3391.572265625, -185.09054565429688, -1575.2874755859375) 
 	   		createAirPart()
-            local destination = CFrame.new(-3368.590576171875, -167.43431091308594, -981.81591796875)
+            local destination = CFrame.new(-3391.572265625, -182.09054565429688, -1575.2874755859375)
             checkAndMoveTo(destination)
             wait(0.5)
             
@@ -2032,9 +2032,9 @@ local All_Monster = {
     ["Nodryre Level:100"] = function()
         local MobName = "Nodryre"
         if Equip_Weapon == "Bow Farm" then
-            airCF = CFrame.new(-3368.590576171875, -170.43431091308594, -981.81591796875) 
+            airCF = CFrame.new(231.00592041015625, 120.15098571777344, -203.12843322753906) 
 	   		createAirPart()
-            local destination = CFrame.new(-3368.590576171875, -167.43431091308594, -981.81591796875)
+            local destination = CFrame.new(231.00592041015625, 123.15098571777344, -203.12843322753906)
             checkAndMoveTo(destination)
             wait(0.5)
             
@@ -2116,20 +2116,27 @@ local All_Monster = {
             end
         end
     end,
-    
+        
     ["Dragon Level:105"] = function()
         local MobName = "Dragon"
+        local distance = 10
+        local height = 0
+        
         if Equip_Weapon == "Bow Farm" then
-            airCF = CFrame.new(-3368.590576171875, -170.43431091308594, -981.81591796875) 
-	   		createAirPart()
-            local destination = CFrame.new(-3368.590576171875, -167.43431091308594, -981.81591796875)
-            checkAndMoveTo(destination)
-            wait(0.5)
-            
+        	local airPart = createAirPart_1()
             while Attack do
                 Get_Item()
                 for _, v in ipairs(Workspace.Mobs:GetChildren()) do
                     if v.Name == MobName and v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude <= 5000 then
+                    spawn(function()
+                            while Attack and v.Humanoid.Health > 0 do
+                            local targetPosition = v.HumanoidRootPart.CFrame.Position + v.HumanoidRootPart.CFrame.LookVector * -distance + Vector3.new(0, height, 0)
+                                airPart.CFrame = CFrame.new(targetPosition) * CFrame.new(0, 5, 0)
+                                moveTo(airPart.CFrame)
+                                wait(0.1)
+                                repeat wait() until v.Humanoid.Health <= 0
+                            end
+                        end)
                         spawn(function()
                             for _, tool in ipairs(Character:GetChildren()) do
                                 if tool:IsA("Tool") then
@@ -2208,9 +2215,9 @@ local All_Monster = {
     ["MichKal Level:150"] = function()
         local MobName = "Michkal"
         if Equip_Weapon == "Bow Farm" then
-            airCF = CFrame.new(-3368.590576171875, -170.43431091308594, -981.81591796875) 
+            airCF = CFrame.new(-982.2509155273438, 177.73472595214844, -1793.6485595703125) 
 	   		createAirPart()
-            local destination = CFrame.new(-3368.590576171875, -167.43431091308594, -981.81591796875)
+            local destination = CFrame.new(-982.2509155273438, 180.73472595214844, -1793.6485595703125)
             checkAndMoveTo(destination)
             wait(0.5)
             
@@ -2296,9 +2303,9 @@ local All_Monster = {
     ["Melioofus Level:200"] = function()
         local MobName = "Melioofus"
         if Equip_Weapon == "Bow Farm" then
-            airCF = CFrame.new(-3368.590576171875, -170.43431091308594, -981.81591796875) 
+            airCF = CFrame.new(-833.2517700195312, 484.2136535644531, 223.50010681152344) 
 	   		createAirPart()
-            local destination = CFrame.new(-3368.590576171875, -167.43431091308594, -981.81591796875)
+            local destination = CFrame.new(-833.2517700195312, 487.2136535644531, 223.50010681152344)
             checkAndMoveTo(destination)
             wait(0.5)
             
@@ -2384,9 +2391,9 @@ local All_Monster = {
     ["Kurito Level:333"] = function()
         local MobName = "Kurito"
         if Equip_Weapon == "Bow Farm" then
-            airCF = CFrame.new(-3368.590576171875, -170.43431091308594, -981.81591796875) 
+            airCF = CFrame.new(-2773.451416015625, -229.88571166992188, -362.5797119140625) 
 	   		createAirPart()
-            local destination = CFrame.new(-3368.590576171875, -167.43431091308594, -981.81591796875)
+            local destination = CFrame.new(-2773.451416015625, -226.88571166992188, -362.5797119140625)
             checkAndMoveTo(destination)
             wait(0.5)
             
@@ -2424,7 +2431,7 @@ local All_Monster = {
                 wait(0.1)
             end
         elseif Equip_Weapon == "Sword Farm" then
-            moveTo(CFrame.new(-2838.8486328125, -339.6742248535156, -388.2934875488281))
+            moveTo(CFrame.new(-2773.451416015625, -339.9622497558594, -362.5797119140625))
             wait(0.5)
             while Attack do
                 Get_Item()
@@ -2472,9 +2479,9 @@ local All_Monster = {
     ["Regulus Level:???"] = function()
         local MobName = "Regulus"
         if Equip_Weapon == "Bow Farm" then
-            airCF = CFrame.new(-3368.590576171875, -170.43431091308594, -981.81591796875) 
+            airCF = CFrame.new(-2972.357421875, -229.97445678710938, -340.29730224609375) 
 	   		createAirPart()
-            local destination = CFrame.new(-3368.590576171875, -167.43431091308594, -981.81591796875)
+            local destination = CFrame.new(-2972.357421875, -226.97445678710938, -340.29730224609375)
             checkAndMoveTo(destination)
             wait(0.5)
             
@@ -2512,7 +2519,7 @@ local All_Monster = {
                 wait(0.1)
             end
         elseif Equip_Weapon == "Sword Farm" then
-            moveTo(CFrame.new(-2980.464599609375, -339.6742248535156, -396.0430908203125))
+            moveTo(CFrame.new(-2963.154541015625, -339.9622802734375, -343.052490234375))
             wait(0.5)
             while Attack do
                 Get_Item()
@@ -2595,6 +2602,63 @@ Xlib:MakeToggle({
             Secret_Monster()
         else
             removeAirParts()
+            removeAirParts_1()
+        end
+    end
+})
+
+
+local Tab4 = Xlib:MakeTab({
+    Name = "Magic Farm",
+    Parent = Window
+})
+
+local Tab5 = Xlib:MakeTab({
+    Name = "Other",
+    Parent = Window
+})
+
+
+local function TpLand(destination)
+    HumanoidRootPart.Anchored = true
+    
+    local distance = (destination.Position - HumanoidRootPart.Position).Magnitude
+    local speed = 500
+    local time = distance / speed
+    
+    local tweenInfo = TweenInfo.new(time, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+    local tween = TweenService:Create(HumanoidRootPart, tweenInfo, {CFrame = destination})
+    tween:Play()
+    tween.Completed:Wait()
+    HumanoidRootPart.Anchored = false
+end
+
+local TP_AllLand = {
+    ["First City"] = function() TpLand(CFrame.new(-761.6853637695312, 99.91349029541016, 440.947998046875)) end,
+    ["Floating Island"] = function() TpLand(CFrame.new(-732.0307006835938, 402.58660888671875, -625.8231201171875)) end,
+    ["Castle"] = function() TpLand(CFrame.new(280.6831970214844, 19.368431091308594, -511.48638916015625)) end,
+    ["High Mountain"] = function() TpLand(CFrame.new(-2389.85302734375, 85.94990539550781, -550.436767578125)) end,
+    ["Village"] = function() TpLand(CFrame.new(-1517.326416015625, 0.9699152708053589, -755.0040283203125)) end,
+    ["Forest"] = function() TpLand(CFrame.new(-685.2787475585938, 30.715778350830078, -1542.4014892578125)) end,
+}
+
+local TP_Land
+
+Xlib:MakeDropdown({
+    Name = "Select Market",
+    Parent = Tab5,
+    Options = {"First City", "Floating Island", "Castle", "High Mountain", "Village", "Forest",},
+    Callback = function(option)
+        TP_Land = TP_AllLand[option]
+    end
+})
+
+Xlib:MakeButton({
+    Name = "Click TP",
+    Parent = Tab5,
+    Callback = function()
+        if TP_Land then
+            TP_Land()
         end
     end
 })
