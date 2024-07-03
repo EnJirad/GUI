@@ -200,7 +200,7 @@ function Xlib:MakeToggle(config)
     ToggleButton.Parent = Toggle
 
     local ToggleButtonCorner = Instance.new("UICorner")
-    ToggleButtonCorner.CornerRadius = UDim.new(0, 5)
+    ToggleButtonCorner.CornerRadius = UDim.new(0, 20)
     ToggleButtonCorner.Parent = ToggleButton
 
     local ToggleLabel = Instance.new("TextLabel")
