@@ -1,5 +1,7 @@
 local Xlib = {}
 function Xlib:MakeWindow(config)
+    local DefaultTab = config.DefaultTab or nil -- ใช้ nil เพื่อให้เลือกแท็บแรกในลำดับ
+
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = "Xlib_Gui"
     ScreenGui.Parent = game:GetService("CoreGui")
@@ -133,6 +135,17 @@ function Xlib:MakeWindow(config)
         end
     end)
 
+    -- เลือกแท็บตามลำดับที่สร้างขึ้นมา
+    local firstTab
+    for _, tab in ipairs(config.Tabs) do
+        firstTab = tab
+        break
+    end
+
+    if firstTab then
+        TabFrame.CanvasPosition = Vector2.new(TabFrame.Size.X.Offset * (#config.Tabs - 1), 0)
+    end
+
     return {
         MainFrame = MainFrame,
         TabFrame = TabFrame,
@@ -179,35 +192,6 @@ function Xlib:MakeTab(config)
         ToggleContainer = ToggleContainer
     }
 end
-
-
----- Function to create a section
-function Xlib:MakeSection(config)
-    local SectionFrame = Instance.new("Frame")
-    SectionFrame.Size = UDim2.new(1, -20, 0, 50)  -- Example size
-    SectionFrame.Position = UDim2.new(0, 10, 0, 10)  -- Example position
-    SectionFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    SectionFrame.Parent = config.Parent  -- Parent it under the provided parent
-
-    local TitleLabel = Instance.new("TextLabel")
-    TitleLabel.Size = UDim2.new(1, 0, 0, 20)
-    TitleLabel.Position = UDim2.new(0, 0, 0, 0)
-    TitleLabel.Text = config.Title or "Section Title"
-    TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    TitleLabel.BackgroundTransparency = 1
-    TitleLabel.Font = Enum.Font.GothamBold
-    TitleLabel.TextSize = 16
-    TitleLabel.Parent = SectionFrame
-
-    local ContentFrame = Instance.new("Frame")
-    ContentFrame.Size = UDim2.new(1, 0, 1, -20)
-    ContentFrame.Position = UDim2.new(0, 0, 0, 20)
-    ContentFrame.BackgroundTransparency = 1
-    ContentFrame.Parent = SectionFrame
-
-    return ContentFrame
-end
-
 
 -- Function to create toggles
 function Xlib:MakeToggle(config)
