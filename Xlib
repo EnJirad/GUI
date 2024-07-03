@@ -181,46 +181,33 @@ function Xlib:MakeTab(config)
 end
 
 
--- Function to create a section
+---- Function to create a section
 function Xlib:MakeSection(config)
     local SectionFrame = Instance.new("Frame")
-    SectionFrame.Size = UDim2.new(1, -20, 0, 100)  -- Adjust size as needed
-    SectionFrame.Position = UDim2.new(0, 10, 0, (#config.Parent:GetChildren()) * 110)  -- Adjust position spacing
-    SectionFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)  -- Adjust background color
-    SectionFrame.Parent = config.Parent
+    SectionFrame.Size = UDim2.new(1, -20, 0, 50)  -- Example size
+    SectionFrame.Position = UDim2.new(0, 10, 0, 10)  -- Example position
+    SectionFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    SectionFrame.Parent = config.Parent  -- Parent it under the provided parent
 
-    local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, 5)
-    UICorner.Parent = SectionFrame
-
-    local SectionTitle = Instance.new("TextLabel")
-    SectionTitle.Size = UDim2.new(1, -20, 0, 30)
-    SectionTitle.Position = UDim2.new(0, 10, 0, 0)
-    SectionTitle.Text = config.Title or "Section Title"
-    SectionTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-    SectionTitle.BackgroundTransparency = 1
-    SectionTitle.Font = Enum.Font.GothamBold
-    SectionTitle.TextSize = 14
-    SectionTitle.Parent = SectionFrame
+    local TitleLabel = Instance.new("TextLabel")
+    TitleLabel.Size = UDim2.new(1, 0, 0, 20)
+    TitleLabel.Position = UDim2.new(0, 0, 0, 0)
+    TitleLabel.Text = config.Title or "Section Title"
+    TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TitleLabel.BackgroundTransparency = 1
+    TitleLabel.Font = Enum.Font.GothamBold
+    TitleLabel.TextSize = 16
+    TitleLabel.Parent = SectionFrame
 
     local ContentFrame = Instance.new("Frame")
-    ContentFrame.Size = UDim2.new(1, -20, 1, -30)
-    ContentFrame.Position = UDim2.new(0, 10, 0, 30)
-    ContentFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)  -- Adjust content background color
+    ContentFrame.Size = UDim2.new(1, 0, 1, -20)
+    ContentFrame.Position = UDim2.new(0, 0, 0, 20)
+    ContentFrame.BackgroundTransparency = 1
     ContentFrame.Parent = SectionFrame
 
-    local UIListLayout = Instance.new("UIListLayout")
-    UIListLayout.Parent = ContentFrame
-    UIListLayout.Padding = UDim.new(0, 5)  -- Adjust padding between elements
-    UIListLayout.VerticalAlignment = Enum.VerticalAlignment.Top
-
-    -- Function to add elements to the section
-    function SectionFrame:AddElement(element)
-        element.Parent = ContentFrame
-    end
-
-    return SectionFrame
+    return ContentFrame
 end
+
 
 -- Function to create toggles
 function Xlib:MakeToggle(config)
