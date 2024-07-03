@@ -65,6 +65,7 @@ function Xlib:MakeWindow(config)
     ContentFrame.ScrollBarThickness = 5
     ContentFrame.Parent = MainFrame
 
+    -- Create minimized icon
     local MinimizedIcon = Instance.new("TextButton")
     MinimizedIcon.Size = UDim2.new(0, 50, 0, 50)
     MinimizedIcon.Position = UDim2.new(0, 10, 0, 10)
@@ -76,6 +77,7 @@ function Xlib:MakeWindow(config)
     MinimizedIcon.Draggable = true
     MinimizedIcon.Parent = ScreenGui
 
+    -- Minimize and restore functions
     local function minimizeWindow()
         MainFrame.Visible = false
         MinimizedIcon.Visible = true
@@ -94,6 +96,7 @@ function Xlib:MakeWindow(config)
     MinimizedIcon.MouseButton1Click:Connect(restoreWindow)
     CloseButton.MouseButton1Click:Connect(closeWindow)
 
+    -- Make minimized icon draggable
     local dragging
     local dragInput
     local dragStart
@@ -134,7 +137,6 @@ function Xlib:MakeWindow(config)
         MainFrame = MainFrame,
         TabFrame = TabFrame,
         ContentFrame = ContentFrame,
-        closeWindow = closeWindow  -- Return the closeWindow function
     }
 end
 
@@ -321,5 +323,3 @@ function Xlib:MakeDropdown(config)
 end
 
 return Xlib
-
-
