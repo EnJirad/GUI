@@ -101,7 +101,7 @@ Xlib:MakeToggle({
 
 local DailyLogin = false
 Xlib:MakeButton({
-    Name = "Daily Login",
+    Name = "Login Rewards",
     Parent = Tab1,
     Callback = function()
         if DailyLogin then
