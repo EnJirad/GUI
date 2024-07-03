@@ -2632,7 +2632,7 @@ local function TpLand(destination)
     HumanoidRootPart.Anchored = true
     
     local distance = (destination.Position - HumanoidRootPart.Position).Magnitude
-    local speed = 500
+    local speed =  400
     local time = distance / speed
     
     local tweenInfo = TweenInfo.new(time, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
@@ -2762,4 +2762,3 @@ Xlib:MakeButton({
         end
     end
 }) 
-
