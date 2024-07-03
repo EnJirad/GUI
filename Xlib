@@ -193,15 +193,11 @@ function Xlib:MakeToggle(config)
     UICorner.Parent = Toggle
 
     local ToggleButton = Instance.new("TextButton")
-    ToggleButton.Size = UDim2.new(1, -10, 1, -10)
-    ToggleButton.Position = UDim2.new(0, 5, 0, 5)
+    ToggleButton.Size = UDim2.new(0, 20, 0, 20)
+    ToggleButton.Position = UDim2.new(1, -30, 0.5, -10)
     ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
     ToggleButton.Text = ""
     ToggleButton.Parent = Toggle
-
-    local ToggleButtonCorner = Instance.new("UICorner")
-    ToggleButtonCorner.CornerRadius = UDim.new(0, 5)
-    ToggleButtonCorner.Parent = ToggleButton
 
     local ToggleLabel = Instance.new("TextLabel")
     ToggleLabel.Size = UDim2.new(1, -40, 1, 0)
@@ -218,7 +214,7 @@ function Xlib:MakeToggle(config)
     ToggleButton.MouseButton1Click:Connect(function()
         toggled = not toggled
         if toggled then
-            ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 255)
+            ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
             if config.Callback then
                 config.Callback(true)
             end
@@ -230,7 +226,6 @@ function Xlib:MakeToggle(config)
         end
     end)
 end
-
 
 -- Function to create buttons
 function Xlib:MakeButton(config)
