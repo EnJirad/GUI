@@ -195,7 +195,7 @@ function Xlib:MakeToggle(config)
     local ToggleButton = Instance.new("ImageButton")
     ToggleButton.Size = UDim2.new(0, 20, 0, 20)
     ToggleButton.Position = UDim2.new(1, -30, 0.5, -10)
-    ToggleButton.BackgroundTransparency = 1
+    ToggleButton.BackgroundTransparency = 0
     ToggleButton.Image = "rbxassetid://1831323758" -- Initial icon for off state
     ToggleButton.Parent = Toggle
 
