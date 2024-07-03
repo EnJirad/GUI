@@ -66,17 +66,15 @@ function Xlib:MakeWindow(config)
     ContentFrame.Parent = MainFrame
 
     -- Create minimized icon
-    local MinimizedIcon = Instance.new("TextButton")
+    local MinimizedIcon = Instance.new("ImageButton")
     MinimizedIcon.Size = UDim2.new(0, 50, 0, 50)
     MinimizedIcon.Position = UDim2.new(0, 10, 0, 10)
-    MinimizedIcon.Text = "> XHub <"
-    MinimizedIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
-    MinimizedIcon.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    MinimizedIcon.Image = "rbxassetid://18313239545"
     MinimizedIcon.Visible = false
     MinimizedIcon.Active = true
     MinimizedIcon.Draggable = true
     MinimizedIcon.Parent = ScreenGui
-
+    
     -- Minimize and restore functions
     local function minimizeWindow()
         MainFrame.Visible = false
