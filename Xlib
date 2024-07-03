@@ -196,8 +196,7 @@ function Xlib:MakeToggle(config)
     ToggleButton.Size = UDim2.new(0, 30, 0, 30)
     ToggleButton.Position = UDim2.new(1, -40, 0, 0)
     ToggleButton.BackgroundTransparency = 1
-    ToggleButton.Image = "rbxassetid://1831323758" -- Initial icon for off state
-    ToggleButton.ImageColor3 = Color3.fromRGB(255, 255, 255) -- Icon color set to white
+    ToggleButton.Image = "rbxassetid://1831323758" -- Initial icon for off state (assuming white)
     ToggleButton.Parent = Toggle
 
     local ToggleLabel = Instance.new("TextLabel")
