@@ -2621,3 +2621,145 @@ local Tab4 = Xlib:MakeTab({
     Name = "Magic Farm",
     Parent = Window
 })
+
+local Tab5 = Xlib:MakeTab({
+    Name = "Other",
+    Parent = Window
+})
+
+
+local function TpLand(destination)
+    HumanoidRootPart.Anchored = true
+    
+    local distance = (destination.Position - HumanoidRootPart.Position).Magnitude
+    local speed = 500
+    local time = distance / speed
+    
+    local tweenInfo = TweenInfo.new(time, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+    local tween = TweenService:Create(HumanoidRootPart, tweenInfo, {CFrame = destination})
+    tween:Play()
+    tween.Completed:Wait()
+    HumanoidRootPart.Anchored = false
+end
+
+local TP_AllLand = {
+    ["First City"] = function() TpLand(CFrame.new(-761.6853637695312, 99.91349029541016, 440.947998046875)) end,
+    ["Floating Island"] = function() TpLand(CFrame.new(-732.0307006835938, 402.58660888671875, -625.8231201171875)) end,
+    ["Castle"] = function() TpLand(CFrame.new(280.6831970214844, 19.368431091308594, -511.48638916015625)) end,
+    ["High Mountain"] = function() TpLand(CFrame.new(-2389.85302734375, 85.94990539550781, -550.436767578125)) end,
+    ["Village"] = function() TpLand(CFrame.new(-1517.326416015625, 0.9699152708053589, -755.0040283203125)) end,
+    ["Forest"] = function() TpLand(CFrame.new(-685.2787475585938, 30.715778350830078, -1542.4014892578125)) end,
+}
+
+local TP_Land
+
+Xlib:MakeDropdown({
+    Name = "Select Market",
+    Parent = Tab5,
+    Options = {"First City", "Floating Island", "Castle", "High Mountain", "Village", "Forest",},
+    Callback = function(option)
+        TP_Land = TP_AllLand[option]
+    end
+})
+
+Xlib:MakeButton({
+    Name = "Click TP",
+    Parent = Tab5,
+    Callback = function()
+        if TP_Land then
+            TP_Land()
+        end
+    end
+})
+
+local Refresh = false
+Xlib:MakeButton({
+    Name = "Refresh Script",
+    Parent = Tab5,
+    Callback = function()
+        if Refresh then
+            window.closeWindow()
+            local Game = loadstring(game:HttpGet('https://raw.githubusercontent.com/EnJirad/GUI/main/Main_New.lua'))()  -- Refresh the script
+        end
+    end
+})
+
+
+local FullBright
+Xlib:MakeToggle({
+    Name = "FullBright",
+    Parent = Tab5,
+    Default = false,
+    Callback = function(value)
+        FullBright = value
+        
+        _G.FullBrightEnabled = FullBright
+        if not _G.FullBrightExecuted then
+        _G.FullBrightEnabled = false
+        
+        _G.NormalLightingSettings = {
+			Brightness = game:GetService("Lighting").Brightness,
+			ClockTime = game:GetService("Lighting").ClockTime,
+		}
+        game:GetService("Lighting"):GetPropertyChangedSignal("Brightness"):Connect(function()
+			if game:GetService("Lighting").Brightness ~= 1 and game:GetService("Lighting").Brightness ~= _G.NormalLightingSettings.Brightness then
+				_G.NormalLightingSettings.Brightness = game:GetService("Lighting").Brightness
+				if not _G.FullBrightEnabled then
+					repeat
+						wait()
+					until _G.FullBrightEnabled
+				end
+				game:GetService("Lighting").Brightness = 1
+			end
+		end)
+		
+		game:GetService("Lighting"):GetPropertyChangedSignal("ClockTime"):Connect(function()
+			if game:GetService("Lighting").ClockTime ~= 12 and game:GetService("Lighting").ClockTime ~= _G.NormalLightingSettings.ClockTime then
+				_G.NormalLightingSettings.ClockTime = game:GetService("Lighting").ClockTime
+				if not _G.FullBrightEnabled then
+					repeat
+						wait()
+					until _G.FullBrightEnabled
+				end
+				game:GetService("Lighting").ClockTime = 12
+			end
+		end)
+		game:GetService("Lighting").Brightness = 1
+		game:GetService("Lighting").ClockTime = 12
+		local LatestValue = true
+		spawn(function()
+			repeat
+				wait()
+			until _G.FullBrightEnabled
+			while wait() do
+				if _G.FullBrightEnabled ~= LatestValue then
+					if not _G.FullBrightEnabled then
+						game:GetService("Lighting").Brightness = _G.NormalLightingSettings.Brightness
+						game:GetService("Lighting").ClockTime = _G.NormalLightingSettings.ClockTime
+	
+					else
+						game:GetService("Lighting").Brightness = 1
+						game:GetService("Lighting").ClockTime = 12
+					end
+					LatestValue = not LatestValue
+				end
+			end
+		end)
+	end
+	_G.FullBrightExecuted = true
+end
+})
+
+local Rejoin = false
+Xlib:MakeButton({
+    Name = "Rejoin",
+    Parent = Tab5,
+    Callback = function()
+        if Rejoin then
+            local tpservice = game:GetService("TeleportService")
+            local plr = game.Players.LocalPlayer
+            tpservice:Teleport(game.PlaceId, plr)
+        end
+    end
+}) 
+
