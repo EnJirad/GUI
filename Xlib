@@ -1,7 +1,5 @@
 local Xlib = {}
 function Xlib:MakeWindow(config)
-    local DefaultTab = config.DefaultTab or nil -- ใช้ nil เพื่อให้เลือกแท็บแรกในลำดับ
-
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = "Xlib_Gui"
     ScreenGui.Parent = game:GetService("CoreGui")
@@ -134,17 +132,6 @@ function Xlib:MakeWindow(config)
             update(input)
         end
     end)
-
-    -- เลือกแท็บตามลำดับที่สร้างขึ้นมา
-    local firstTab
-    for _, tab in ipairs(config.Tabs) do
-        firstTab = tab
-        break
-    end
-
-    if firstTab then
-        TabFrame.CanvasPosition = Vector2.new(TabFrame.Size.X.Offset * (#config.Tabs - 1), 0)
-    end
 
     return {
         MainFrame = MainFrame,
@@ -336,5 +323,3 @@ function Xlib:MakeDropdown(config)
 end
 
 return Xlib
-
-
