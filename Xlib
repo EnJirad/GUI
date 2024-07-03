@@ -182,86 +182,48 @@ end
 
 -- Function to create toggles
 function Xlib:MakeToggle(config)
-    -- สร้างเฟรมสำหรับ Toggle
     local Toggle = Instance.new("Frame")
-    Toggle.Size = UDim2.new(1, -20, 0, 30)  -- กำหนดขนาดของเฟรม
-    Toggle.Position = UDim2.new(0, 10, 0, (#config.Parent.ToggleContainer:GetChildren()) * 40)  -- กำหนดตำแหน่งของเฟรม
-    Toggle.BackgroundColor3 = Color3.fromRGB(40, 40, 40)  -- กำหนดสีพื้นหลังของเฟรม
-    Toggle.Parent = config.Parent.ToggleContainer  -- ตั้งค่า parent ของเฟรมเป็น ToggleContainer ที่กำหนดใน config
+    Toggle.Size = UDim2.new(1, -20, 0, 30)
+    Toggle.Position = UDim2.new(0, 10, 0, (#config.Parent.ToggleContainer:GetChildren()) * 40)
+    Toggle.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    Toggle.Parent = config.Parent.ToggleContainer
 
-    -- สร้างมุมโค้งให้กับ Toggle
     local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, 5)  -- กำหนดความโค้งของมุม
-    UICorner.Parent = Toggle  -- ตั้งค่า parent ของ UICorner เป็น Toggle
+    UICorner.CornerRadius = UDim.new(0, 5)
+    UICorner.Parent = Toggle
 
-    -- สร้างปุ่ม Toggle
-    local ToggleButton = Instance.new("TextButton")
-    ToggleButton.Size = UDim2.new(0, 28, 1, -10)  -- กำหนดขนาดของปุ่ม
-    ToggleButton.Position = UDim2.new(1, -35, 0.5, -15)  -- กำหนดตำแหน่งของปุ่ม
-    ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)  -- กำหนดสีพื้นหลังของปุ่ม
-    ToggleButton.Text = ""  -- ตั้งค่าให้ปุ่มไม่มีข้อความ
-    ToggleButton.Parent = Toggle  -- ตั้งค่า parent ของปุ่มเป็น Toggle
+    local ToggleButton = Instance.new("ImageButton")
+    ToggleButton.Size = UDim2.new(0, 20, 0, 20)
+    ToggleButton.Position = UDim2.new(1, -30, 0.5, -10)
+    ToggleButton.BackgroundTransparency = 1
+    ToggleButton.Image = "rbxassetid://1831323758" -- Initial icon for off state
+    ToggleButton.Parent = Toggle
 
-    -- สร้างมุมโค้งให้กับปุ่ม Toggle
-    local ButtonUICorner = Instance.new("UICorner")
-    ButtonUICorner.CornerRadius = UDim.new(0, 5)  -- กำหนดความโค้งของมุมปุ่ม
-    ButtonUICorner.Parent = ToggleButton  -- ตั้งค่า parent ของ ButtonUICorner เป็น ToggleButton
-
-    -- สร้างป้ายชื่อสำหรับ Toggle
     local ToggleLabel = Instance.new("TextLabel")
-    ToggleLabel.Size = UDim2.new(1, -40, 1, 0)  -- กำหนดขนาดของป้ายชื่อ
-    ToggleLabel.Position = UDim2.new(0, 10, 0, 0)  -- กำหนดตำแหน่งของป้ายชื่อ
-    ToggleLabel.BackgroundTransparency = 1  -- กำหนดความโปร่งใสของพื้นหลังป้ายชื่อ
-    ToggleLabel.Text = config.Name  -- ตั้งค่าข้อความของป้ายชื่อจาก config
-    ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)  -- กำหนดสีข้อความเป็นสีขาว
-    ToggleLabel.Font = Enum.Font.Gotham  -- กำหนดฟอนต์ของข้อความ
-    ToggleLabel.TextSize = 14  -- กำหนดขนาดตัวอักษร
-    ToggleLabel.Parent = Toggle  -- ตั้งค่า parent ของป้ายชื่อเป็น Toggle
+    ToggleLabel.Size = UDim2.new(1, -40, 1, 0)
+    ToggleLabel.Position = UDim2.new(0, 10, 0, 0)
+    ToggleLabel.BackgroundTransparency = 1
+    ToggleLabel.Text = config.Name
+    ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ToggleLabel.Font = Enum.Font.Gotham
+    ToggleLabel.TextSize = 14
+    ToggleLabel.Parent = Toggle
 
-    -- สร้างเช็คมาร์คสำหรับ Toggle
-    local Checkmark = Instance.new("Frame")
-    Checkmark.Size = UDim2.new(1, -10, 1, -10)  -- กำหนดขนาดของเช็คมาร์ค
-    Checkmark.Position = UDim2.new(0, 5, 0, 5)  -- กำหนดตำแหน่งของเช็คมาร์ค
-    Checkmark.BackgroundTransparency = 0  -- ตั้งค่าความโปร่งใสของพื้นหลังเช็คมาร์ค
-    Checkmark.Parent = ToggleButton  -- ตั้งค่า parent ของเช็คมาร์คเป็น ToggleButton
+    local toggled = false
 
-    local CheckmarkImage = Instance.new("ImageLabel")
-    CheckmarkImage.Size = UDim2.new(1, 0, 1, 0)  -- กำหนดขนาดของรูปภาพเช็คมาร์ค
-    CheckmarkImage.Position = UDim2.new(0, 0, 0, 0)  -- กำหนดตำแหน่งของรูปภาพเช็คมาร์ค
-    CheckmarkImage.BackgroundTransparency = 1  -- ตั้งค่าความโปร่งใสของพื้นหลังรูปภาพเช็คมาร์ค
-    
-    -- ตรวจสอบสถานะเริ่มต้นเพื่อกำหนดรูปภาพเช็คมาร์ค
-    if config.InitialState then
-        CheckmarkImage.Image = "rbxassetid://18313244171"  -- ตั้งค่ารูปภาพเช็คมาร์คเป็น Asset ID เมื่อเปิด
-        ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)  -- เปลี่ยนสีปุ่มเป็นสีเขียวถ้าถูกเปิด
-    else
-        CheckmarkImage.Image = "rbxassetid://1831323758"  -- ตั้งค่ารูปภาพเช็คมาร์คเป็น Asset ID เมื่อปิด
-        ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)  -- เปลี่ยนสีปุ่มเป็นสีแดงถ้าถูกปิด
-    end
-    
-    CheckmarkImage.ImageColor3 = Color3.fromRGB(0, 255, 0)  -- กำหนดสีของรูปภาพเช็คมาร์ค
-    CheckmarkImage.Visible = config.InitialState or false  -- ตั้งค่าให้รูปภาพเช็คมาร์คแสดงหรือซ่อนตามสถานะเริ่มต้น
-    CheckmarkImage.Parent = Checkmark  -- ตั้งค่า parent ของรูปภาพเช็คมาร์คเป็น Checkmark
-
-    local toggled = config.InitialState or false  -- สร้างตัวแปรสำหรับเก็บสถานะการเปิดปิดของปุ่ม
-
-    -- กำหนดฟังก์ชันเมื่อปุ่ม Toggle ถูกกด
-    ToggleButton.MouseButton1Click:Connect(function()
-        toggled = not toggled  -- เปลี่ยนสถานะการเปิดปิดของปุ่ม
+    local function updateButtonImage()
         if toggled then
-            ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)  -- เปลี่ยนสีปุ่มเป็นสีเขียวถ้าถูกเปิด
-            CheckmarkImage.Image = "rbxassetid://18313244171"  -- เปลี่ยนรูปภาพเช็คมาร์คเป็น Asset ID เมื่อเปิด
-            CheckmarkImage.Visible = true  -- แสดงรูปภาพเช็คมาร์ค
-            if config.Callback then
-                config.Callback(true)  -- เรียกใช้ Callback ถ้ามีการกำหนดใน config
-            end
+            ToggleButton.Image = "rbxassetid://18313244171" -- Icon for on state
         else
-            ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)  -- เปลี่ยนสีปุ่มเป็นสีแดงถ้าถูกปิด
-            CheckmarkImage.Image = "rbxassetid://1831323758"  -- เปลี่ยนรูปภาพเช็คมาร์คเป็น Asset ID เมื่อปิด
-            CheckmarkImage.Visible = false  -- ซ่อนรูปภาพเช็คมาร์ค
-            if config.Callback then
-                config.Callback(false)  -- เรียกใช้ Callback ถ้ามีการกำหนดใน config
-            end
+            ToggleButton.Image = "rbxassetid://1831323758" -- Icon for off state
+        end
+    end
+
+    ToggleButton.MouseButton1Click:Connect(function()
+        toggled = not toggled
+        updateButtonImage()
+        if config.Callback then
+            config.Callback(toggled)
         end
     end)
 end
