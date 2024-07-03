@@ -193,16 +193,17 @@ function Xlib:MakeToggle(config)
     UICorner.Parent = Toggle
 
     local ToggleButton = Instance.new("ImageButton")
-    ToggleButton.Size = UDim2.new(0, 20, 0, 20)
-    ToggleButton.Position = UDim2.new(1, -30, 0.5, -10)
-    ToggleButton.BackgroundTransparency = 0
+    ToggleButton.Size = UDim2.new(0, 30, 0, 30)
+    ToggleButton.Position = UDim2.new(1, -40, 0, 0)
+    ToggleButton.BackgroundTransparency = 1
     ToggleButton.Image = "rbxassetid://1831323758" -- Initial icon for off state
+    ToggleButton.ImageColor3 = Color3.fromRGB(255, 255, 255) -- Icon color set to white
     ToggleButton.Parent = Toggle
 
     local ToggleLabel = Instance.new("TextLabel")
     ToggleLabel.Size = UDim2.new(1, -40, 1, 0)
     ToggleLabel.Position = UDim2.new(0, 10, 0, 0)
-    ToggleLabel.BackgroundTransparency = 0
+    ToggleLabel.BackgroundTransparency = 1
     ToggleLabel.Text = config.Name
     ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     ToggleLabel.Font = Enum.Font.Gotham
@@ -227,6 +228,7 @@ function Xlib:MakeToggle(config)
         end
     end)
 end
+
 
 
 -- Function to create buttons
