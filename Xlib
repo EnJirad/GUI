@@ -213,20 +213,228 @@ function Xlib:MakeToggle(config)
         if toggled then
             ToggleButton.Image = "rbxassetid://18313244171" -- Icon for on state
         else
-            ToggleButton.Image = "rbxassetid://1831323758" -- Icon for off state
-        end
+local Xlib = {}
+function Xlib:MakeWindow(config)
+    local ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.Name = "Xlib_Gui"
+    ScreenGui.Parent = game:GetService("CoreGui")
+
+    local MainFrame = Instance.new("Frame")
+    MainFrame.Size = UDim2.new(0, 400, 0, 350)
+    MainFrame.Position = UDim2.new(0.5, -200, 0.5, -175)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    MainFrame.BorderSizePixel = 0
+    MainFrame.Active = true
+    MainFrame.Draggable = true
+    MainFrame.Parent = ScreenGui
+
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 10)
+    UICorner.Parent = MainFrame
+
+    local TitleBar = Instance.new("Frame")
+    TitleBar.Size = UDim2.new(1, 0, 0, 30)
+    TitleBar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    TitleBar.BorderSizePixel = 0
+    TitleBar.Parent = MainFrame
+
+    local TitleLabel = Instance.new("TextLabel")
+    TitleLabel.Size = UDim2.new(1, -60, 1, 0)
+    TitleLabel.Position = UDim2.new(0, 10, 0, 0)
+    TitleLabel.Text = config.Name or "Xlib UI"
+    TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TitleLabel.BackgroundTransparency = 1
+    TitleLabel.Font = Enum.Font.GothamBold
+    TitleLabel.TextSize = 18
+    TitleLabel.Parent = TitleBar
+
+    local MinimizeButton = Instance.new("ImageButton")
+    MinimizeButton.Size = UDim2.new(0, 20, 0, 20)
+    MinimizeButton.Position = UDim2.new(1, -55, 0, 5)
+    MinimizedIcon.Image = "rbxassetid://18313246206"
+    MinimizeButton.Parent = TitleBar
+    
+    local CloseButton = Instance.new("ImageButton")
+    CloseButton.Size = UDim2.new(0, 20, 0, 20)
+    CloseButton.Position = UDim2.new(1, -30, 0, 5)
+    CloseButton.Image = "rbxassetid://18313234883"
+    CloseButton.Parent = TitleBar
+    
+    local TabFrame = Instance.new("ScrollingFrame")
+    TabFrame.Size = UDim2.new(0, 100, 1, -30)
+    TabFrame.Position = UDim2.new(0, 0, 0, 30)
+    TabFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    TabFrame.BorderSizePixel = 0
+    TabFrame.ScrollBarThickness = 5
+    TabFrame.Parent = MainFrame
+
+    local ContentFrame = Instance.new("ScrollingFrame")
+    ContentFrame.Size = UDim2.new(1, -100, 1, -30)
+    ContentFrame.Position = UDim2.new(0, 100, 0, 30)
+    ContentFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    ContentFrame.BorderSizePixel = 0
+    ContentFrame.ScrollBarThickness = 5
+    ContentFrame.Parent = MainFrame
+
+    -- Create minimized icon
+    local MinimizedIcon = Instance.new("ImageButton")
+    MinimizedIcon.Size = UDim2.new(0, 50, 0, 50)
+    MinimizedIcon.Position = UDim2.new(0, 10, 0, 10)
+    MinimizedIcon.Image = "rbxassetid://18313239545"
+    MinimizedIcon.Visible = false
+    MinimizedIcon.Active = true
+    MinimizedIcon.Draggable = true
+    MinimizedIcon.Parent = ScreenGui
+    
+    -- Minimize and restore functions
+    local function minimizeWindow()
+        MainFrame.Visible = false
+        MinimizedIcon.Visible = true
     end
+
+    local function restoreWindow()
+        MainFrame.Visible = true
+        MinimizedIcon.Visible = false
+    end
+
+    local function closeWindow()
+        ScreenGui:Destroy()
+    end
+
+    MinimizeButton.MouseButton1Click:Connect(minimizeWindow)
+    MinimizedIcon.MouseButton1Click:Connect(restoreWindow)
+    CloseButton.MouseButton1Click:Connect(closeWindow)
+
+    -- Make minimized icon draggable
+    local dragging
+    local dragInput
+    local dragStart
+    local startPos
+
+    local function update(input)
+        local delta = input.Position - dragStart
+        MinimizedIcon.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+
+    MinimizedIcon.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = MinimizedIcon.Position
+
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    MinimizedIcon.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            dragInput = input
+        end
+    end)
+
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            update(input)
+        end
+    end)
+
+    return {
+        MainFrame = MainFrame,
+        TabFrame = TabFrame,
+        ContentFrame = ContentFrame,
+    }
+end
+
+-- Function to create tabs
+function Xlib:MakeTab(config)
+    local TabButton = Instance.new("TextButton")
+    TabButton.Size = UDim2.new(1, 0, 0, 30)
+    TabButton.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    TabButton.Text = config.Name
+    TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TabButton.Font = Enum.Font.Gotham
+    TabButton.TextSize = 14
+    TabButton.Parent = config.Parent.TabFrame
+
+    local UIListLayout = config.Parent.TabFrame:FindFirstChildOfClass("UIListLayout")
+    if not UIListLayout then
+        UIListLayout = Instance.new("UIListLayout")
+        UIListLayout.Parent = config.Parent.TabFrame
+    end
+
+    local ToggleContainer = Instance.new("Frame")
+    ToggleContainer.Size = UDim2.new(1, 0, 1, 0)
+    ToggleContainer.BackgroundTransparency = 1
+    ToggleContainer.Parent = config.Parent.ContentFrame
+    ToggleContainer.Visible = false
+
+    TabButton.MouseButton1Click:Connect(function()
+        for _, child in pairs(config.Parent.ContentFrame:GetChildren()) do
+            if child:IsA("Frame") then
+                child.Visible = false
+            end
+        end
+        ToggleContainer.Visible = true
+
+        -- Reset the UIListLayout to update with new children
+        UIListLayout:Apply(config.Parent.ContentFrame:GetChildren())
+    end)
+
+    return {
+        ToggleContainer = ToggleContainer
+    }
+end
+
+-- Function to create toggles
+function Xlib:MakeToggle(config)
+    local Toggle = Instance.new("Frame")
+    Toggle.Size = UDim2.new(1, -20, 0, 30)
+    Toggle.Position = UDim2.new(0, 10, 0, (#config.Parent.ToggleContainer:GetChildren()) * 40)
+    Toggle.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    Toggle.Parent = config.Parent.ToggleContainer
+
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 5)
+    UICorner.Parent = Toggle
+
+    local ToggleButton = Instance.new("TextButton")
+    ToggleButton.Size = UDim2.new(0, 20, 0, 20)
+    ToggleButton.Position = UDim2.new(1, -30, 0.5, -10)
+    ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    ToggleButton.Text = ""
+    ToggleButton.Parent = Toggle
+
+    local ToggleLabel = Instance.new("TextLabel")
+    ToggleLabel.Size = UDim2.new(1, -40, 1, 0)
+    ToggleLabel.Position = UDim2.new(0, 10, 0, 0)
+    ToggleLabel.BackgroundTransparency = 1
+    ToggleLabel.Text = config.Name
+    ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ToggleLabel.Font = Enum.Font.Gotham
+    ToggleLabel.TextSize = 14
+    ToggleLabel.Parent = Toggle
+
+    local toggled = false
 
     ToggleButton.MouseButton1Click:Connect(function()
         toggled = not toggled
-        updateButtonImage()
-        if config.Callback then
-            config.Callback(toggled)
+        if toggled then
+            ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+            if config.Callback then
+                config.Callback(true)
+            end
+        else
+            ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+            if config.Callback then
+                config.Callback(false)
+            end
         end
     end)
 end
-
-
 
 -- Function to create buttons
 function Xlib:MakeButton(config)
