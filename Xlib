@@ -228,18 +228,15 @@ function Xlib:MakeToggle(config)
     local CheckmarkImage = Instance.new("ImageLabel")
     CheckmarkImage.Size = UDim2.new(1, 0, 1, 0)  -- กำหนดขนาดของรูปภาพเช็คมาร์ค
     CheckmarkImage.Position = UDim2.new(0, 0, 0, 0)  -- กำหนดตำแหน่งของรูปภาพเช็คมาร์ค
-    CheckmarkImage.BackgroundTransparency = 1  -- ตั้งค่าความโปร่งใสของพื้นหลังรูปภาพเช็คมาร์ค
+    CheckmarkImage.BackgroundTransparency = 0  -- ตั้งค่าความโปร่งใสของพื้นหลังรูปภาพเช็คมาร์ค
     
     -- ตรวจสอบสถานะเริ่มต้นเพื่อกำหนดรูปภาพเช็คมาร์ค
     if config.InitialState then
         CheckmarkImage.Image = "rbxassetid://18313244171"  -- ตั้งค่ารูปภาพเช็คมาร์คเป็น Asset ID เมื่อเปิด
-        ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)  -- เปลี่ยนสีปุ่มเป็นสีเขียวถ้าถูกเปิด
     else
         CheckmarkImage.Image = "rbxassetid://1831323758"  -- ตั้งค่ารูปภาพเช็คมาร์คเป็น Asset ID เมื่อปิด
-        ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)  -- เปลี่ยนสีปุ่มเป็นสีแดงถ้าถูกปิด
     end
     
-    CheckmarkImage.ImageColor3 = Color3.fromRGB(0, 255, 0)  -- กำหนดสีของรูปภาพเช็คมาร์ค
     CheckmarkImage.Visible = config.InitialState or false  -- ตั้งค่าให้รูปภาพเช็คมาร์คแสดงหรือซ่อนตามสถานะเริ่มต้น
     CheckmarkImage.Parent = Checkmark  -- ตั้งค่า parent ของรูปภาพเช็คมาร์คเป็น Checkmark
 
@@ -249,14 +246,12 @@ function Xlib:MakeToggle(config)
     ToggleButton.MouseButton1Click:Connect(function()
         toggled = not toggled  -- เปลี่ยนสถานะการเปิดปิดของปุ่ม
         if toggled then
-            ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)  -- เปลี่ยนสีปุ่มเป็นสีเขียวถ้าถูกเปิด
             CheckmarkImage.Image = "rbxassetid://18313244171"  -- เปลี่ยนรูปภาพเช็คมาร์คเป็น Asset ID เมื่อเปิด
             CheckmarkImage.Visible = true  -- แสดงรูปภาพเช็คมาร์ค
             if config.Callback then
                 config.Callback(true)  -- เรียกใช้ Callback ถ้ามีการกำหนดใน config
             end
         else
-            ToggleButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)  -- เปลี่ยนสีปุ่มเป็นสีแดงถ้าถูกปิด
             CheckmarkImage.Image = "rbxassetid://1831323758"  -- เปลี่ยนรูปภาพเช็คมาร์คเป็น Asset ID เมื่อปิด
             CheckmarkImage.Visible = false  -- ซ่อนรูปภาพเช็คมาร์ค
             if config.Callback then
