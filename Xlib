@@ -137,6 +137,7 @@ function Xlib:MakeWindow(config)
         MainFrame = MainFrame,
         TabFrame = TabFrame,
         ContentFrame = ContentFrame,
+        closeWindow = closeWindow,
     }
 end
 
