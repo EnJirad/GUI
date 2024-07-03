@@ -2678,7 +2678,6 @@ Xlib:MakeButton({
     Parent = Tab5,
     Callback = function()
         if Refresh then
-            window.closeWindow()
             local Game = loadstring(game:HttpGet('https://raw.githubusercontent.com/EnJirad/GUI/main/Main_New.lua'))()  -- Refresh the script
         end
     end
