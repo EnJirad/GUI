@@ -37,7 +37,7 @@ function Xlib:MakeWindow(config)
     local MinimizeButton = Instance.new("ImageButton")
     MinimizeButton.Size = UDim2.new(0, 20, 0, 20)
     MinimizeButton.Position = UDim2.new(1, -55, 0, 5)
-    MinimizeButton.Image = "rbxassetid://18313246206"  -- Placeholder image ID
+    MinimizeButton.Image = "rbxassetid://13907035327"  -- Placeholder image ID
     MinimizeButton.Parent = TitleBar
     
     local CloseButton = Instance.new("ImageButton")
