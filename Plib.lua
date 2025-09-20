@@ -1134,3 +1134,5 @@ function PixelLib:CreateGui(config)
 
     return TabControls
 end
+
+return PixelLib
