@@ -461,7 +461,7 @@ function PixelLib:CreateGui(config)
     local TabDivider = Instance.new("Frame")
     TabDivider.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     TabDivider.BackgroundTransparency = 0.85
-    TabDivider.Position = UDim2.new(0.5, 0, 0, 38)
+    TabDivider.Position = UDim2.new(0, 0, 0, 38)
     TabDivider.Size = UDim2.new(1, 0, 0, 1)
     TabDivider.Parent = MainFrame
 
