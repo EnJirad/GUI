@@ -29,7 +29,7 @@ local ClientDataSnapshot = require(ReplicatedStorage.ClientSource.Systems.Client
 local MagnetBoxData = require(ReplicatedStorage.Source.Data.MagnetBoxData)
 local Network = require(ReplicatedStorage.Source.Network)
 
-local guf = false
+local guf = true
 MovementSection:AddToggle({
     Name = "GUI FrostByte",
     Default = guf,
@@ -120,7 +120,7 @@ MovementSection:AddToggle({
                         Color = Color3.fromRGB(255, 0, 0)
                     })
                 end
-                wait(60)
+                wait(180)
             end
         end
     end
