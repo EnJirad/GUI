@@ -1023,24 +1023,6 @@ function PixelLib:CreateGui(config)
                 DropdownOverlay.Visible = false
                 DropdownOverlay.Parent = ContentContainer
 
-                local OverlayShadowHolder = Instance.new("Frame")
-                OverlayShadowHolder.BackgroundTransparency = 1
-                OverlayShadowHolder.Size = UDim2.new(1, 0, 1, 0)
-                OverlayShadowHolder.ZIndex = 0
-                OverlayShadowHolder.Parent = DropdownOverlay
-
-                local OverlayShadow = Instance.new("ImageLabel")
-                OverlayShadow.Image = "rbxassetid://6015897843"
-                OverlayShadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
-                OverlayShadow.ImageTransparency = 0.5
-                OverlayShadow.ScaleType = Enum.ScaleType.Slice
-                OverlayShadow.SliceCenter = Rect.new(49, 49, 450, 450)
-                OverlayShadow.BackgroundTransparency = 1
-                OverlayShadow.Position = UDim2.new(0.5, 0, 0.5, 0)
-                OverlayShadow.Size = UDim2.new(1, 35, 1, 35)
-                OverlayShadow.ZIndex = 0
-                OverlayShadow.Parent = OverlayShadowHolder
-
                 local OverlayCorner = Instance.new("UICorner", DropdownOverlay)
 
                 local OverlayButton = Instance.new("TextButton")
@@ -1064,14 +1046,14 @@ function PixelLib:CreateGui(config)
 
                 local DropdownStroke = Instance.new("UIStroke")
                 DropdownStroke.Color = Color3.fromRGB(255, 255, 255)
-                DropdownStroke.Thickness = 2.5
+                DropdownStroke.Thickness = 2
                 DropdownStroke.Transparency = 0.8
                 DropdownStroke.Parent = DropdownFrame
 
                 local DropdownContent = Instance.new("Frame")
                 DropdownContent.BackgroundTransparency = 1
-                DropdownContent.Position = UDim2.new(0.5, 0, 0.5, 0)
-                DropdownContent.Size = UDim2.new(1, -10, 1, -10)
+                DropdownContent.Position = UDim2.new(0, 0, 0, 0)
+                DropdownContent.Size = UDim2.new(1, 0, 1, 0)
                 DropdownContent.Parent = DropdownFrame
 
                 local OptionList = Instance.new("ScrollingFrame")
@@ -1152,5 +1134,3 @@ function PixelLib:CreateGui(config)
 
     return TabControls
 end
-
-return PixelLib
