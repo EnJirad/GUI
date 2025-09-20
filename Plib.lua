@@ -843,21 +843,25 @@ function PixelLib:CreateGui(config)
                 IndicatorCorner.Parent = ToggleIndicator
 
                 local isToggled = toggleConfig.Default
-                -- เรียก Callback ทันทีเมื่อเริ่มต้นถ้า Default = true
+                -- เรียก Callback แบบ Asynchronous เมื่อเริ่มต้นถ้า Default = true
                 if isToggled then
-                    toggleConfig.Callback(isToggled)
+                    task.spawn(function()
+                        toggleConfig.Callback(isToggled)
+                    end)
                 end
 
                 ToggleButton.MouseButton1Click:Connect(function()
                     isToggled = not isToggled
                     TweenService:Create(ToggleIndicator, TWEEN_INFO, { BackgroundColor3 = isToggled and guiConfig.Color or Color3.fromRGB(80, 80, 80) }):Play()
-                    toggleConfig.Callback(isToggled)
+                    task.spawn(function()
+                        toggleConfig.Callback(isToggled)
+                    end)
                 end)
 
                 UpdateSectionSize()
                 return ToggleButton
             end
-
+            
             function ElementControls:AddSlider(config)
                 local sliderConfig = config or {}
                 sliderConfig.Name = sliderConfig.Name or "Slider"
