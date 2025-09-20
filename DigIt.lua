@@ -29,11 +29,13 @@ local ClientDataSnapshot = require(ReplicatedStorage.ClientSource.Systems.Client
 local MagnetBoxData = require(ReplicatedStorage.Source.Data.MagnetBoxData)
 local Network = require(ReplicatedStorage.Source.Network)
 
+local guf = false
 MovementSection:AddToggle({
     Name = "GUI FrostByte",
-    Default = true,
+    Default = guf,
     Callback = function(state)
-        if state then
+        guf = state
+        if guf then
             local success, err = pcall(function()
                 loadstring(game:HttpGet("https://rawscripts.net/raw/SECRETS-Dig-it-V2-AUTO-FARM-GUI-29-FEATURES-27327"))()
             end)
@@ -57,12 +59,14 @@ MovementSection:AddToggle({
 })
 
 -- ===== Open Magnet Box =====
+local mg = true
 MovementSection:AddToggle({
     Name = "เปิดกล่องแม่เหล็ก",
-    Default = true,
+    Default = mg,
     Callback = function(state)
-        if state then
-            while state do
+        mg = state
+        if mg then
+            while mg do
                 local success, err = pcall(function()
                     local inventory = ClientDataSnapshot.Get("Inventory")
                     local magnetIndexes = {}
@@ -95,13 +99,15 @@ MovementSection:AddToggle({
 })
 
 -- ===== Withdraw From Pet =====
+local gp = true
 MovementSection:AddToggle({
     Name = "เก็บของ จากสัตว์เลี้ยง",
-    Default = true,
+    Default = gp,
     Callback = function(state)
-        if state then
+        gp = state
+        if gp then
             local petRemote = ReplicatedStorage:WaitForChild("RemoteEvents"):WaitForChild("WithdrawFromPet")
-            while state do
+            while gp do
                 local success, err = pcall(function()
                     petRemote:FireServer()
                     print("WithdrawFromPet fired ✅")
