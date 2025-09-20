@@ -120,7 +120,7 @@ MovementSection:AddToggle({
                         Color = Color3.fromRGB(255, 0, 0)
                     })
                 end
-                wait(180)
+                wait(60)
             end
         end
     end
