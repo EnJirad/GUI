@@ -71,84 +71,35 @@ end
 
 local ToggleButton = CreateToggleButton()
 
--- Function to enable dragging and resizing
-local function EnableDragAndResize(topBar, frame)
-    local function EnableDragging(dragTarget, dragFrame)
-        local isDragging = false
-        local dragStart = nil
-        local startPos = nil
+-- Function to enable dragging
+local function EnableDragging(topBar, frame)
+    local isDragging = false
+    local dragStart = nil
+    local startPos = nil
 
-        local function UpdateDragPosition(input)
-            local delta = input.Position - dragStart
-            dragFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-        end
-
-        dragTarget.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                isDragging = true
-                dragStart = input.Position
-                startPos = dragFrame.Position
-                input.Changed:Connect(function()
-                    if input.UserInputState == Enum.UserInputState.End then
-                        isDragging = false
-                    end
-                end)
-            end
-        end)
-
-        dragTarget.InputChanged:Connect(function(input)
-            if isDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-                UpdateDragPosition(input)
-            end
-        end)
+    local function UpdateDragPosition(input)
+        local delta = input.Position - dragStart
+        frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
     end
 
-    local function EnableResizing(resizeFrame)
-        local isResizing = false
-        local startPos = nil
-        local minWidth = math.max(resizeFrame.Size.X.Offset, 400)
-        local minHeight = minWidth - 100
-
-        local ResizeCorner = Instance.new("Frame")
-        ResizeCorner.AnchorPoint = Vector2.new(1, 1)
-        ResizeCorner.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        ResizeCorner.BackgroundTransparency = 0.999
-        ResizeCorner.BorderSizePixel = 0
-        ResizeCorner.Position = UDim2.new(1, 20, 1, 20)
-        ResizeCorner.Size = UDim2.new(0, 40, 0, 40)
-        ResizeCorner.Name = "ResizeCorner"
-        ResizeCorner.Parent = resizeFrame
-
-        local function UpdateSize(input)
-            local delta = input.Position - startPos
-            local newWidth = math.max(minWidth, startPos.X.Offset + delta.X)
-            local newHeight = math.max(minHeight, startPos.Y.Offset + delta.Y)
-            TweenService:Create(resizeFrame, TweenInfo.new(0.2), {
-                Size = UDim2.new(0, newWidth, 0, newHeight)
-            }):Play()
+    topBar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            isDragging = true
+            dragStart = input.Position
+            startPos = frame.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    isDragging = false
+                end
+            end)
         end
+    end)
 
-        ResizeCorner.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                isResizing = true
-                startPos = input.Position
-                input.Changed:Connect(function()
-                    if input.UserInputState == Enum.UserInputState.End then
-                        isResizing = false
-                    end
-                end)
-            end
-        end)
-
-        ResizeCorner.InputChanged:Connect(function(input)
-            if isResizing and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-                UpdateSize(input)
-            end
-        end)
-    end
-
-    EnableResizing(frame)
-    EnableDragging(topBar, frame)
+    topBar.InputChanged:Connect(function(input)
+        if isDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            UpdateDragPosition(input)
+        end
+    end)
 end
 
 -- Circle click effect
@@ -288,7 +239,7 @@ function PixelLib:CreateNotification(options)
             DropShadow.Name = "DropShadow"
             DropShadow.Parent = ShadowHolder
 
-            TopBar.BackgroundTransparency = 0.999
+            TopBar.BackgroundTransparency = 1
             TopBar.Size = UDim2.new(1, 0, 0, 36)
             TopBar.Name = "TopBar"
             TopBar.Parent = NotifyContent
@@ -298,7 +249,7 @@ function PixelLib:CreateNotification(options)
             TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
             TitleLabel.TextSize = 14
             TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-            TitleLabel.BackgroundTransparency = 0.999
+            TitleLabel.BackgroundTransparency = 1
             TitleLabel.Size = UDim2.new(1, 0, 1, 0)
             TitleLabel.Position = UDim2.new(0, 10, 0, 0)
             TitleLabel.Parent = TopBar
@@ -315,7 +266,7 @@ function PixelLib:CreateNotification(options)
             DescLabel.TextColor3 = notify.Color
             DescLabel.TextSize = 14
             DescLabel.TextXAlignment = Enum.TextXAlignment.Left
-            DescLabel.BackgroundTransparency = 0.999
+            DescLabel.BackgroundTransparency = 1
             DescLabel.Size = UDim2.new(1, 0, 1, 0)
             DescLabel.Position = UDim2.new(0, TitleLabel.TextBounds.X + 15, 0, 0)
             DescLabel.Parent = TopBar
@@ -327,7 +278,7 @@ function PixelLib:CreateNotification(options)
             CloseButton.Font = Enum.Font.SourceSans
             CloseButton.Text = ""
             CloseButton.TextColor3 = Color3.fromRGB(0, 0, 0)
-            CloseButton.BackgroundTransparency = 0.999
+            CloseButton.BackgroundTransparency = 1
             CloseButton.Position = UDim2.new(1, -5, 0.5, 0)
             CloseButton.Size = UDim2.new(0, 25, 0, 25)
             CloseButton.Name = "CloseButton"
@@ -335,7 +286,7 @@ function PixelLib:CreateNotification(options)
 
             CloseIcon.Image = "rbxassetid://9886659671"
             CloseIcon.AnchorPoint = Vector2.new(0.5, 0.5)
-            CloseIcon.BackgroundTransparency = 0.999
+            CloseIcon.BackgroundTransparency = 1
             CloseIcon.Position = UDim2.new(0.49, 0, 0.5, 0)
             CloseIcon.Size = UDim2.new(1, -8, 1, -8)
             CloseIcon.Parent = CloseButton
@@ -346,7 +297,7 @@ function PixelLib:CreateNotification(options)
             ContentLabel.Text = notify.Content
             ContentLabel.TextXAlignment = Enum.TextXAlignment.Left
             ContentLabel.TextYAlignment = Enum.TextYAlignment.Top
-            ContentLabel.BackgroundTransparency = 0.999
+            ContentLabel.BackgroundTransparency = 1
             ContentLabel.Position = UDim2.new(0, 10, 0, 27)
             ContentLabel.Size = UDim2.new(1, -20, 0, 13)
             ContentLabel.Parent = NotifyContent
@@ -399,12 +350,10 @@ function PixelLib:CreateGui(config)
     local DropShadow = Instance.new("ImageLabel")
     local MainFrame = Instance.new("Frame")
     local MainCorner = Instance.new("UICorner")
-    local MainStroke = Instance.new("UIStroke")
     local TopBar = Instance.new("Frame")
     local TitleLabel = Instance.new("TextLabel")
     local TopCorner = Instance.new("UICorner")
     local DescLabel = Instance.new("TextLabel")
-    local DescStroke = Instance.new("UIStroke")
     local CloseButton = Instance.new("TextButton")
     local CloseIcon = Instance.new("ImageLabel")
     local MinimizeButton = Instance.new("TextButton")
@@ -443,21 +392,16 @@ function PixelLib:CreateGui(config)
     DropShadow.Name = "DropShadow"
     DropShadow.Parent = ShadowHolder
 
-    MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
     MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
     MainFrame.BackgroundTransparency = 0.1
-    MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+    MainFrame.Position = UDim2.new(0, 0, 0, 0)
     MainFrame.Size = guiConfig.SizeUI
     MainFrame.Name = "MainFrame"
-    MainFrame.Parent = DropShadow
+    MainFrame.Parent = ShadowHolder
 
     MainCorner.Parent = MainFrame
 
-    MainStroke.Color = Color3.fromRGB(50, 50, 50)
-    MainStroke.Thickness = 1.6
-    MainStroke.Parent = MainFrame
-
-    TopBar.BackgroundTransparency = 0.999
+    TopBar.BackgroundTransparency = 1
     TopBar.Size = UDim2.new(1, 0, 0, 38)
     TopBar.Name = "TopBar"
     TopBar.Parent = MainFrame
@@ -467,7 +411,7 @@ function PixelLib:CreateGui(config)
     TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     TitleLabel.TextSize = 14
     TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-    TitleLabel.BackgroundTransparency = 0.999
+    TitleLabel.BackgroundTransparency = 1
     TitleLabel.Size = UDim2.new(1, -100, 1, 0)
     TitleLabel.Position = UDim2.new(0, 10, 0, 0)
     TitleLabel.Parent = TopBar
@@ -479,19 +423,15 @@ function PixelLib:CreateGui(config)
     DescLabel.TextColor3 = guiConfig.Color
     DescLabel.TextSize = 14
     DescLabel.TextXAlignment = Enum.TextXAlignment.Left
-    DescLabel.BackgroundTransparency = 0.999
+    DescLabel.BackgroundTransparency = 1
     DescLabel.Size = UDim2.new(1, -(TitleLabel.TextBounds.X + 104), 1, 0)
     DescLabel.Position = UDim2.new(0, TitleLabel.TextBounds.X + 15, 0, 0)
     DescLabel.Parent = TopBar
 
-    DescStroke.Color = guiConfig.Color
-    DescStroke.Thickness = 0.4
-    DescStroke.Parent = DescLabel
-
     CloseButton.Font = Enum.Font.SourceSans
     CloseButton.Text = ""
     CloseButton.TextColor3 = Color3.fromRGB(0, 0, 0)
-    CloseButton.BackgroundTransparency = 0.999
+    CloseButton.BackgroundTransparency = 1
     CloseButton.Position = UDim2.new(1, -8, 0.5, 0)
     CloseButton.Size = UDim2.new(0, 25, 0, 25)
     CloseButton.Name = "CloseButton"
@@ -499,7 +439,7 @@ function PixelLib:CreateGui(config)
 
     CloseIcon.Image = "rbxassetid://9886659671"
     CloseIcon.AnchorPoint = Vector2.new(0.5, 0.5)
-    CloseIcon.BackgroundTransparency = 0.999
+    CloseIcon.BackgroundTransparency = 1
     CloseIcon.Position = UDim2.new(0.49, 0, 0.5, 0)
     CloseIcon.Size = UDim2.new(1, -8, 1, -8)
     CloseIcon.Parent = CloseButton
@@ -507,7 +447,7 @@ function PixelLib:CreateGui(config)
     MinimizeButton.Font = Enum.Font.SourceSans
     MinimizeButton.Text = ""
     MinimizeButton.TextColor3 = Color3.fromRGB(0, 0, 0)
-    MinimizeButton.BackgroundTransparency = 0.999
+    MinimizeButton.BackgroundTransparency = 1
     MinimizeButton.Position = UDim2.new(1, -42, 0.5, 0)
     MinimizeButton.Size = UDim2.new(0, 25, 0, 25)
     MinimizeButton.Name = "MinimizeButton"
@@ -515,12 +455,12 @@ function PixelLib:CreateGui(config)
 
     MinimizeIcon.Image = "rbxassetid://9886659276"
     MinimizeIcon.AnchorPoint = Vector2.new(0.5, 0.5)
-    MinimizeIcon.BackgroundTransparency = 0.999
+    MinimizeIcon.BackgroundTransparency = 1
     MinimizeIcon.Position = UDim2.new(0.5, 0, 0.5, 0)
     MinimizeIcon.Size = UDim2.new(1, -8, 1, -8)
     MinimizeIcon.Parent = MinimizeButton
 
-    TabContainer.BackgroundTransparency = 0.999
+    TabContainer.BackgroundTransparency = 1
     TabContainer.Position = UDim2.new(0, 9, 0, 50)
     TabContainer.Size = UDim2.new(0, guiConfig.TabWidth, 1, -59)
     TabContainer.Name = "TabContainer"
@@ -536,7 +476,7 @@ function PixelLib:CreateGui(config)
     TabDivider.Name = "TabDivider"
     TabDivider.Parent = MainFrame
 
-    ContentContainer.BackgroundTransparency = 0.999
+    ContentContainer.BackgroundTransparency = 1
     ContentContainer.Position = UDim2.new(0, guiConfig.TabWidth + 18, 0, 50)
     ContentContainer.Size = UDim2.new(1, -(guiConfig.TabWidth + 27), 1, -59)
     ContentContainer.Name = "ContentContainer"
@@ -549,15 +489,14 @@ function PixelLib:CreateGui(config)
     TabTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
     TabTitle.TextSize = 24
     TabTitle.TextXAlignment = Enum.TextXAlignment.Left
-    TabTitle.BackgroundTransparency = 0.999
+    TabTitle.BackgroundTransparency = 1
     TabTitle.Size = UDim2.new(1, 0, 0, 30)
     TabTitle.Name = "TabTitle"
     TabTitle.Parent = ContentContainer
 
-    ContentFrame.AnchorPoint = Vector2.new(0, 1)
-    ContentFrame.BackgroundTransparency = 0.999
+    ContentFrame.BackgroundTransparency = 1
     ContentFrame.ClipsDescendants = true
-    ContentFrame.Position = UDim2.new(0, 0, 1, 0)
+    ContentFrame.Position = UDim2.new(0, 0, 0, 33)
     ContentFrame.Size = UDim2.new(1, 0, 1, -33)
     ContentFrame.Name = "ContentFrame"
     ContentFrame.Parent = ContentContainer
@@ -576,7 +515,7 @@ function PixelLib:CreateGui(config)
     TabList.CanvasSize = UDim2.new(0, 0, 0, 0)
     TabList.ScrollBarThickness = 0
     TabList.Active = true
-    TabList.BackgroundTransparency = 0.999
+    TabList.BackgroundTransparency = 1
     TabList.Size = UDim2.new(1, 0, 1, -10)
     TabList.Name = "TabList"
     TabList.Parent = TabContainer
@@ -617,10 +556,10 @@ function PixelLib:CreateGui(config)
         GuiControls:DestroyGui()
     end)
 
-    EnableDragAndResize(TopBar, ShadowHolder)
+    EnableDragging(TopBar, ShadowHolder)
 
     local DropdownOverlay = Instance.new("Frame")
-    DropdownOverlay.BackgroundTransparency = 0.999
+    DropdownOverlay.BackgroundTransparency = 1
     DropdownOverlay.ClipsDescendants = true
     DropdownOverlay.Position = UDim2.new(1, 8, 1, 8)
     DropdownOverlay.Size = UDim2.new(1, 154, 1, 54)
@@ -655,7 +594,7 @@ function PixelLib:CreateGui(config)
     local OverlayButton = Instance.new("TextButton")
     OverlayButton.Font = Enum.Font.SourceSans
     OverlayButton.Text = ""
-    OverlayButton.BackgroundTransparency = 0.999
+    OverlayButton.BackgroundTransparency = 1
     OverlayButton.Size = UDim2.new(1, 0, 1, 0)
     OverlayButton.Name = "OverlayButton"
     OverlayButton.Parent = DropdownOverlay
@@ -670,9 +609,9 @@ function PixelLib:CreateGui(config)
 
         local TabContent = Instance.new("ScrollingFrame")
         local ContentLayout = Instance.new("UIListLayout")
-        TabContent.ScrollBarThickness = 4
+        TabContent.ScrollBarThickness = 0
         TabContent.Active = true
-        TabContent.BackgroundTransparency = 0.999
+        TabContent.BackgroundTransparency = 1
         TabContent.Size = UDim2.new(1, 0, 1, 0)
         TabContent.Name = "TabContent"
         TabContent.Parent = TabPages
@@ -687,26 +626,20 @@ function PixelLib:CreateGui(config)
         end)
 
         local TabButtonFrame = Instance.new("Frame")
-        local TabButtonCorner = Instance.new("UICorner")
         local TabButton = Instance.new("TextButton")
         local TabLabel = Instance.new("TextLabel")
         local TabIcon = Instance.new("ImageLabel")
-        local TabIndicatorStroke = Instance.new("UIStroke")
-        local TabIndicatorCorner = Instance.new("UICorner")
 
-        TabButtonFrame.BackgroundTransparency = tabIndex == 0 and 0.92 or 0.999
+        TabButtonFrame.BackgroundTransparency = tabIndex == 0 and 0.92 or 1
         TabButtonFrame.LayoutOrder = tabIndex
         TabButtonFrame.Size = UDim2.new(1, 0, 0, 30)
         TabButtonFrame.Name = "TabButtonFrame"
         TabButtonFrame.Parent = TabList
 
-        TabButtonCorner.CornerRadius = UDim.new(0, 4)
-        TabButtonCorner.Parent = TabButtonFrame
-
         TabButton.Font = Enum.Font.GothamBold
         TabButton.Text = ""
         TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-        TabButton.BackgroundTransparency = 0.999
+        TabButton.BackgroundTransparency = 1
         TabButton.Size = UDim2.new(1, 0, 1, 0)
         TabButton.Name = "TabButton"
         TabButton.Parent = TabButtonFrame
@@ -716,14 +649,14 @@ function PixelLib:CreateGui(config)
         TabLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
         TabLabel.TextSize = 13
         TabLabel.TextXAlignment = Enum.TextXAlignment.Left
-        TabLabel.BackgroundTransparency = 0.999
+        TabLabel.BackgroundTransparency = 1
         TabLabel.Position = UDim2.new(0, 30, 0, 0)
         TabLabel.Size = UDim2.new(1, 0, 1, 0)
         TabLabel.Name = "TabLabel"
         TabLabel.Parent = TabButtonFrame
 
         TabIcon.Image = tab.Icon
-        TabIcon.BackgroundTransparency = 0.999
+        TabIcon.BackgroundTransparency = 1
         TabIcon.Position = UDim2.new(0, 9, 0, 7)
         TabIcon.Size = UDim2.new(0, 16, 0, 16)
         TabIcon.Name = "TabIcon"
@@ -738,12 +671,6 @@ function PixelLib:CreateGui(config)
             TabIndicator.Size = UDim2.new(0, 1, 0, 12)
             TabIndicator.Name = "TabIndicator"
             TabIndicator.Parent = TabButtonFrame
-
-            TabIndicatorStroke.Color = guiConfig.Color
-            TabIndicatorStroke.Thickness = 1.6
-            TabIndicatorStroke.Parent = TabIndicator
-
-            TabIndicatorCorner.Parent = TabIndicator
         end
 
         TabButton.Activated:Connect(function()
@@ -752,7 +679,7 @@ function PixelLib:CreateGui(config)
             if currentIndicator and TabButtonFrame.LayoutOrder ~= PageLayout.CurrentPage.LayoutOrder then
                 for _, tabFrame in TabList:GetChildren() do
                     if tabFrame:IsA("Frame") then
-                        TweenService:Create(tabFrame, TweenInfo.new(0.2), { BackgroundTransparency = 0.999 }):Play()
+                        TweenService:Create(tabFrame, TweenInfo.new(0.2), { BackgroundTransparency = 1 }):Play()
                     end
                 end
                 TweenService:Create(TabButtonFrame, TweenInfo.new(0.6), { BackgroundTransparency = 0.92 }):Play()
@@ -769,25 +696,19 @@ function PixelLib:CreateGui(config)
         local SectionControls = {}
         local sectionIndex = 0
 
-        function SectionControls:AddSection(title, collapsible)
+        function SectionControls:AddSection(title)
             local sectionTitle = title or "Section"
-            local isCollapsible = collapsible or false
 
             local SectionFrame = Instance.new("Frame")
             local SectionHeader = Instance.new("Frame")
-            local HeaderCorner = Instance.new("UICorner")
             local HeaderButton = Instance.new("TextButton")
-            local CollapseIconFrame = Instance.new("Frame")
-            local CollapseIcon = Instance.new("ImageLabel")
             local SectionTitleLabel = Instance.new("TextLabel")
             local SectionDivider = Instance.new("Frame")
-            local DividerCorner = Instance.new("UICorner")
-            local DividerGradient = Instance.new("UIGradient")
             local SectionContent = Instance.new("Frame")
             local ContentPadding = Instance.new("UIPadding")
             local ContentList = Instance.new("UIListLayout")
 
-            SectionFrame.BackgroundTransparency = 0.999
+            SectionFrame.BackgroundTransparency = 1
             SectionFrame.LayoutOrder = sectionIndex
             SectionFrame.ClipsDescendants = true
             SectionFrame.Size = UDim2.new(1, 0, 0, 30)
@@ -800,37 +721,19 @@ function PixelLib:CreateGui(config)
             SectionHeader.Name = "SectionHeader"
             SectionHeader.Parent = SectionFrame
 
-            HeaderCorner.CornerRadius = UDim.new(0, 4)
-            HeaderCorner.Parent = SectionHeader
-
             HeaderButton.Font = Enum.Font.SourceSans
             HeaderButton.Text = ""
-            HeaderButton.BackgroundTransparency = 0.999
+            HeaderButton.BackgroundTransparency = 1
             HeaderButton.Size = UDim2.new(1, 0, 1, 0)
             HeaderButton.Name = "HeaderButton"
             HeaderButton.Parent = SectionHeader
-
-            CollapseIconFrame.BackgroundTransparency = 0.999
-            CollapseIconFrame.Position = UDim2.new(1, -5, 0.5, 0)
-            CollapseIconFrame.Size = UDim2.new(0, 20, 0, 20)
-            CollapseIconFrame.Name = "CollapseIconFrame"
-            CollapseIconFrame.Parent = SectionHeader
-
-            CollapseIcon.Image = "rbxassetid://16851841101"
-            CollapseIcon.AnchorPoint = Vector2.new(0.5, 0.5)
-            CollapseIcon.BackgroundTransparency = 0.999
-            CollapseIcon.Position = UDim2.new(0.5, 0, 0.5, 0)
-            CollapseIcon.Rotation = -90
-            CollapseIcon.Size = UDim2.new(1, 6, 1, 6)
-            CollapseIcon.Name = "CollapseIcon"
-            CollapseIcon.Parent = CollapseIconFrame
 
             SectionTitleLabel.Font = Enum.Font.GothamBold
             SectionTitleLabel.Text = sectionTitle
             SectionTitleLabel.TextColor3 = Color3.fromRGB(230, 230, 230)
             SectionTitleLabel.TextSize = 13
             SectionTitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-            SectionTitleLabel.BackgroundTransparency = 0.999
+            SectionTitleLabel.BackgroundTransparency = 1
             SectionTitleLabel.Position = UDim2.new(0, 10, 0.5, 0)
             SectionTitleLabel.Size = UDim2.new(1, -50, 0, 13)
             SectionTitleLabel.Name = "SectionTitleLabel"
@@ -841,16 +744,6 @@ function PixelLib:CreateGui(config)
             SectionDivider.Size = UDim2.new(1, 0, 0, 2)
             SectionDivider.Name = "SectionDivider"
             SectionDivider.Parent = SectionFrame
-
-            DividerCorner.CornerRadius = UDim.new(0, 100)
-            DividerCorner.Parent = SectionDivider
-
-            DividerGradient.Color = ColorSequence.new({
-                ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
-                ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),
-                ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
-            })
-            DividerGradient.Parent = SectionDivider
 
             SectionContent.BackgroundTransparency = 1
             SectionContent.Position = UDim2.new(0, 0, 0, 35)
@@ -867,33 +760,14 @@ function PixelLib:CreateGui(config)
             ContentList.SortOrder = Enum.SortOrder.LayoutOrder
             ContentList.Parent = SectionContent
 
-            local isCollapsed = false
-            local defaultHeight = 0
-
             local function UpdateSectionSize()
                 local contentHeight = ContentList.AbsoluteContentSize.Y + ContentPadding.PaddingTop.Offset
-                defaultHeight = contentHeight + 35
-                SectionFrame.Size = UDim2.new(1, 0, 0, isCollapsed and 30 or defaultHeight)
-                SectionContent.Visible = not isCollapsed
+                SectionFrame.Size = UDim2.new(1, 0, 0, contentHeight + 35)
                 TabContent.CanvasSize = UDim2.new(0, 0, 0, ContentLayout.AbsoluteContentSize.Y)
             end
 
             SectionContent.ChildAdded:Connect(UpdateSectionSize)
             SectionContent.ChildRemoved:Connect(UpdateSectionSize)
-
-            if isCollapsible then
-                HeaderButton.MouseButton1Click:Connect(function()
-                    isCollapsed = not isCollapsed
-                    TweenService:Create(
-                        CollapseIcon,
-                        TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
-                        { Rotation = isCollapsed and 0 or -90 }
-                    ):Play()
-                    UpdateSectionSize()
-                end)
-            else
-                CollapseIconFrame.Visible = false
-            end
 
             local ElementControls = {}
 
@@ -903,7 +777,6 @@ function PixelLib:CreateGui(config)
                 buttonConfig.Callback = buttonConfig.Callback or function() end
 
                 local ButtonFrame = Instance.new("Frame")
-                local ButtonCorner = Instance.new("UICorner")
                 local Button = Instance.new("TextButton")
                 local ButtonLabel = Instance.new("TextLabel")
 
@@ -911,9 +784,6 @@ function PixelLib:CreateGui(config)
                 ButtonFrame.Size = UDim2.new(1, 0, 0, 30)
                 ButtonFrame.Name = "ButtonFrame"
                 ButtonFrame.Parent = SectionContent
-
-                ButtonCorner.CornerRadius = UDim.new(0, 4)
-                ButtonCorner.Parent = ButtonFrame
 
                 Button.Font = Enum.Font.SourceSans
                 Button.Text = ""
@@ -952,19 +822,14 @@ function PixelLib:CreateGui(config)
                 toggleConfig.Callback = toggleConfig.Callback or function() end
 
                 local ToggleFrame = Instance.new("Frame")
-                local ToggleCorner = Instance.new("UICorner")
                 local ToggleButton = Instance.new("TextButton")
                 local ToggleLabel = Instance.new("TextLabel")
                 local ToggleIndicator = Instance.new("Frame")
-                local IndicatorCorner = Instance.new("UICorner")
 
                 ToggleFrame.BackgroundTransparency = 0.95
                 ToggleFrame.Size = UDim2.new(1, 0, 0, 30)
                 ToggleFrame.Name = "ToggleFrame"
                 ToggleFrame.Parent = SectionContent
-
-                ToggleCorner.CornerRadius = UDim.new(0, 4)
-                ToggleCorner.Parent = ToggleFrame
 
                 ToggleButton.Font = Enum.Font.SourceSans
                 ToggleButton.Text = ""
@@ -989,9 +854,6 @@ function PixelLib:CreateGui(config)
                 ToggleIndicator.Size = UDim2.new(0, 25, 0, 16)
                 ToggleIndicator.Name = "ToggleIndicator"
                 ToggleIndicator.Parent = ToggleFrame
-
-                IndicatorCorner.CornerRadius = UDim.new(0, 8)
-                IndicatorCorner.Parent = ToggleIndicator
 
                 local isToggled = toggleConfig.Default
 
@@ -1028,12 +890,9 @@ function PixelLib:CreateGui(config)
                 sliderConfig.Callback = sliderConfig.Callback or function() end
 
                 local SliderFrame = Instance.new("Frame")
-                local SliderCorner = Instance.new("UICorner")
                 local SliderLabel = Instance.new("TextLabel")
                 local SliderBar = Instance.new("Frame")
-                local BarCorner = Instance.new("UICorner")
                 local SliderFill = Instance.new("Frame")
-                local FillCorner = Instance.new("UICorner")
                 local SliderButton = Instance.new("TextButton")
                 local ValueLabel = Instance.new("TextLabel")
 
@@ -1041,9 +900,6 @@ function PixelLib:CreateGui(config)
                 SliderFrame.Size = UDim2.new(1, 0, 0, 40)
                 SliderFrame.Name = "SliderFrame"
                 SliderFrame.Parent = SectionContent
-
-                SliderCorner.CornerRadius = UDim.new(0, 4)
-                SliderCorner.Parent = SliderFrame
 
                 SliderLabel.Font = Enum.Font.GothamBold
                 SliderLabel.Text = sliderConfig.Name
@@ -1062,16 +918,10 @@ function PixelLib:CreateGui(config)
                 SliderBar.Name = "SliderBar"
                 SliderBar.Parent = SliderFrame
 
-                BarCorner.CornerRadius = UDim.new(0, 3)
-                BarCorner.Parent = SliderBar
-
                 SliderFill.BackgroundColor3 = guiConfig.Color
                 SliderFill.Size = UDim2.new(0, 0, 1, 0)
                 SliderFill.Name = "SliderFill"
                 SliderFill.Parent = SliderBar
-
-                FillCorner.CornerRadius = UDim.new(0, 3)
-                FillCorner.Parent = SliderFill
 
                 SliderButton.Font = Enum.Font.SourceSans
                 SliderButton.Text = ""
@@ -1137,7 +987,6 @@ function PixelLib:CreateGui(config)
                 dropdownConfig.Callback = dropdownConfig.Callback or function() end
 
                 local DropdownMainFrame = Instance.new("Frame")
-                local DropdownCorner = Instance.new("UICorner")
                 local DropdownButton = Instance.new("TextButton")
                 local DropdownLabel = Instance.new("TextLabel")
                 local SelectedLabel = Instance.new("TextLabel")
@@ -1147,9 +996,6 @@ function PixelLib:CreateGui(config)
                 DropdownMainFrame.Size = UDim2.new(1, 0, 0, 30)
                 DropdownMainFrame.Name = "DropdownMainFrame"
                 DropdownMainFrame.Parent = SectionContent
-
-                DropdownCorner.CornerRadius = UDim.new(0, 4)
-                DropdownCorner.Parent = DropdownMainFrame
 
                 DropdownButton.Font = Enum.Font.SourceSans
                 DropdownButton.Text = ""
@@ -1189,8 +1035,6 @@ function PixelLib:CreateGui(config)
                 ArrowIcon.Parent = DropdownMainFrame
 
                 local DropdownFrame = Instance.new("Frame")
-                local DropdownCorner = Instance.new("UICorner")
-                local DropdownStroke = Instance.new("UIStroke")
                 local DropdownContent = Instance.new("Frame")
                 local OptionList = Instance.new("ScrollingFrame")
                 local OptionLayout = Instance.new("UIListLayout")
@@ -1202,15 +1046,7 @@ function PixelLib:CreateGui(config)
                 DropdownFrame.ClipsDescendants = true
                 DropdownFrame.Parent = DropdownOverlay
 
-                DropdownCorner.CornerRadius = UDim.new(0, 3)
-                DropdownCorner.Parent = DropdownFrame
-
-                DropdownStroke.Color = Color3.fromRGB(255, 255, 255)
-                DropdownStroke.Thickness = 2.5
-                DropdownStroke.Transparency = 0.8
-                DropdownStroke.Parent = DropdownFrame
-
-                DropdownContent.BackgroundTransparency = 0.999
+                DropdownContent.BackgroundTransparency = 1
                 DropdownContent.Position = UDim2.new(0.5, 0, 0.5, 0)
                 DropdownContent.Size = UDim2.new(1, -10, 1, -10)
                 DropdownContent.Name = "DropdownContent"
@@ -1258,7 +1094,7 @@ function PixelLib:CreateGui(config)
                         if not success then
                             warn("Dropdown callback error: " .. tostring(err))
                         end
-                        TweenService:Create(DropdownOverlay, TweenInfo.new(0.2), { BackgroundTransparency = 0.999 }):Play()
+                        TweenService:Create(DropdownOverlay, TweenInfo.new(0.2), { BackgroundTransparency = 1 }):Play()
                         TweenService:Create(DropdownFrame, TweenInfo.new(0.2), { Position = UDim2.new(1, 172, 0.5, 0) }):Play()
                         task.wait(0.2)
                         DropdownOverlay.Visible = false
@@ -1276,7 +1112,7 @@ function PixelLib:CreateGui(config)
 
                 OverlayButton.Activated:Connect(function()
                     if DropdownOverlay.Visible then
-                        TweenService:Create(DropdownOverlay, TweenInfo.new(0.2), { BackgroundTransparency = 0.999 }):Play()
+                        TweenService:Create(DropdownOverlay, TweenInfo.new(0.2), { BackgroundTransparency = 1 }):Play()
                         TweenService:Create(DropdownFrame, TweenInfo.new(0.2), { Position = UDim2.new(1, 172, 0.5, 0) }):Play()
                         task.wait(0.2)
                         DropdownOverlay.Visible = false
