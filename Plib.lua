@@ -843,6 +843,11 @@ function PixelLib:CreateGui(config)
                 IndicatorCorner.Parent = ToggleIndicator
 
                 local isToggled = toggleConfig.Default
+                -- เรียก Callback ทันทีเมื่อเริ่มต้นถ้า Default = true
+                if isToggled then
+                    toggleConfig.Callback(isToggled)
+                end
+
                 ToggleButton.MouseButton1Click:Connect(function()
                     isToggled = not isToggled
                     TweenService:Create(ToggleIndicator, TWEEN_INFO, { BackgroundColor3 = isToggled and guiConfig.Color or Color3.fromRGB(80, 80, 80) }):Play()
