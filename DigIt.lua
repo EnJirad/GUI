@@ -41,7 +41,8 @@ MovementSection:AddToggle({
         guf = state
         if guf then
             local success, err = pcall(function()
-                loadstring(game:HttpGet("https://rawscripts.net/raw/SECRETS-Dig-it-V2-AUTO-FARM-GUI-29-FEATURES-27327"))()
+                -- loadstring(game:HttpGet("https://rawscripts.net/raw/SECRETS-Dig-it-V2-AUTO-FARM-GUI-29-FEATURES-27327"))()
+                loadstring(game:HttpGet("https://init.frostbyte.lol"))()
             end)
             if not success then
                 PixelLib:CreateNotification({
