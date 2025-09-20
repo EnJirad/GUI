@@ -201,7 +201,7 @@ if isfile and isfile("Pixle_config.txt") then
 end
 
 MovementSection:AddDropdown({
-    Name = "Select Shovel",
+    Name = "เลือกที่ขุด",
     Options = shovelOptions,
     Default = selectedShovel,
     Callback = function(selected)
@@ -213,7 +213,7 @@ MovementSection:AddDropdown({
 
 local equipShovelToggle = true
 MovementSection:AddToggle({
-    Name = "Equip Shovel Select",
+    Name = "ออโต้ ติดตั้งที่ขุด",
     Default = equipShovelToggle,
     Callback = function(state)
         equipShovelToggle = state
