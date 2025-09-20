@@ -30,30 +30,28 @@ local MagnetBoxData = require(ReplicatedStorage.Source.Data.MagnetBoxData)
 local Network = require(ReplicatedStorage.Source.Network)
 
 MovementSection:AddToggle({
-    Name = "GUI",
+    Name = "GUI FrostByte",
     Default = true,
     Callback = function(state)
         if state then
-            task.spawn(function()
-                local success, err = pcall(function()
-                    loadstring(game:HttpGet("https://rawscripts.net/raw/SECRETS-Dig-it-V2-AUTO-FARM-GUI-29-FEATURES-27327"))()
-                end)
-                if not success then
-                    PixelLib:CreateNotification({
-                        Title = "GUI Loader",
-                        Description = "Failed",
-                        Content = "Error loading GUI: " .. tostring(err),
-                        Color = Color3.fromRGB(255, 0, 0)
-                    })
-                else
-                    PixelLib:CreateNotification({
-                        Title = "GUI Loader",
-                        Description = "Success",
-                        Content = "GUI loaded successfully",
-                        Color = Color3.fromRGB(0, 255, 0)
-                    })
-                end
+            local success, err = pcall(function()
+                loadstring(game:HttpGet("https://rawscripts.net/raw/SECRETS-Dig-it-V2-AUTO-FARM-GUI-29-FEATURES-27327"))()
             end)
+            if not success then
+                PixelLib:CreateNotification({
+                    Title = "GUI Loader",
+                    Description = "Failed",
+                    Content = "Error loading GUI: " .. tostring(err),
+                    Color = Color3.fromRGB(255, 0, 0)
+                })
+            else
+                PixelLib:CreateNotification({
+                    Title = "GUI Loader",
+                    Description = "Success",
+                    Content = "GUI loaded successfully",
+                    Color = Color3.fromRGB(0, 255, 0)
+                })
+            end
         end
     end
 })
@@ -64,36 +62,34 @@ MovementSection:AddToggle({
     Default = true,
     Callback = function(state)
         if state then
-            task.spawn(function()
-                while state do
-                    local success, err = pcall(function()
-                        local inventory = ClientDataSnapshot.Get("Inventory")
-                        local magnetIndexes = {}
+            while state do
+                local success, err = pcall(function()
+                    local inventory = ClientDataSnapshot.Get("Inventory")
+                    local magnetIndexes = {}
 
-                        for i, v in inventory do
-                            if MagnetBoxData[v.Name] and not v.Attributes.Pinned then
-                                table.insert(magnetIndexes, i)
-                            end
+                    for i, v in inventory do
+                        if MagnetBoxData[v.Name] and not v.Attributes.Pinned then
+                            table.insert(magnetIndexes, i)
                         end
-
-                        if #magnetIndexes > 0 then
-                            for _, id in ipairs(magnetIndexes) do
-                                Network:FireServer("OpenMagnetBox", id)
-                                task.wait(0.1)
-                            end
-                        end
-                    end)
-                    if not success then
-                        PixelLib:CreateNotification({
-                            Title = "Open Magnet Box",
-                            Description = "Error",
-                            Content = "Error: " .. tostring(err),
-                            Color = Color3.fromRGB(255, 0, 0)
-                        })
                     end
-                    task.wait(5)
+
+                    if #magnetIndexes > 0 then
+                        for _, id in ipairs(magnetIndexes) do
+                            Network:FireServer("OpenMagnetBox", id)
+                            wait(0.1)
+                        end
+                    end
+                end)
+                if not success then
+                    PixelLib:CreateNotification({
+                        Title = "Open Magnet Box",
+                        Description = "Error",
+                        Content = "Error: " .. tostring(err),
+                        Color = Color3.fromRGB(255, 0, 0)
+                    })
                 end
-            end)
+                wait(5)
+            end
         end
     end
 })
@@ -104,24 +100,22 @@ MovementSection:AddToggle({
     Default = true,
     Callback = function(state)
         if state then
-            task.spawn(function()
-                local petRemote = ReplicatedStorage:WaitForChild("RemoteEvents"):WaitForChild("WithdrawFromPet")
-                while state do
-                    local success, err = pcall(function()
-                        petRemote:FireServer()
-                        print("WithdrawFromPet fired ✅")
-                    end)
-                    if not success then
-                        PixelLib:CreateNotification({
-                            Title = "Withdraw From Pet",
-                            Description = "Error",
-                            Content = "Error: " .. tostring(err),
-                            Color = Color3.fromRGB(255, 0, 0)
-                        })
-                    end
-                    task.wait(60)
+            local petRemote = ReplicatedStorage:WaitForChild("RemoteEvents"):WaitForChild("WithdrawFromPet")
+            while state do
+                local success, err = pcall(function()
+                    petRemote:FireServer()
+                    print("WithdrawFromPet fired ✅")
+                end)
+                if not success then
+                    PixelLib:CreateNotification({
+                        Title = "Withdraw From Pet",
+                        Description = "Error",
+                        Content = "Error: " .. tostring(err),
+                        Color = Color3.fromRGB(255, 0, 0)
+                    })
                 end
-            end)
+                wait(60)
+            end
         end
     end
 })
