@@ -19,7 +19,8 @@ local PlayerTab = TabControls:CreateTab({
 
 -- Movement Section
 local MovementSection = PlayerTab:AddSection("Movement", true)
-local player = game.Players.LocalPlayer
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
 local myCharacter = player.Character or player.CharacterAdded:Wait()
 local myHumanoidRootPart = myCharacter:WaitForChild("HumanoidRootPart")
 
@@ -27,7 +28,7 @@ local Mob_tp = false
 local mobLoop
 
 -- 🔹 ค่าระยะเริ่มต้นของมอน
-local offsetX, offsetY, offsetZ = 0, 25, 0
+local offsetX, offsetY, offsetZ = -5, 13, 3
 
 -- 🔹 Slider สำหรับปรับระยะ X/Y/Z
 MovementSection:AddSlider({
@@ -68,7 +69,12 @@ MovementSection:AddToggle({
             mobLoop = coroutine.create(function()
                 while Mob_tp do
                     for _, obj in ipairs(workspace:GetChildren()) do
-                        if obj:IsA("Model") and obj:FindFirstChild("Humanoid") and obj ~= myCharacter then
+                        -- 🔹 ข้ามตัวละครผู้เล่นทุกคน
+                        if Players:GetPlayerFromCharacter(obj) then
+                            continue
+                        end
+
+                        if obj:IsA("Model") and obj:FindFirstChild("Humanoid") then
                             local mobHumanoid = obj:FindFirstChild("Humanoid")
                             local mobRoot = obj:FindFirstChild("HumanoidRootPart") or obj:FindFirstChildWhichIsA("BasePart")
                             if mobRoot and mobHumanoid then
@@ -92,7 +98,7 @@ MovementSection:AddToggle({
 
                 -- 🔹 ปิด toggle → ให้มอนลุกขึ้น + เปิด Gravity
                 for _, obj in ipairs(workspace:GetChildren()) do
-                    if obj:IsA("Model") and obj:FindFirstChild("Humanoid") and obj ~= myCharacter then
+                    if obj:IsA("Model") and obj:FindFirstChild("Humanoid") then
                         local mobHumanoid = obj:FindFirstChild("Humanoid")
                         if mobHumanoid then
                             mobHumanoid.Sit = false
@@ -107,7 +113,7 @@ MovementSection:AddToggle({
         elseif not Mob_tp then
             -- 🔹 ปิด toggle ระหว่าง loop → ให้มอนลุกขึ้น + เปิด Gravity
             for _, obj in ipairs(workspace:GetChildren()) do
-                if obj:IsA("Model") and obj:FindFirstChild("Humanoid") and obj ~= myCharacter then
+                if obj:IsA("Model") and obj:FindFirstChild("Humanoid") then
                     local mobHumanoid = obj:FindFirstChild("Humanoid")
                     if mobHumanoid then
                         mobHumanoid.Sit = false
@@ -121,13 +127,14 @@ MovementSection:AddToggle({
 })
 
 
+
 local use_Ability = false
 local abilities_all = {"lightning", "solar", "clockwork", "blind", "constellation"}
 local abilities_mele = { "constellation", "ablaze","bloodSnowstorm", "slash", "ablaze",}
 local abilities_magi = {"lightning", "solar", "sandTornado", "lunarSpell",}
 local abilities_use = {"blind", "clockwork", "boneStrength", "rejuvenate", "berserk"}
-local abilities_cutgrade = {"constellation", "boneStrength", "berserk"}
-local abilities = {"constellation"}
+local abilities_cutgrade = {"constellation", "lightning", "solar"}
+local abilities = {"lightning", "solar", "rejuvenate", "berserk"}
 
 
 MovementSection:AddToggle({
@@ -136,7 +143,7 @@ MovementSection:AddToggle({
     Callback = function(state)
         use_Ability = state
         while use_Ability do
-            for _, ability in ipairs(abilities_cutgrade) do
+            for _, ability in ipairs(abilities) do
                 local args = { ability }
                 game:GetService("ReplicatedStorage"):WaitForChild("remotes"):WaitForChild("useAbility"):FireServer(unpack(args))
                 wait(0.5) -- เว้นระยะเวลาระหว่างการใช้สกิล (ปรับได้)
