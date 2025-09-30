@@ -131,11 +131,12 @@ MovementSection:AddToggle({
 local use_Ability = false
 local abilities_all = {"lightning", "solar", "clockwork", "blind", "constellation"}
 local abilities_mele = { "constellation", "ablaze","bloodSnowstorm", "slash", }
-local abilities_magi = {"lightning", "solar", "sandTornado", "lunarSpell",}
+local abilities_magi = {"lightning", "solar", "sandTornado", "lunarSpell", "arcticWind", }
 local abilities_use = {"blind", "clockwork", "boneStrength", "rejuvenate", "berserk"}
 local abilities_cutgrade = {"constellation", "lightning", "solar"}
-local abilities = {"ablaze", "lunarSpell", "sandTornado", "lightning", "solar", "blind", "rejuvenate", "berserk", "boneStrength",}
-
+local abilities_set1 = {"ablaze", "lunarSpell", "sandTornado", "lightning", "solar", "blind", "rejuvenate", "berserk", "boneStrength",}
+local abilities_one = {"ablaze", "arcticWind", "shroom", "rejuvenate", "bloodThirst", "boneStrength",}
+local abilities = {"bloodThirst"}
 
 MovementSection:AddToggle({
     Name = "Auto Skill",
@@ -143,7 +144,7 @@ MovementSection:AddToggle({
     Callback = function(state)
         use_Ability = state
         while use_Ability do
-            for _, ability in ipairs(abilities) do
+            for _, ability in ipairs(abilities_one) do
                 local args = { ability }
                 game:GetService("ReplicatedStorage"):WaitForChild("remotes"):WaitForChild("useAbility"):FireServer(unpack(args))
                 wait(0.5) -- เว้นระยะเวลาระหว่างการใช้สกิล (ปรับได้)
