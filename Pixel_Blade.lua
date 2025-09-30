@@ -134,7 +134,7 @@ local abilities_mele = { "constellation", "ablaze","bloodSnowstorm", "slash", "a
 local abilities_magi = {"lightning", "solar", "sandTornado", "lunarSpell",}
 local abilities_use = {"blind", "clockwork", "boneStrength", "rejuvenate", "berserk"}
 local abilities_cutgrade = {"constellation", "lightning", "solar"}
-local abilities = {"lightning", "solar", "rejuvenate", "berserk"}
+local abilities = {"constellation", "lightning", "solar", "rejuvenate", "berserk", "boneStrength",}
 
 
 MovementSection:AddToggle({
