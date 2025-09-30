@@ -33,8 +33,8 @@ local offsetX, offsetY, offsetZ = -5, 13, 3
 -- 🔹 Slider สำหรับปรับระยะ X/Y/Z
 MovementSection:AddSlider({
     Name = "Mob Offset X",
-    Min = -50,
-    Max = 50,
+    Min = -100,
+    Max = 100,
     Default = offsetX,
     Callback = function(value)
         offsetX = value
@@ -42,8 +42,8 @@ MovementSection:AddSlider({
 })
 MovementSection:AddSlider({
     Name = "Mob Offset Y",
-    Min = 0,
-    Max = 50,
+    Min = -100,
+    Max = 100,
     Default = offsetY,
     Callback = function(value)
         offsetY = value
@@ -51,8 +51,8 @@ MovementSection:AddSlider({
 })
 MovementSection:AddSlider({
     Name = "Mob Offset Z",
-    Min = -50,
-    Max = 50,
+    Min = -100,
+    Max = 100,
     Default = offsetZ,
     Callback = function(value)
         offsetZ = value
