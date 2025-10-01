@@ -94,19 +94,18 @@ MovementSection:AddToggle({
     end
 })
 
-local use_Ability = false
-local abilities_mele = { "constellation", "ablaze","bloodSnowstorm", "slash", }
-local abilities_magi = {"lightning", "solar", "sandTornado", "lunarSpell", "arcticWind", "gemstone",}
-local abilities_use = {"blind", "clockwork", "boneStrength", "rejuvenate", "berserk"}
-local abilities_cutgrade = {"constellation", "lightning", "solar"}
-local abilities_set1 = {"ablaze", "lunarSpell", "sandTornado", "lightning", "solar", "blind", "rejuvenate", "berserk", "boneStrength",}
-local abilities_one = {"lightning", "solar", "sandTornado","ablaze", "arcticWind","rejuvenate", "bloodThirst", "boneStrength",}
-local abilities = {"voidGrip"}
+local abilities_mele = { "constellation","slash", }
+local abilities_magi = {"lightning", "solar", "sandTornado", "lunarSpell", "arcticWind", "gemstone", "ablaze", "bloodSnowstorm", "sandTornado", "lunarSpell", }
+local abilities_use = {"boneStrength", "rejuvenate", "berserk", "bloodThirst", }
+local abilities_other = {"voidGrip", }
+
+local abilities_allT = {
+    "bloodThirst"
+}
 
 local abilities_all = {
-    "gemstone", "lightning", "solar", "clockwork", "blind", "constellation",
-    "ablaze","bloodSnowstorm", "slash", "sandTornado", "lunarSpell",
-    "arcticWind", "boneStrength", "rejuvenate", "berserk", "bloodThirst"
+    "lightning", "solar", "sandTornado", "lunarSpell", "arcticWind", "gemstone", "ablaze", "bloodSnowstorm", "sandTornado", "lunarSpell", 
+    "boneStrength", "rejuvenate", "berserk", "bloodThirst"
 }
 
 local use_Ability = false
@@ -142,4 +141,3 @@ MovementSection:AddToggle({
         end
     end
 })
-
