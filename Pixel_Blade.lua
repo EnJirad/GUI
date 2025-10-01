@@ -93,7 +93,7 @@ MovementSection:AddToggle({
 
 
 local use_Ability = false
-local abilities_all = {"lightning", "solar", "clockwork", "blind", "constellation"}
+local abilities_all = {"lightning", "solar", "clockwork", "blind", "constellation","ablaze","bloodSnowstorm", "slash", "sandTornado", "lunarSpell", "arcticWind", "boneStrength", "rejuvenate", "berserk", "bloodThirst", }
 local abilities_mele = { "constellation", "ablaze","bloodSnowstorm", "slash", }
 local abilities_magi = {"lightning", "solar", "sandTornado", "lunarSpell", "arcticWind", }
 local abilities_use = {"blind", "clockwork", "boneStrength", "rejuvenate", "berserk"}
@@ -108,7 +108,7 @@ MovementSection:AddToggle({
     Callback = function(state)
         use_Ability = state
         while use_Ability do
-            for _, ability in ipairs(abilities_one) do
+            for _, ability in ipairs(abilities_all) do
                 local args = { ability }
                 game:GetService("ReplicatedStorage"):WaitForChild("remotes"):WaitForChild("useAbility"):FireServer(unpack(args))
                 wait(0.5) -- เว้นระยะเวลาระหว่างการใช้สกิล (ปรับได้)
