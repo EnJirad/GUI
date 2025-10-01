@@ -32,7 +32,7 @@ local mobLoop
 local activeMobs = {}
 
 -- 🔹 Offset
-local offsetX, offsetY, offsetZ = 0, 25, 50
+local offsetX, offsetY, offsetZ = 0, 25, 40
 local range = 200 -- ระยะรอบตัวเรา
 MovementSection:AddSlider({ Name = "Mob Offset X", Min = -100, Max = 100, Default = offsetX, Callback = function(value) offsetX = value end })
 MovementSection:AddSlider({ Name = "Mob Offset Y", Min = -100, Max = 100, Default = offsetY, Callback = function(value) offsetY = value end })
@@ -97,15 +97,16 @@ MovementSection:AddToggle({
 local abilities_mele = { "constellation","slash", }
 local abilities_magi = {"lightning", "solar", "sandTornado", "lunarSpell", "arcticWind", "gemstone", "ablaze", "bloodSnowstorm", "sandTornado", "lunarSpell", }
 local abilities_use = {"boneStrength", "rejuvenate", "berserk", "bloodThirst", }
-local abilities_other = {"voidGrip", }
+local abilities_other = {"voidGrip", "raiseTheDead", "goldenArmy", "CosmicVision", "Oblivion", "blackHole", "cosmicBeam"}
 
-local abilities_allT = {
-    "bloodThirst"
+local abilities_all1 = {
+    "lunarSpell"
 }
 
 local abilities_all = {
-    "lightning", "solar", "sandTornado", "lunarSpell", "arcticWind", "gemstone", "ablaze", "bloodSnowstorm", "sandTornado", "lunarSpell", 
-    "boneStrength", "rejuvenate", "berserk", "bloodThirst"
+    "lightning", "solar", "sandTornado", "lunarSpell", "arcticWind", "gemstone", "ablaze", "bloodSnowstorm", "sandTornado", "lunarSpell",
+    "voidGrip", "raiseTheDead", "goldenArmy", "CosmicVision", "Oblivion", "blackHole", "cosmicBeam",
+    "rejuvenate", "bloodThirst"
 }
 
 local use_Ability = false
