@@ -20,83 +20,70 @@ local PlayerTab = TabControls:CreateTab({
 -- Movement Section
 local MovementSection = PlayerTab:AddSection("Movement", true)
 local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
 local player = Players.LocalPlayer
 local myCharacter = player.Character or player.CharacterAdded:Wait()
-local myHumanoidRootPart = myCharacter:WaitForChild("HumanoidRootPart")
 
-local Mob_tp = false
+local MobSitLoop = false
 local mobLoop
 
--- 🔹 ค่าระยะเริ่มต้นของมอน
-local offsetX, offsetY, offsetZ = -5, 13, 3
-
--- 🔹 Slider สำหรับปรับระยะ X/Y/Z
-MovementSection:AddSlider({
-    Name = "Mob Offset X",
-    Min = -100,
-    Max = 100,
-    Default = offsetX,
-    Callback = function(value)
-        offsetX = value
-    end
-})
-MovementSection:AddSlider({
-    Name = "Mob Offset Y",
-    Min = -100,
-    Max = 100,
-    Default = offsetY,
-    Callback = function(value)
-        offsetY = value
-    end
-})
-MovementSection:AddSlider({
-    Name = "Mob Offset Z",
-    Min = -100,
-    Max = 100,
-    Default = offsetZ,
-    Callback = function(value)
-        offsetZ = value
-    end
-})
+-- 🔹 Offset
+local offsetX, offsetY, offsetZ = 0, 15, -10
+MovementSection:AddSlider({ Name = "Mob Offset X", Min = -100, Max = 100, Default = offsetX, Callback = function(value) offsetX = value end })
+MovementSection:AddSlider({ Name = "Mob Offset Y", Min = -100, Max = 100, Default = offsetY, Callback = function(value) offsetY = value end })
+MovementSection:AddSlider({ Name = "Mob Offset Z", Min = -100, Max = 100, Default = offsetZ, Callback = function(value) offsetZ = value end })
 
 MovementSection:AddToggle({
-    Name = "Warp Mobs Above Head (Sit + Zero Gravity)",
-    Default = Mob_tp,
+    Name = "Force Mobs Sit + Zero Gravity (Tween)",
+    Default = MobSitLoop,
     Callback = function(state)
-        Mob_tp = state
+        MobSitLoop = state
 
-        if Mob_tp and not mobLoop then
+        if MobSitLoop and not mobLoop then
             mobLoop = coroutine.create(function()
-                while Mob_tp do
+                while MobSitLoop do
                     for _, obj in ipairs(workspace:GetChildren()) do
-                        -- 🔹 ข้ามตัวละครผู้เล่นทุกคน
+                        -- 🔹 ข้ามตัวละครผู้เล่น
                         if Players:GetPlayerFromCharacter(obj) then
+                            continue
+                        end
+
+                        -- 🔹 ข้าม "Shroom"
+                        if string.sub(obj.Name,1,6) == "Shroom" then
                             continue
                         end
 
                         if obj:IsA("Model") and obj:FindFirstChild("Humanoid") then
                             local mobHumanoid = obj:FindFirstChild("Humanoid")
                             local mobRoot = obj:FindFirstChild("HumanoidRootPart") or obj:FindFirstChildWhichIsA("BasePart")
-                            if mobRoot and mobHumanoid then
-                                -- 🔹 ให้มอนนั่งก่อน
-                                mobHumanoid.Sit = true
 
-                                -- 🔹 ปิดแรงโน้มถ่วงของมอน
+                            if mobRoot and mobHumanoid then
+                                -- 🔹 บังคับนั่ง + ปิดแรงโน้มถ่วง
+                                mobHumanoid.Sit = true
                                 mobHumanoid.PlatformStand = true
-                                
-                                -- 🔹 ตั้ง Velocity = 0 เพื่อไม่ให้ตก
-                                mobRoot.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-                                
-                                -- 🔹 ตำแหน่งเหนือหัว + Offset จาก Slider
-                                local targetPos = myHumanoidRootPart.Position + Vector3.new(offsetX, offsetY, offsetZ)
-                                mobRoot.CFrame = CFrame.new(targetPos)
+
+                                -- กันไม่ให้ตก/หมุน
+                                mobRoot.AssemblyLinearVelocity = Vector3.new(0,0,0)
+                                mobRoot.AssemblyAngularVelocity = Vector3.new(0,0,0)
+
+                                -- 🔹 Tween ตามตำแหน่ง
+                                local myHumanoidRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+                                if myHumanoidRootPart then
+                                    local targetPos = myHumanoidRootPart.Position + Vector3.new(offsetX, offsetY, offsetZ)
+
+                                    if (mobRoot.Position - targetPos).Magnitude > 3 then -- ถ้าห่างเกิน 3 studs ค่อย Tween
+                                        local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+                                        local tween = TweenService:Create(mobRoot, tweenInfo, { CFrame = CFrame.new(targetPos) })
+                                        tween:Play()
+                                    end
+                                end
                             end
                         end
                     end
                     task.wait(0.1)
                 end
 
-                -- 🔹 ปิด toggle → ให้มอนลุกขึ้น + เปิด Gravity
+                -- 🔹 คืนค่าปกติเมื่อปิด
                 for _, obj in ipairs(workspace:GetChildren()) do
                     if obj:IsA("Model") and obj:FindFirstChild("Humanoid") then
                         local mobHumanoid = obj:FindFirstChild("Humanoid")
@@ -110,8 +97,8 @@ MovementSection:AddToggle({
                 mobLoop = nil
             end)
             coroutine.resume(mobLoop)
-        elseif not Mob_tp then
-            -- 🔹 ปิด toggle ระหว่าง loop → ให้มอนลุกขึ้น + เปิด Gravity
+        else
+            -- 🔹 คืนค่าปกติเมื่อปิด toggle
             for _, obj in ipairs(workspace:GetChildren()) do
                 if obj:IsA("Model") and obj:FindFirstChild("Humanoid") then
                     local mobHumanoid = obj:FindFirstChild("Humanoid")
@@ -125,7 +112,6 @@ MovementSection:AddToggle({
         end
     end
 })
-
 
 
 local use_Ability = false
