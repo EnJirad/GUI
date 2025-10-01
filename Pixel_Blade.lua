@@ -101,7 +101,7 @@ local abilities_use = {"blind", "clockwork", "boneStrength", "rejuvenate", "bers
 local abilities_cutgrade = {"constellation", "lightning", "solar"}
 local abilities_set1 = {"ablaze", "lunarSpell", "sandTornado", "lightning", "solar", "blind", "rejuvenate", "berserk", "boneStrength",}
 local abilities_one = {"lightning", "solar", "sandTornado","ablaze", "arcticWind","rejuvenate", "bloodThirst", "boneStrength",}
-local abilities = {"bloodThirst"}
+local abilities = {"voidGrip"}
 
 local abilities_all = {
     "lightning", "solar", "clockwork", "blind", "constellation",
