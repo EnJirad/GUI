@@ -32,7 +32,7 @@ local mobLoop
 local activeMobs = {}
 
 -- 🔹 Offset
-local offsetX, offsetY, offsetZ = 0, 15, -10
+local offsetX, offsetY, offsetZ = 0, 25, 50
 local range = 200 -- ระยะรอบตัวเรา
 MovementSection:AddSlider({ Name = "Mob Offset X", Min = -100, Max = 100, Default = offsetX, Callback = function(value) offsetX = value end })
 MovementSection:AddSlider({ Name = "Mob Offset Y", Min = -100, Max = 100, Default = offsetY, Callback = function(value) offsetY = value end })
