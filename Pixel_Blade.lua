@@ -96,7 +96,7 @@ MovementSection:AddToggle({
 
 local use_Ability = false
 local abilities_mele = { "constellation", "ablaze","bloodSnowstorm", "slash", }
-local abilities_magi = {"lightning", "solar", "sandTornado", "lunarSpell", "arcticWind", }
+local abilities_magi = {"lightning", "solar", "sandTornado", "lunarSpell", "arcticWind", "gemstone",}
 local abilities_use = {"blind", "clockwork", "boneStrength", "rejuvenate", "berserk"}
 local abilities_cutgrade = {"constellation", "lightning", "solar"}
 local abilities_set1 = {"ablaze", "lunarSpell", "sandTornado", "lightning", "solar", "blind", "rejuvenate", "berserk", "boneStrength",}
@@ -104,7 +104,7 @@ local abilities_one = {"lightning", "solar", "sandTornado","ablaze", "arcticWind
 local abilities = {"voidGrip"}
 
 local abilities_all = {
-    "lightning", "solar", "clockwork", "blind", "constellation",
+    "gemstone", "lightning", "solar", "clockwork", "blind", "constellation",
     "ablaze","bloodSnowstorm", "slash", "sandTornado", "lunarSpell",
     "arcticWind", "boneStrength", "rejuvenate", "berserk", "bloodThirst"
 }
