@@ -125,11 +125,14 @@ MovementSection:AddToggle({
     end
 })
 
--- =========================
--- Auto Farm
--- =========================
+
+
 local AutoWarpLoop = false
 local warpLoop
+
+-- debug memory
+local lastRoomName = nil
+local stuckCount = 0
 
 MovementSection:AddToggle({
     Name = "Auto Warp",
@@ -146,7 +149,7 @@ MovementSection:AddToggle({
                         continue
                     end
 
-                    -- สร้าง roomList ภายในฟังก์ชัน dynamic
+                    -- === สร้าง roomList dynamic ===
                     local mainRooms = {"Small_odd", "Small_even", "Medium_even", "Medium_odd"}
                     local roomList = {}
                     for _, name in ipairs(mainRooms) do table.insert(roomList, name) end
@@ -156,16 +159,13 @@ MovementSection:AddToggle({
                         end
                     end
 
-                    local mobsTrue = {}
-                    local mobsFalse = {}
+                    local mobsTrue, mobsFalse = {}, {}
 
-                    -- วนเช็คเฉพาะมอนศัตรู
                     for _, obj in ipairs(workspace:GetChildren()) do
                         if obj:IsA("Model") then
                             local mobName = obj.Name
                             if friendlySet[mobName] then continue end
                             if not enemySet[mobName] then continue end
-
                             local attr = obj:GetAttribute("hadEntrance")
                             if attr == true then
                                 table.insert(mobsTrue, obj)
@@ -175,50 +175,81 @@ MovementSection:AddToggle({
                         end
                     end
 
-                    -- ถ้ามีมอน hadEntrance true → อยู่รอที่ Tp ของห้องเดิม
+                    -- ถ้ามีมอน hadEntrance true → อยู่รอ
                     if #mobsTrue > 0 then
                         task.wait(5)
                         continue
                     end
 
+                    local chosenRoom = nil
+
                     if #mobsFalse > 0 then
-                        -- หา nearest room จากมอนตัวแรก
-                        local targetMob = mobsFalse[1]
-                        local mobPivot = targetMob:GetPivot() or targetMob:FindFirstChild("HumanoidRootPart")
-                        if mobPivot then
-                            local nearestRoom = nil
-                            local nearestDist = math.huge
-                            for _, roomName in ipairs(roomList) do
-                                local room = workspace:FindFirstChild(roomName)
-                                if room and room:FindFirstChild("fightZone") then
-                                    local dist = (mobPivot.Position - room.fightZone.Position).Magnitude
-                                    if dist < nearestDist then
-                                        nearestDist = dist
-                                        nearestRoom = room
-                                    end
-                                end
-                            end
-
-                            if nearestRoom then
-                                -- ตรวจสอบว่าห้องเป็น BossFight หรือไม่
-                                local lastZoneName = string.find(nearestRoom.Name, "BossFight") and "FLOOR" or "Tp"
-                                local sequence = {"ExitZone", "fightZone", lastZoneName}
-
-                                for _, zoneName in ipairs(sequence) do
-                                    local zone = nearestRoom:FindFirstChild(zoneName)
-                                    if zone and zone.Position then
-                                        pcall(function()
-                                            hrp.CFrame = CFrame.new(zone.Position + Vector3.new(0,5,0))
-                                        end)
-                                        task.wait(1)
+                        local nearestRoom, nearestDist = nil, math.huge
+                        for _, mob in ipairs(mobsFalse) do
+                            local mobPivot = mob:GetPivot() or mob:FindFirstChild("HumanoidRootPart")
+                            if mobPivot then
+                                for _, roomName in ipairs(roomList) do
+                                    local room = workspace:FindFirstChild(roomName)
+                                    if room and room:FindFirstChild("fightZone") then
+                                        local dist = (mobPivot.Position - room.fightZone.Position).Magnitude
+                                        if dist < nearestDist then
+                                            nearestDist = dist
+                                            nearestRoom = room
+                                        end
                                     end
                                 end
                             end
                         end
+
+                        chosenRoom = nearestRoom
+                    end
+
+                    if chosenRoom then
+                        -- === check stuck loop ===
+                        if lastRoomName == chosenRoom.Name then
+                            stuckCount += 1
+                        else
+                            stuckCount = 0
+                        end
+                        lastRoomName = chosenRoom.Name
+
+                        if stuckCount >= 3 then
+                            local maxRoomNum, targetPos = 0, nil
+                            for _, roomObj in ipairs(workspace:GetChildren()) do
+                                if roomObj:IsA("Model") and tonumber(roomObj.Name) then
+                                    local num = tonumber(roomObj.Name)
+                                    if num > maxRoomNum then
+                                        maxRoomNum = num
+                                        local roomRoot = roomObj:FindFirstChild("Root")
+                                        if roomRoot then
+                                            targetPos = roomRoot.Position
+                                        end
+                                    end
+                                end
+                            end
+                            if targetPos then
+                                hrp.CFrame = CFrame.new(targetPos + Vector3.new(0,5,0))
+                            end
+                            stuckCount = 0
+                            task.wait(5)
+                            continue
+                        end
+
+                        local lastZoneName = string.find(chosenRoom.Name, "BossFight") and "FLOOR" or "Tp"
+                        local sequence = {"ExitZone", "fightZone", lastZoneName}
+
+                        for _, zoneName in ipairs(sequence) do
+                            local zone = chosenRoom:FindFirstChild(zoneName)
+                            if zone and zone.Position then
+                                pcall(function()
+                                    hrp.CFrame = CFrame.new(zone.Position + Vector3.new(0,5,0))
+                                end)
+                                task.wait(1)
+                            end
+                        end
                     else
                         -- ไม่มีมอนเลย → วาปไปห้องเลขสูงสุด
-                        local maxRoomNum = 0
-                        local targetPos = nil
+                        local maxRoomNum, targetPos = 0, nil
                         for _, roomObj in ipairs(workspace:GetChildren()) do
                             if roomObj:IsA("Model") and tonumber(roomObj.Name) then
                                 local num = tonumber(roomObj.Name)
@@ -232,9 +263,7 @@ MovementSection:AddToggle({
                             end
                         end
                         if targetPos then
-                            pcall(function()
-                                hrp.CFrame = CFrame.new(targetPos + Vector3.new(0,5,0))
-                            end)
+                            hrp.CFrame = CFrame.new(targetPos + Vector3.new(0,5,0))
                         end
                     end
 
@@ -242,7 +271,7 @@ MovementSection:AddToggle({
                 end
             end)
         elseif not AutoWarpLoop and warpLoop then
-            warpLoop:Cancel()
+            task.cancel(warpLoop)
             warpLoop = nil
         end
     end
