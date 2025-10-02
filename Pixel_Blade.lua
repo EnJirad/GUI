@@ -19,7 +19,7 @@ local MovementSection = PlayerTab:AddSection("Movement", true)
 -- =====================
 -- ⚡ Replay Games
 -- =====================
-local replay_g = false
+local replay_g = true
 MovementSection:AddToggle({
     Name = "Replay Games",
     Default = replay_g,
@@ -56,7 +56,7 @@ MovementSection:AddSlider({ Name = "Mob Offset Z", Min = -100, Max = 100, Defaul
 -- =========================
 -- Auto Farm Toggle
 -- =========================
-local MobFreezeLoop = false
+local MobFreezeLoop = true
 local mobLoop
 
 -- ลิสต์มอนมิตร
@@ -125,7 +125,7 @@ MovementSection:AddToggle({
     end
 })
 
-local AutoWarpLoop = false
+local AutoWarpLoop = true
 local warpLoop
 
 -- debug memory
@@ -325,7 +325,7 @@ local abilities_all = {
     "rejuvenate","bloodThirst","frozenWall", "ablaze", "voidGrip",
     "DeathGrasp", "Oblivion", "raiseTheDead","goldenArmy","CosmicVision","blackHole","cosmicBeam",
 }
-local use_Ability = false
+local use_Ability = true
 local currentAbilityIndex, abilityLoop = 1, nil
 
 MovementSection:AddToggle({
