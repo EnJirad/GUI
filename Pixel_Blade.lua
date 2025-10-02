@@ -125,7 +125,6 @@ MovementSection:AddToggle({
     end
 })
 
-
 local AutoWarpLoop = false
 local warpLoop
 
@@ -133,6 +132,7 @@ local warpLoop
 local lastRoomName = nil
 local stuckCount = 0
 local superStuck = 0 -- นับว่าแม้แต่ห้องเลขสูงสุดยังติด
+local roomBlacklist = {} -- กันไม่ให้วนกลับห้องเดิม
 
 MovementSection:AddToggle({
     Name = "Auto Warp",
@@ -142,6 +142,7 @@ MovementSection:AddToggle({
 
         if AutoWarpLoop and not warpLoop then
             warpLoop = task.spawn(function()
+                warn("[AutoWarp] Started loop")
                 while AutoWarpLoop do
                     local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
                     if not hrp then 
@@ -188,7 +189,13 @@ MovementSection:AddToggle({
                             if mobPivot then
                                 for _, roomName in ipairs(roomList) do
                                     local room = workspace:FindFirstChild(roomName)
-                                    if room and room:FindFirstChild("fightZone") then
+
+                                    -- ❌ ข้ามห้องบอส + blacklist
+                                    if room 
+                                        and room:FindFirstChild("fightZone") 
+                                        and not string.find(room.Name, "BossFight") 
+                                        and not roomBlacklist[room.Name] then
+
                                         local dist = (mobPivot.Position - room.fightZone.Position).Magnitude
                                         if dist < nearestDist then
                                             nearestDist = dist
@@ -205,37 +212,38 @@ MovementSection:AddToggle({
                         -- === check stuck loop ===
                         if lastRoomName == chosenRoom.Name then
                             stuckCount += 1
+                            warn("[AutoWarp] Stuck counter:", stuckCount)
                         else
                             stuckCount = 0
                         end
                         lastRoomName = chosenRoom.Name
 
                         if stuckCount >= 3 then
-                            -- 🚨 วนห้องเดิมครบ 3 รอบ
                             stuckCount = 0
                             superStuck += 1
 
                             if superStuck >= 2 then
-                                -- 🚨 วนจนแม้แต่ห้องเลขสูงสุดก็ยังติด → ไปหาห้องที่มีมอน hadEntrance == false แทน
+                                -- 🚨 super stuck → ไปหามอนโดยตรง
                                 if #mobsFalse > 0 then
                                     local fallbackRoom = mobsFalse[1]
                                     local pivot = fallbackRoom:GetPivot()
                                     if pivot then
                                         hrp.CFrame = CFrame.new(pivot.Position + Vector3.new(0,5,0))
-                                        warn("[AutoWarp] 🚨 Super stuck, warping directly to mob room:", fallbackRoom.Name)
+                                        warn("[AutoWarp] 🚨 Super stuck, warping directly to mob:", fallbackRoom.Name)
                                     end
                                 end
                                 superStuck = 0
                                 task.wait(5)
                                 continue
                             else
-                                -- วาปไปห้องเลขสูงสุด
-                                local maxRoomNum, targetPos = 0, nil
+                                -- 🚨 stuck ปกติ → วาปไปห้องเลขสูงสุด
+                                local maxRoomNum, targetPos, maxRoomObj = 0, nil, nil
                                 for _, roomObj in ipairs(workspace:GetChildren()) do
                                     if roomObj:IsA("Model") and tonumber(roomObj.Name) then
                                         local num = tonumber(roomObj.Name)
                                         if num > maxRoomNum then
                                             maxRoomNum = num
+                                            maxRoomObj = roomObj
                                             local roomRoot = roomObj:FindFirstChild("Root")
                                             if roomRoot then
                                                 targetPos = roomRoot.Position
@@ -245,7 +253,11 @@ MovementSection:AddToggle({
                                 end
                                 if targetPos then
                                     hrp.CFrame = CFrame.new(targetPos + Vector3.new(0,5,0))
-                                    warn("[AutoWarp] 🚨 Stuck too long, warping to highest number room")
+                                    warn("[AutoWarp] 🚨 Stuck too long, warping to highest number room:", maxRoomObj.Name)
+                                    -- ✅ blacklist ห้องนี้
+                                    if maxRoomObj then
+                                        roomBlacklist[maxRoomObj.Name] = true
+                                    end
                                 end
                                 task.wait(5)
                                 continue
@@ -261,11 +273,12 @@ MovementSection:AddToggle({
                                 pcall(function()
                                     hrp.CFrame = CFrame.new(zone.Position + Vector3.new(0,5,0))
                                 end)
+                                warn("[AutoWarp] Warping to:", zoneName, "of", chosenRoom.Name)
                                 task.wait(1)
                             end
                         end
                     else
-                        -- ไม่มีมอนเลย → วาปไปห้องเลขสูงสุด
+                        -- ไม่มีมอน → วาปไปห้องเลขสูงสุด
                         local maxRoomNum, targetPos = 0, nil
                         for _, roomObj in ipairs(workspace:GetChildren()) do
                             if roomObj:IsA("Model") and tonumber(roomObj.Name) then
@@ -281,6 +294,7 @@ MovementSection:AddToggle({
                         end
                         if targetPos then
                             hrp.CFrame = CFrame.new(targetPos + Vector3.new(0,5,0))
+                            warn("[AutoWarp] No mobs, warping to highest number room")
                         end
                     end
 
