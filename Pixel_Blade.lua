@@ -42,7 +42,6 @@ MovementSection:AddToggle({
     end
 })
 
-
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
@@ -54,7 +53,7 @@ MovementSection:AddSlider({ Name = "Mob Offset Y", Min = -100, Max = 100, Defaul
 MovementSection:AddSlider({ Name = "Mob Offset Z", Min = -100, Max = 100, Default = offsetZ, Callback = function(v) offsetZ = v end })
 
 -- =========================
--- Auto Farm Toggle
+-- Auto Farm Toggle (Soft Lock)
 -- =========================
 local MobFreezeLoop = true
 local mobLoop
@@ -112,7 +111,22 @@ MovementSection:AddToggle({
                         if hadEntrance == true then
                             local mobHRP = obj:FindFirstChild("HumanoidRootPart")
                             if mobHRP then
-                                mobHRP.CFrame = CFrame.new(hrp.Position + Vector3.new(offsetX, offsetY, offsetZ))
+                                -- Soft lock แบบไม่ Anchored
+                                if mobHRP:FindFirstChild("BodyVelocity") then
+                                    mobHRP.BodyVelocity:Destroy()
+                                end
+                                local bv = Instance.new("BodyVelocity")
+                                bv.Velocity = Vector3.zero
+                                bv.MaxForce = Vector3.new(1e5,1e5,1e5)
+                                bv.P = 1e5
+                                bv.Parent = mobHRP
+
+                                -- ปรับ CanCollide = false ให้ทะลุสิ่งกีดขวาง
+                                mobHRP.CanCollide = false
+
+                                -- อัปเดตตำแหน่งแบบ Soft
+                                local targetPos = hrp.Position + Vector3.new(offsetX, offsetY, offsetZ)
+                                mobHRP.CFrame = CFrame.new(targetPos)
                             end
                         end
                     end
