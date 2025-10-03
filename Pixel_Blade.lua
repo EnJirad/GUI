@@ -44,48 +44,36 @@ MovementSection:AddToggle({
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local PhysicsService = game:GetService("PhysicsService")
 local player = Players.LocalPlayer
 
--- ตัวแปร offset สำหรับฟาร์มมอน
-local offsetX, offsetY, offsetZ = 0, 25, 30
-MovementSection:AddSlider({ Name = "Mob Offset X", Min = -100, Max = 100, Default = offsetX, Callback = function(v) offsetX = v end })
-MovementSection:AddSlider({ Name = "Mob Offset Y", Min = -100, Max = 100, Default = offsetY, Callback = function(v) offsetY = v end })
-MovementSection:AddSlider({ Name = "Mob Offset Z", Min = -100, Max = 100, Default = offsetZ, Callback = function(v) offsetZ = v end })
+-- =========================
+-- Auto Farm Toggle (Adaptive Smooth Tween + Auto Offset + Soft Lock + Collisions)
+-- =========================
 
--- =========================
--- Auto Farm Toggle (Soft Lock)
--- =========================
+local friendlyMobs = { "GoldenPhantom","GiantInfernoGuardian","GiantSkeleton","GiantWizard","GiantZombie",
+    "NecromancerGhoul","ShroomArcher","ShroomKnight","ShroomPaladin" }
+
+local enemyMobs = { "GiantGoblin","CursedGiantGoblin","LumberJack","CursedLumberJack","Kingslayer",
+    "ShimBomboYeti","CorruptShimBomboYeti","Akuma","CorruptAkuma","AkumaOLD","IceDragon",
+    "Zombie","CursedZombie","Archer","CursedArcher","Giant","MegaGiant","Mage","DarkMage",
+    "CannonGoblin","DoubleCannonGoblin","MortarGoblin","MegaMortarGoblin","Bolt","DarkBolt",
+    "Atticus","AtticusOLD","Ghoul","CorruptGhoul","NightWatcher","CorruptNightWatcher","Yeti","CorruptYeti",
+    "FrostGoblin","CorruptFrostGoblin","IceGolem","CorruptIceGolem","MiniIceGolem","MiniIceGolemOld",
+    "MiniCorruptIceGolem","MiniCorruptIceGolemOld","MountainGolem","IglooGoblin","CorruptIglooGoblin",
+    "Ashinaga","CorruptAshinaga","ShadowKnight","CorruptShadowKnight","Sorcerer","CorruptSorcerer",
+    "ElderSorcerer","Kori","BomberGoblin","DesertArcher","Guardian","Maneater","ManeaterOLD",
+    "Mummy","Nekros","Skeleton","SniperSkeleton","TNTSkull","TombstoneGoblin","Wizard",
+    "DarkTombstoneGoblin","InfernoWizard","InfernoGuardian","CorruptSkeleton","CorruptDesertArcher",
+    "CorruptSniperSkeleton","DarkNekros","DarkBomberGoblin","SunsetMummy" }
+
+local friendlySet, enemySet = {}, {}
+for _, name in pairs(friendlyMobs) do friendlySet[name] = true end
+for _, name in pairs(enemyMobs) do enemySet[name] = true end
+
 local MobFreezeLoop = true
 local mobLoop
-
--- ลิสต์มอนมิตร
-local friendlyMobs = {
-    "GoldenPhantom","GiantInfernoGuardian","GiantSkeleton","GiantWizard","GiantZombie",
-    "NecromancerGhoul","ShroomArcher","ShroomKnight","ShroomPaladin"
-}
-
--- ลิสต์มอนศัตรู
-local enemyMobs = {
-    "Archer","Bolt","CannonGoblin","CursedArcher","CursedGiantGoblin","CursedLumberJack",
-    "CursedZombie","DarkBolt","DarkMage","DoubleCannonGoblin","Giant","GiantGoblin",
-    "Kingslayer","LumberJack","Mage","MegaGiant","MegaMortarGoblin","MortarGoblin",
-    "Zombie","Atticus","AtticusOLD","BomberGoblin","DesertArcher","Guardian","Maneater",
-    "ManeaterOLD","Mummy","Nekros","Skeleton","SniperSkeleton","TNTSkull","TombstoneGoblin",
-    "Wizard","DarkTombstoneGoblin","InfernoWizard","InfernoGuardian","CorruptSkeleton",
-    "CorruptDesertArcher","CorruptSniperSkeleton","DarkNekros","DarkBomberGoblin","SunsetMummy",
-    "NightWatcher","Ashinaga","MiniCorruptIceGolem","ShadowKnight","Ghoul","CorruptShadowKnight",
-    "MiniIceGolemOld","CorruptIceGolem","FrostGoblin","IglooGoblin","CorruptYeti","AkumaOLD",
-    "ElderSorcerer","Kori","IceDragon","Akuma","MountainGolem","CorruptGhoul","Yeti",
-    "CorruptAshinaga","MiniCorruptIceGolemOld","CorruptNightWatcher","CorruptFrostGoblin",
-    "CorruptIglooGoblin","Sorcerer","CorruptSorcerer","IceGolem","MiniIceGolem","ShimBomboYeti",
-    "CorruptShimBomboYeti","CorruptAkuma"
-}
-
--- แปลงลิสต์เป็น set เพื่อเช็คเร็ว
-local friendlySet = {}
-for _, name in pairs(friendlyMobs) do friendlySet[name] = true end
-local enemySet = {}
-for _, name in pairs(enemyMobs) do enemySet[name] = true end
 
 MovementSection:AddToggle({
     Name = "Auto Farm",
@@ -101,32 +89,52 @@ MovementSection:AddToggle({
                 for _, obj in ipairs(workspace:GetChildren()) do
                     if obj:IsA("Model") then
                         local mobName = obj.Name
-
-                        -- ข้ามมอนมิตร
                         if friendlySet[mobName] then continue end
-                        -- ข้ามมอนที่ไม่ใช่ศัตรู
                         if not enemySet[mobName] then continue end
 
                         local hadEntrance = obj:GetAttribute("hadEntrance")
                         if hadEntrance == true then
                             local mobHRP = obj:FindFirstChild("HumanoidRootPart")
-                            if mobHRP then
-                                -- Soft lock แบบไม่ Anchored
+                            local humanoid = obj:FindFirstChildWhichIsA("Humanoid")
+                            if mobHRP and humanoid then
+                                -- ลบ BodyVelocity เดิม
                                 if mobHRP:FindFirstChild("BodyVelocity") then
                                     mobHRP.BodyVelocity:Destroy()
                                 end
-                                local bv = Instance.new("BodyVelocity")
-                                bv.Velocity = Vector3.zero
-                                bv.MaxForce = Vector3.new(1e5,1e5,1e5)
-                                bv.P = 1e5
-                                bv.Parent = mobHRP
 
-                                -- ปรับ CanCollide = false ให้ทะลุสิ่งกีดขวาง
-                                mobHRP.CanCollide = false
+                                -- ตั้ง CollisionGroup ให้ทะลุ Default
+                                for _, part in ipairs(obj:GetDescendants()) do
+                                    if part:IsA("BasePart") then
+                                        part.CanCollide = false
+                                        PhysicsService:SetPartCollisionGroup(part, "enemies")
+                                    end
+                                end
 
-                                -- อัปเดตตำแหน่งแบบ Soft
-                                local targetPos = hrp.Position + Vector3.new(offsetX, offsetY, offsetZ)
-                                mobHRP.CFrame = CFrame.new(targetPos)
+                                -- Auto Offset dynamic
+                                local mobSize = mobHRP.Size
+                                local baseOffset = Vector3.new(0, 25, 20)
+                                local targetPos = hrp.Position + Vector3.new(baseOffset.X, baseOffset.Y, baseOffset.Z + mobSize.Z)
+
+                                -- Adaptive Tween
+                                local distance = (targetPos - mobHRP.Position).Magnitude
+                                local walkSpeed = humanoid.WalkSpeed
+                                local tweenTime = math.clamp(distance / walkSpeed, 0.1, 0.5)
+
+                                local tweenInfo = TweenInfo.new(tweenTime, Enum.EasingStyle.Linear)
+                                local tween = TweenService:Create(mobHRP, tweenInfo, {CFrame = CFrame.new(targetPos)})
+
+                                tween.Completed:Connect(function()
+                                    -- Soft Lock
+                                    if not mobHRP:FindFirstChild("BodyVelocity") then
+                                        local bv = Instance.new("BodyVelocity")
+                                        bv.MaxForce = Vector3.new(1e5,1e5,1e5)
+                                        bv.P = 1e5
+                                        bv.Velocity = Vector3.new(0,0,0)
+                                        bv.Parent = mobHRP
+                                    end
+                                end)
+
+                                tween:Play()
                             end
                         end
                     end
@@ -139,14 +147,14 @@ MovementSection:AddToggle({
     end
 })
 
+
 local AutoWarpLoop = true
 local warpLoop
 
--- debug memory
 local lastRoomName = nil
 local stuckCount = 0
-local superStuck = 0 -- นับว่าแม้แต่ห้องเลขสูงสุดยังติด
-local roomBlacklist = {} -- กันไม่ให้วนกลับห้องเดิม
+local superStuck = 0
+local roomBlacklist = {}
 
 MovementSection:AddToggle({
     Name = "Auto Warp",
@@ -156,7 +164,6 @@ MovementSection:AddToggle({
 
         if AutoWarpLoop and not warpLoop then
             warpLoop = task.spawn(function()
-                warn("[AutoWarp] Started loop")
                 while AutoWarpLoop do
                     local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
                     if not hrp then 
@@ -164,7 +171,7 @@ MovementSection:AddToggle({
                         continue
                     end
 
-                    -- === สร้าง roomList dynamic ===
+                    -- สร้าง roomList dynamic
                     local mainRooms = {"Small_odd", "Small_even", "Medium_even", "Medium_odd"}
                     local roomList = {}
                     for _, name in ipairs(mainRooms) do table.insert(roomList, name) end
@@ -174,6 +181,7 @@ MovementSection:AddToggle({
                         end
                     end
 
+                    -- ตรวจจับมอน
                     local mobsTrue, mobsFalse = {}, {}
                     for _, obj in ipairs(workspace:GetChildren()) do
                         if obj:IsA("Model") then
@@ -189,12 +197,13 @@ MovementSection:AddToggle({
                         end
                     end
 
-                    -- ถ้ามีมอน hadEntrance true → อยู่รอ
+                    -- ถ้ามีมอน hadEntrance true → รอ
                     if #mobsTrue > 0 then
                         task.wait(5)
                         continue
                     end
 
+                    -- เลือกห้อง
                     local chosenRoom = nil
                     if #mobsFalse > 0 then
                         local nearestRoom, nearestDist = nil, math.huge
@@ -203,13 +212,7 @@ MovementSection:AddToggle({
                             if mobPivot then
                                 for _, roomName in ipairs(roomList) do
                                     local room = workspace:FindFirstChild(roomName)
-
-                                    -- ❌ ข้ามห้องบอส + blacklist
-                                    if room 
-                                        and room:FindFirstChild("fightZone") 
-                                        and not string.find(room.Name, "BossFight") 
-                                        and not roomBlacklist[room.Name] then
-
+                                    if room and room:FindFirstChild("fightZone") and not roomBlacklist[room.Name] then
                                         local dist = (mobPivot.Position - room.fightZone.Position).Magnitude
                                         if dist < nearestDist then
                                             nearestDist = dist
@@ -222,74 +225,74 @@ MovementSection:AddToggle({
                         chosenRoom = nearestRoom
                     end
 
+                    -- เช็ค stuck
                     if chosenRoom then
-                        -- === check stuck loop ===
                         if lastRoomName == chosenRoom.Name then
                             stuckCount += 1
-                            warn("[AutoWarp] Stuck counter:", stuckCount)
-                        else
-                            stuckCount = 0
-                        end
-                        lastRoomName = chosenRoom.Name
 
-                        if stuckCount >= 3 then
-                            stuckCount = 0
-                            superStuck += 1
+                            if stuckCount >= 1 then
+                                stuckCount = 0
+                                superStuck += 1
 
-                            if superStuck >= 2 then
-                                -- 🚨 super stuck → ไปหามอนโดยตรง
-                                if #mobsFalse > 0 then
-                                    local fallbackRoom = mobsFalse[1]
-                                    local pivot = fallbackRoom:GetPivot()
-                                    if pivot then
-                                        hrp.CFrame = CFrame.new(pivot.Position + Vector3.new(0,5,0))
-                                        warn("[AutoWarp] 🚨 Super stuck, warping directly to mob:", fallbackRoom.Name)
+                                if superStuck >= 2 then
+                                    if #mobsFalse > 0 then
+                                        local fallbackRoom = mobsFalse[1]
+                                        local pivot = fallbackRoom:GetPivot()
+                                        if pivot then
+                                            hrp.CFrame = CFrame.new(pivot.Position + Vector3.new(0,5,0))
+                                        end
                                     end
-                                end
-                                superStuck = 0
-                                task.wait(5)
-                                continue
-                            else
-                                -- 🚨 stuck ปกติ → วาปไปห้องเลขสูงสุด
-                                local maxRoomNum, targetPos, maxRoomObj = 0, nil, nil
-                                for _, roomObj in ipairs(workspace:GetChildren()) do
-                                    if roomObj:IsA("Model") and tonumber(roomObj.Name) then
-                                        local num = tonumber(roomObj.Name)
-                                        if num > maxRoomNum then
-                                            maxRoomNum = num
-                                            maxRoomObj = roomObj
-                                            local roomRoot = roomObj:FindFirstChild("Root")
-                                            if roomRoot then
-                                                targetPos = roomRoot.Position
+                                    superStuck = 0
+                                    task.wait(5)
+                                    continue
+                                else
+                                    -- stuck ปกติ → วาปไปห้องเลขสูงสุด
+                                    local maxRoomNum, targetPos, maxRoomObj = 0, nil, nil
+                                    for _, roomObj in ipairs(workspace:GetChildren()) do
+                                        if roomObj:IsA("Model") and tonumber(roomObj.Name) then
+                                            local num = tonumber(roomObj.Name)
+                                            if num > maxRoomNum then
+                                                maxRoomNum = num
+                                                maxRoomObj = roomObj
+                                                local roomRoot = roomObj:FindFirstChild("Root")
+                                                if roomRoot then
+                                                    targetPos = roomRoot.Position
+                                                end
                                             end
                                         end
                                     end
-                                end
-                                if targetPos then
-                                    hrp.CFrame = CFrame.new(targetPos + Vector3.new(0,5,0))
-                                    warn("[AutoWarp] 🚨 Stuck too long, warping to highest number room:", maxRoomObj.Name)
-                                    -- ✅ blacklist ห้องนี้
-                                    if maxRoomObj then
-                                        roomBlacklist[maxRoomObj.Name] = true
+                                    if targetPos then
+                                        hrp.CFrame = CFrame.new(targetPos + Vector3.new(0,5,0))
+                                        if maxRoomObj then
+                                            roomBlacklist[maxRoomObj.Name] = true
+                                        end
                                     end
+                                    task.wait(5)
+                                    continue
                                 end
-                                task.wait(5)
-                                continue
                             end
+                        else
+                            stuckCount = 0
                         end
 
-                        local lastZoneName = string.find(chosenRoom.Name, "BossFight") and "FLOOR" or "Tp"
-                        local sequence = {"ExitZone", "fightZone", lastZoneName}
+                        lastRoomName = chosenRoom.Name
 
-                        for _, zoneName in ipairs(sequence) do
-                            local zone = chosenRoom:FindFirstChild(zoneName)
-                            if zone and zone:IsA("BasePart") then
-                                pcall(function()
-                                    hrp.CFrame = CFrame.new(zone.Position + Vector3.new(0,5,0))
-                                end)
-                                warn("[AutoWarp] Warping to:", zoneName, "of", chosenRoom.Name)
-                                task.wait(1)
-                            end
+                        -- วาป ExitZone
+                        local exitZone = chosenRoom:FindFirstChild("ExitZone")
+                        if exitZone and exitZone:IsA("BasePart") then
+                            pcall(function()
+                                hrp.CFrame = CFrame.new(exitZone.Position + Vector3.new(0,5,0))
+                            end)
+                            task.wait(1)
+                        end
+
+                        -- จุดสุดท้าย → fightZone offset (สูง 20, ห่าง 20)
+                        local fightZone = chosenRoom:FindFirstChild("fightZone")
+                        if fightZone and fightZone:IsA("BasePart") then
+                            local targetPos = fightZone.Position + Vector3.new(0,20,20)
+                            pcall(function()
+                                hrp.CFrame = CFrame.new(targetPos)
+                            end)
                         end
                     else
                         -- ไม่มีมอน → วาปไปห้องเลขสูงสุด
@@ -308,11 +311,10 @@ MovementSection:AddToggle({
                         end
                         if targetPos then
                             hrp.CFrame = CFrame.new(targetPos + Vector3.new(0,5,0))
-                            warn("[AutoWarp] No mobs, warping to highest number room")
                         end
                     end
 
-                    task.wait(5)
+                    task.wait(1)
                 end
             end)
         elseif not AutoWarpLoop and warpLoop then
@@ -349,7 +351,7 @@ MovementSection:AddToggle({
         use_Ability = state
         if use_Ability and not abilityLoop then
             abilityLoop = RunService.Heartbeat:Connect(function()
-                task.wait(0.3) -- ยิงสกิลทุก 0.3 วิ
+                task.wait(1) -- ยิงสกิลทุก 1 วิ
                 if not use_Ability then return end
                 local ability = abilities_all[currentAbilityIndex]
                 if ability then
