@@ -149,12 +149,12 @@ MovementSection:AddToggle({
 
 local AutoWarpLoop = true
 local warpLoop
-local fightZoneWatcher
 
 local lastRoomName = nil
 local stuckCount = 0
 local superStuck = 0
 local roomBlacklist = {}
+local lastFightOffsetPos = nil -- เก็บตำแหน่ง fightZone offset ล่าสุด
 
 MovementSection:AddToggle({
     Name = "Auto Warp",
@@ -197,6 +197,19 @@ MovementSection:AddToggle({
                         end
                     end
 
+                    -- ถ้ามีมอน hadEntrance true → รอ และ warp กลับถ้าอยู่ห่างจาก lastFightOffsetPos
+                    if #mobsTrue > 0 and lastFightOffsetPos then
+                        local dist = (hrp.Position - lastFightOffsetPos).Magnitude
+                        if dist > 5 then
+                            -- warp กลับไปใช้ตำแหน่ง fightZone offset ล่าสุด
+                            pcall(function()
+                                hrp.CFrame = CFrame.new(lastFightOffsetPos)
+                            end)
+                        end
+                        task.wait(5)
+                        continue
+                    end
+
                     -- เลือกห้อง
                     local chosenRoom = nil
                     if #mobsFalse > 0 then
@@ -219,14 +232,15 @@ MovementSection:AddToggle({
                         chosenRoom = nearestRoom
                     end
 
-                    -- เช็ค stuck และวาปตามสเต็ป
-                    local targetPos
+                    -- เช็ค stuck
                     if chosenRoom then
                         if lastRoomName == chosenRoom.Name then
                             stuckCount += 1
+
                             if stuckCount >= 1 then
                                 stuckCount = 0
                                 superStuck += 1
+
                                 if superStuck >= 2 then
                                     if #mobsFalse > 0 then
                                         local fallbackRoom = mobsFalse[1]
@@ -240,7 +254,7 @@ MovementSection:AddToggle({
                                     continue
                                 else
                                     -- stuck ปกติ → วาปไปห้องเลขสูงสุด
-                                    local maxRoomNum, targetPos2, maxRoomObj = 0, nil, nil
+                                    local maxRoomNum, targetPos, maxRoomObj = 0, nil, nil
                                     for _, roomObj in ipairs(workspace:GetChildren()) do
                                         if roomObj:IsA("Model") and tonumber(roomObj.Name) then
                                             local num = tonumber(roomObj.Name)
@@ -249,13 +263,13 @@ MovementSection:AddToggle({
                                                 maxRoomObj = roomObj
                                                 local roomRoot = roomObj:FindFirstChild("Root")
                                                 if roomRoot then
-                                                    targetPos2 = roomRoot.Position
+                                                    targetPos = roomRoot.Position
                                                 end
                                             end
                                         end
                                     end
-                                    if targetPos2 then
-                                        hrp.CFrame = CFrame.new(targetPos2 + Vector3.new(0,5,0))
+                                    if targetPos then
+                                        hrp.CFrame = CFrame.new(targetPos + Vector3.new(0,5,0))
                                         if maxRoomObj then
                                             roomBlacklist[maxRoomObj.Name] = true
                                         end
@@ -282,14 +296,18 @@ MovementSection:AddToggle({
                         -- จุดสุดท้าย → fightZone offset (สูง 20, ห่าง 20)
                         local fightZone = chosenRoom:FindFirstChild("fightZone")
                         if fightZone and fightZone:IsA("BasePart") then
-                            targetPos = fightZone.Position + Vector3.new(0,20,20)
+                            local targetPos = fightZone.Position + Vector3.new(0,20,20)
+
+                            -- อัปเดต lastFightOffsetPos ทันที
+                            lastFightOffsetPos = targetPos
+
                             pcall(function()
                                 hrp.CFrame = CFrame.new(targetPos)
                             end)
                         end
                     else
                         -- ไม่มีมอน → วาปไปห้องเลขสูงสุด
-                        local maxRoomNum, targetPos2 = 0, nil
+                        local maxRoomNum, targetPos = 0, nil
                         for _, roomObj in ipairs(workspace:GetChildren()) do
                             if roomObj:IsA("Model") and tonumber(roomObj.Name) then
                                 local num = tonumber(roomObj.Name)
@@ -297,76 +315,26 @@ MovementSection:AddToggle({
                                     maxRoomNum = num
                                     local roomRoot = roomObj:FindFirstChild("Root")
                                     if roomRoot then
-                                        targetPos2 = roomRoot.Position
+                                        targetPos = roomRoot.Position
                                     end
                                 end
                             end
                         end
-                        if targetPos2 then
-                            hrp.CFrame = CFrame.new(targetPos2 + Vector3.new(0,5,0))
+                        if targetPos then
+                            hrp.CFrame = CFrame.new(targetPos + Vector3.new(0,5,0))
                         end
                     end
 
                     task.wait(1)
                 end
             end)
-
-            -- ========================
-            -- fightZone offset watcher loop (ตลอดเวลา)
-            -- ========================
-            if not fightZoneWatcher then
-                fightZoneWatcher = task.spawn(function()
-                    while AutoWarpLoop do
-                        local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-                        if not hrp then task.wait(0.5) continue end
-
-                        if lastRoomName then
-                            local room = workspace:FindFirstChild(lastRoomName)
-                            local fightZone = room and room:FindFirstChild("fightZone")
-                            if fightZone and fightZone:IsA("BasePart") then
-                                local offsetPos = fightZone.Position + Vector3.new(0,20,20)
-
-                                -- ตรวจสอบมอนในห้อง
-                                local mobsInRoom = {}
-                                for _, obj in ipairs(workspace:GetChildren()) do
-                                    if obj:IsA("Model") then
-                                        local mobName = obj.Name
-                                        if not friendlySet[mobName] and enemySet[mobName] then
-                                            local attr = obj:GetAttribute("hadEntrance")
-                                            if attr == true then
-                                                table.insert(mobsInRoom, obj)
-                                            end
-                                        end
-                                    end
-                                end
-
-                                -- คำนวณระยะทางแนวราบ (XZ plane) เท่านั้น
-                                local hrpXZ = Vector2.new(hrp.Position.X, hrp.Position.Z)
-                                local targetXZ = Vector2.new(offsetPos.X, offsetPos.Z)
-                                if #mobsInRoom > 0 and (hrpXZ - targetXZ).Magnitude > 5 then
-                                    pcall(function()
-                                        hrp.CFrame = CFrame.new(offsetPos.X, hrp.Position.Y, offsetPos.Z)
-                                    end)
-                                end
-                            end
-                        end
-
-                        task.wait(0.5)
-                    end
-                end)
-            end
-        elseif not AutoWarpLoop then
-            if warpLoop then
-                task.cancel(warpLoop)
-                warpLoop = nil
-            end
-            if fightZoneWatcher then
-                task.cancel(fightZoneWatcher)
-                fightZoneWatcher = nil
-            end
+        elseif not AutoWarpLoop and warpLoop then
+            task.cancel(warpLoop)
+            warpLoop = nil
         end
     end
 })
+
 
 -- =====================
 -- ⚡ Auto Skill
