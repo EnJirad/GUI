@@ -61,7 +61,7 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
 
-local tp_mon = false
+local tp_mon = true
 local connection = nil
 local isBusy = false
 
@@ -314,7 +314,7 @@ local abilities_all = {
     "rejuvenate","bloodThirst","frozenWall", "ablaze", "voidGrip",
     "DeathGrasp", "Oblivion", "raiseTheDead","goldenArmy","CosmicVision","blackHole","cosmicBeam",
 }
-local use_Ability = false
+local use_Ability = true
 local currentAbilityIndex, abilityLoop = 1, nil
 
 MovementSection:AddToggle({
