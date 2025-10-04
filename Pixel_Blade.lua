@@ -1,6 +1,6 @@
 local PixelLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/EnJirad/GUI/refs/heads/main/Plib.lua"))()
 
--- Create main GUI
+-- Create main GUI with improved configuration
 local Window = PixelLib:CreateGui({
     NameHub = "Pixel Hub",
     Description = "#VIP: Pixel Blade",
@@ -10,11 +10,26 @@ local Window = PixelLib:CreateGui({
 })
 
 local TabControls = Window
+
+-- Player Features Tab
 local PlayerTab = TabControls:CreateTab({
     Name = "Player",
     Icon = "rbxassetid://7072719338"
 })
+
+-- Movement Section
 local MovementSection = PlayerTab:AddSection("Movement", true)
+
+local BossRooms = {
+    ["YetiBossFight"] = {"ShimBomboYeti","CorruptShimBomboYeti"},
+    ["AkumaBossFight"] = {"Akuma","CorruptAkuma"},
+    ["KoriBossFight"] = {"IceDragon"},
+}
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
+
 
 -- =====================
 -- ⚡ Replay Games
@@ -44,293 +59,239 @@ MovementSection:AddToggle({
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
-local PhysicsService = game:GetService("PhysicsService")
 local player = Players.LocalPlayer
 
--- =========================
--- Auto Farm Toggle (Adaptive Smooth Tween + Auto Offset + Soft Lock + Collisions)
--- =========================
+local tp_mon = false
+local connection = nil
+local isBusy = false
 
-local friendlyMobs = { "GoldenPhantom","GiantInfernoGuardian","GiantSkeleton","GiantWizard","GiantZombie",
-    "NecromancerGhoul","ShroomArcher","ShroomKnight","ShroomPaladin" }
+local friendlyMobs = { 
+    "GoldenPhantom","GiantInfernoGuardian","GiantSkeleton","GiantWizard","GiantZombie",
+    "NecromancerGhoul","ShroomArcher","ShroomKnight","ShroomPaladin"
+}
 
-local enemyMobs = { "GiantGoblin","CursedGiantGoblin","LumberJack","CursedLumberJack","Kingslayer",
-    "ShimBomboYeti","CorruptShimBomboYeti","Akuma","CorruptAkuma","AkumaOLD","IceDragon",
-    "Zombie","CursedZombie","Archer","CursedArcher","Giant","MegaGiant","Mage","DarkMage",
-    "CannonGoblin","DoubleCannonGoblin","MortarGoblin","MegaMortarGoblin","Bolt","DarkBolt",
-    "Atticus","AtticusOLD","Ghoul","CorruptGhoul","NightWatcher","CorruptNightWatcher","Yeti","CorruptYeti",
-    "FrostGoblin","CorruptFrostGoblin","IceGolem","CorruptIceGolem","MiniIceGolem","MiniIceGolemOld",
-    "MiniCorruptIceGolem","MiniCorruptIceGolemOld","MountainGolem","IglooGoblin","CorruptIglooGoblin",
-    "Ashinaga","CorruptAshinaga","ShadowKnight","CorruptShadowKnight","Sorcerer","CorruptSorcerer",
-    "ElderSorcerer","Kori","BomberGoblin","DesertArcher","Guardian","Maneater","ManeaterOLD",
-    "Mummy","Nekros","Skeleton","SniperSkeleton","TNTSkull","TombstoneGoblin","Wizard",
-    "DarkTombstoneGoblin","InfernoWizard","InfernoGuardian","CorruptSkeleton","CorruptDesertArcher",
-    "CorruptSniperSkeleton","DarkNekros","DarkBomberGoblin","SunsetMummy" }
+local BossFT = {
+    "GiantGoblin","CursedGiantGoblin","LumberJack","CursedLumberJack","Kingslayer",
+    "ShimBomboYeti","CorruptShimBomboYeti","Akuma","CorruptAkuma","IceDragon"
+}
 
-local friendlySet, enemySet = {}, {}
-for _, name in pairs(friendlyMobs) do friendlySet[name] = true end
-for _, name in pairs(enemyMobs) do enemySet[name] = true end
+local AkumaSpecials = {"Akuma", "CorruptAkuma"}
+local mainRooms = {"Small_odd","Small_even","Medium_even","Medium_odd","Large_even","Large_odd"}
 
-local MobFreezeLoop = true
-local mobLoop
+local akumaPositions = {}
+local visitedBossRooms = {}     -- ห้อง BossFight ที่เคยไปแล้ว
+local lastFalseMob = nil        -- จำมอน false ล่าสุด
 
-MovementSection:AddToggle({
-    Name = "Auto Farm",
-    Default = MobFreezeLoop,
-    Callback = function(state)
-        MobFreezeLoop = state
+-- =========================================================
+-- Helper
+-- =========================================================
+local function warpTo(pos, offsetY)
+    if not tp_mon or not pos then return end
+    local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if hrp then
+        pcall(function()
+            hrp.CFrame = CFrame.new(pos + Vector3.new(0, offsetY or 0, 0))
+        end)
+    end
+end
 
-        if MobFreezeLoop and not mobLoop then
-            mobLoop = RunService.Heartbeat:Connect(function()
-                local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-                if not hrp then return end
-
-                for _, obj in ipairs(workspace:GetChildren()) do
-                    if obj:IsA("Model") then
-                        local mobName = obj.Name
-                        if friendlySet[mobName] then continue end
-                        if not enemySet[mobName] then continue end
-
-                        local hadEntrance = obj:GetAttribute("hadEntrance")
-                        if hadEntrance == true then
-                            local mobHRP = obj:FindFirstChild("HumanoidRootPart")
-                            local humanoid = obj:FindFirstChildWhichIsA("Humanoid")
-                            if mobHRP and humanoid then
-                                -- ลบ BodyVelocity เดิม
-                                if mobHRP:FindFirstChild("BodyVelocity") then
-                                    mobHRP.BodyVelocity:Destroy()
-                                end
-
-                                -- ตั้ง CollisionGroup ให้ทะลุ Default
-                                for _, part in ipairs(obj:GetDescendants()) do
-                                    if part:IsA("BasePart") then
-                                        part.CanCollide = false
-                                        PhysicsService:SetPartCollisionGroup(part, "enemies")
-                                    end
-                                end
-
-                                -- Auto Offset dynamic
-                                local mobSize = mobHRP.Size
-                                local baseOffset = Vector3.new(0, 25, 20)
-                                local targetPos = hrp.Position + Vector3.new(baseOffset.X, baseOffset.Y, baseOffset.Z + mobSize.Z)
-
-                                -- Adaptive Tween
-                                local distance = (targetPos - mobHRP.Position).Magnitude
-                                local walkSpeed = humanoid.WalkSpeed
-                                local tweenTime = math.clamp(distance / walkSpeed, 0.1, 0.5)
-
-                                local tweenInfo = TweenInfo.new(tweenTime, Enum.EasingStyle.Linear)
-                                local tween = TweenService:Create(mobHRP, tweenInfo, {CFrame = CFrame.new(targetPos)})
-
-                                tween.Completed:Connect(function()
-                                    -- Soft Lock
-                                    if not mobHRP:FindFirstChild("BodyVelocity") then
-                                        local bv = Instance.new("BodyVelocity")
-                                        bv.MaxForce = Vector3.new(1e5,1e5,1e5)
-                                        bv.P = 1e5
-                                        bv.Velocity = Vector3.new(0,0,0)
-                                        bv.Parent = mobHRP
-                                    end
-                                end)
-
-                                tween:Play()
-                            end
+-- หา ExitZone ที่ใกล้มอน hadEntrance == false ที่สุด
+local function warpToNearestExitZone(mobsFalse)
+    local nearestExit, minDist = nil, math.huge
+    for _, mob in ipairs(mobsFalse) do
+        local mobHRP = mob:FindFirstChild("HumanoidRootPart")
+        if mobHRP then
+            for _, room in ipairs(workspace:GetChildren()) do
+                if room:IsA("Model") and (table.find(mainRooms, room.Name) or room.Name:find("BossFight")) then
+                    local exit = room:FindFirstChild("ExitZone")
+                    if exit then
+                        local dist = (mobHRP.Position - exit.Position).Magnitude
+                        if dist < minDist then
+                            minDist = dist
+                            nearestExit = exit.Position
                         end
                     end
                 end
-            end)
-        elseif not MobFreezeLoop and mobLoop then
-            mobLoop:Disconnect()
-            mobLoop = nil
+            end
         end
     end
-})
+    if nearestExit then
+        warpTo(nearestExit, 5)
+        task.wait(0.35)
+        return nearestExit
+    end
+    return nil
+end
 
-local AutoWarpLoop = true
-local warpLoop
+local function warpToLargestRoom()
+    local maxNum, targetPos = 0, nil
+    for _, roomObj in ipairs(workspace:GetChildren()) do
+        if roomObj:IsA("Model") then
+            local n = tonumber(roomObj.Name)
+            if n and n > maxNum then
+                maxNum = n
+                local root = roomObj:FindFirstChild("Root")
+                if root then targetPos = root.Position end
+            end
+        end
+    end
+    if targetPos then warpTo(targetPos, 5) end
+end
 
-local lastRoomName = nil
-local stuckCount = 0
-local superStuck = 0
-local roomBlacklist = {}
-local lastFightOffsetPos = nil -- เก็บตำแหน่ง fightZone offset ล่าสุด
+local function pullMobs(mobs)
+    if not tp_mon then return end
+    local char = player.Character or player.CharacterAdded:Wait()
+    local playerHRP = char and char:FindFirstChild("HumanoidRootPart")
+    if not playerHRP then return end
 
+    for _, mob in ipairs(mobs) do
+        if not tp_mon then break end
+        if not mob or not mob.Parent then continue end
+        local monHRP = mob:FindFirstChild("HumanoidRootPart")
+        if monHRP then
+            monHRP.CanCollide = false
+            local monSize = monHRP.Size or Vector3.new(2,2,2)
+            local distanceOffset = 20 + (monSize.Z / 2)
+            local heightOffset = 20 + (monSize.Y / 4)
+            local tpPosition = playerHRP.Position + playerHRP.CFrame.LookVector * distanceOffset + Vector3.new(0, heightOffset, 0)
+            monHRP.CFrame = CFrame.new(tpPosition, tpPosition + playerHRP.CFrame.LookVector)
+        end
+    end
+end
+
+-- =========================================================
+-- BossFight Logic
+-- =========================================================
+local function handleBossFightRoom(room)
+    if visitedBossRooms[room.Name] then return end
+    visitedBossRooms[room.Name] = true
+
+    local exit = room:FindFirstChild("ExitZone")
+    local floor = room:FindFirstChild("FLOOR")
+
+    if exit and floor then
+        warpTo(exit.Position, 5)
+        task.wait(0.5)
+        warpTo(floor.Position, 5)
+        task.wait(2)
+        warpTo(floor.Position, 5)
+    end
+end
+
+-- =========================================================
+-- Main Loop
+-- =========================================================
 MovementSection:AddToggle({
-    Name = "Auto Warp",
-    Default = AutoWarpLoop,
+    Name = "Auto TP Mon",
+    Default = tp_mon,
     Callback = function(state)
-        AutoWarpLoop = state
+        tp_mon = state
 
-        if AutoWarpLoop and not warpLoop then
-            warpLoop = task.spawn(function()
-                while AutoWarpLoop do
-                    local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-                    if not hrp then 
-                        task.wait(1)
-                        continue
-                    end
+        if not tp_mon then
+            if connection then
+                connection:Disconnect()
+                connection = nil
+            end
+            isBusy = false
+            lastFalseMob = nil
+            visitedBossRooms = {}
+            return
+        end
 
-                    -- สร้าง roomList dynamic
-                    local mainRooms = {"Small_odd", "Small_even", "Medium_even", "Medium_odd"}
-                    local roomList = {}
-                    for _, name in ipairs(mainRooms) do table.insert(roomList, name) end
-                    for _, roomObj in ipairs(workspace:GetChildren()) do
-                        if roomObj:IsA("Model") and string.find(roomObj.Name, "BossFight") then
-                            table.insert(roomList, roomObj.Name)
-                        end
-                    end
+        if tp_mon and not connection then
+            connection = RunService.Heartbeat:Connect(function()
+                if not tp_mon or isBusy then return end
+                isBusy = true
 
-                    -- ตรวจจับมอน
-                    local mobsTrue, mobsFalse = {}, {}
-                    for _, obj in ipairs(workspace:GetChildren()) do
-                        if obj:IsA("Model") then
-                            local mobName = obj.Name
-                            if friendlySet[mobName] then continue end
-                            if not enemySet[mobName] then continue end
-                            local attr = obj:GetAttribute("hadEntrance")
-                            if attr == true then
+                local mobsTrue, mobsFalse = {}, {}
+                for _, obj in pairs(workspace:GetChildren()) do
+                    if obj:IsA("Model") and not table.find(friendlyMobs, obj.Name) then
+                        local hrp = obj:FindFirstChild("HumanoidRootPart")
+                        local hadEntrance = obj:GetAttribute("hadEntrance")
+                        if hrp then
+                            if hadEntrance == true then
                                 table.insert(mobsTrue, obj)
-                            elseif attr == false then
+                            elseif hadEntrance == false then
                                 table.insert(mobsFalse, obj)
                             end
                         end
                     end
-
-                    -- ถ้ามีมอน hadEntrance true → รอ และ warp กลับถ้าอยู่ห่างจาก lastFightOffsetPos
-                    if #mobsTrue > 0 and lastFightOffsetPos then
-                        local dist = (hrp.Position - lastFightOffsetPos).Magnitude
-                        if dist > 5 then
-                            -- warp กลับไปใช้ตำแหน่ง fightZone offset ล่าสุด
-                            pcall(function()
-                                hrp.CFrame = CFrame.new(lastFightOffsetPos)
-                            end)
-                        end
-                        task.wait(5)
-                        continue
-                    end
-
-                    -- เลือกห้อง
-                    local chosenRoom = nil
-                    if #mobsFalse > 0 then
-                        local nearestRoom, nearestDist = nil, math.huge
-                        for _, mob in ipairs(mobsFalse) do
-                            local mobPivot = mob:GetPivot() or mob:FindFirstChild("HumanoidRootPart")
-                            if mobPivot then
-                                for _, roomName in ipairs(roomList) do
-                                    local room = workspace:FindFirstChild(roomName)
-                                    if room and room:FindFirstChild("fightZone") and not roomBlacklist[room.Name] then
-                                        local dist = (mobPivot.Position - room.fightZone.Position).Magnitude
-                                        if dist < nearestDist then
-                                            nearestDist = dist
-                                            nearestRoom = room
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                        chosenRoom = nearestRoom
-                    end
-
-                    -- เช็ค stuck
-                    if chosenRoom then
-                        if lastRoomName == chosenRoom.Name then
-                            stuckCount += 1
-
-                            if stuckCount >= 1 then
-                                stuckCount = 0
-                                superStuck += 1
-
-                                if superStuck >= 2 then
-                                    if #mobsFalse > 0 then
-                                        local fallbackRoom = mobsFalse[1]
-                                        local pivot = fallbackRoom:GetPivot()
-                                        if pivot then
-                                            hrp.CFrame = CFrame.new(pivot.Position + Vector3.new(0,5,0))
-                                        end
-                                    end
-                                    superStuck = 0
-                                    task.wait(5)
-                                    continue
-                                else
-                                    -- stuck ปกติ → วาปไปห้องเลขสูงสุด
-                                    local maxRoomNum, targetPos, maxRoomObj = 0, nil, nil
-                                    for _, roomObj in ipairs(workspace:GetChildren()) do
-                                        if roomObj:IsA("Model") and tonumber(roomObj.Name) then
-                                            local num = tonumber(roomObj.Name)
-                                            if num > maxRoomNum then
-                                                maxRoomNum = num
-                                                maxRoomObj = roomObj
-                                                local roomRoot = roomObj:FindFirstChild("Root")
-                                                if roomRoot then
-                                                    targetPos = roomRoot.Position
-                                                end
-                                            end
-                                        end
-                                    end
-                                    if targetPos then
-                                        hrp.CFrame = CFrame.new(targetPos + Vector3.new(0,5,0))
-                                        if maxRoomObj then
-                                            roomBlacklist[maxRoomObj.Name] = true
-                                        end
-                                    end
-                                    task.wait(5)
-                                    continue
-                                end
-                            end
-                        else
-                            stuckCount = 0
-                        end
-
-                        lastRoomName = chosenRoom.Name
-
-                        -- วาป ExitZone
-                        local exitZone = chosenRoom:FindFirstChild("ExitZone")
-                        if exitZone and exitZone:IsA("BasePart") then
-                            pcall(function()
-                                hrp.CFrame = CFrame.new(exitZone.Position + Vector3.new(0,5,0))
-                            end)
-                            task.wait(1)
-                        end
-
-                        -- จุดสุดท้าย → fightZone offset (สูง 20, ห่าง 20)
-                        local fightZone = chosenRoom:FindFirstChild("fightZone")
-                        if fightZone and fightZone:IsA("BasePart") then
-                            local targetPos = fightZone.Position + Vector3.new(0,20,20)
-
-                            -- อัปเดต lastFightOffsetPos ทันที
-                            lastFightOffsetPos = targetPos
-
-                            pcall(function()
-                                hrp.CFrame = CFrame.new(targetPos)
-                            end)
-                        end
-                    else
-                        -- ไม่มีมอน → วาปไปห้องเลขสูงสุด
-                        local maxRoomNum, targetPos = 0, nil
-                        for _, roomObj in ipairs(workspace:GetChildren()) do
-                            if roomObj:IsA("Model") and tonumber(roomObj.Name) then
-                                local num = tonumber(roomObj.Name)
-                                if num > maxRoomNum then
-                                    maxRoomNum = num
-                                    local roomRoot = roomObj:FindFirstChild("Root")
-                                    if roomRoot then
-                                        targetPos = roomRoot.Position
-                                    end
-                                end
-                            end
-                        end
-                        if targetPos then
-                            hrp.CFrame = CFrame.new(targetPos + Vector3.new(0,5,0))
-                        end
-                    end
-
-                    task.wait(1)
                 end
+
+                -- (1) ถ้ามี hadEntrance == true → ดูดเลย
+                if #mobsTrue > 0 then
+                    pullMobs(mobsTrue)
+                    isBusy = false
+                    return
+                end
+
+                -- (2) ไม่มี true แต่มี false
+                if #mobsFalse > 0 then
+                    task.spawn(function()
+                        if not tp_mon then isBusy = false return end
+
+                        local exitPos = warpToNearestExitZone(mobsFalse)
+                        local target = mobsFalse[1]
+
+                        -- ถ้าเคยไปหามอน false ตัวนี้แล้ว ข้ามไป
+                        if lastFalseMob == target then
+                            warpToLargestRoom()
+                            isBusy = false
+                            return
+                        end
+                        lastFalseMob = target
+
+                        -- เช็คห้อง BossFight
+                        for _, room in pairs(workspace:GetChildren()) do
+                            if room:IsA("Model") and room.Name:find("BossFight") then
+                                handleBossFightRoom(room)
+                            end
+                        end
+
+                        if target and target:FindFirstChild("HumanoidRootPart") then
+                            warpTo(target.HumanoidRootPart.Position, 5)
+                            task.wait(0.5)
+                        end
+
+                        -- เช็คมอนที่เปลี่ยนเป็น hadEntrance == true หรือยัง
+                        local foundTrue = false
+                        for _, obj in pairs(workspace:GetChildren()) do
+                            if obj:IsA("Model") and obj:GetAttribute("hadEntrance") == true then
+                                foundTrue = true
+                                break
+                            end
+                        end
+
+                        if not foundTrue and exitPos and target and target:FindFirstChild("HumanoidRootPart") then
+                            warpTo(exitPos, 5)
+                            task.wait(2)
+                            warpTo(target.HumanoidRootPart.Position, 5)
+                            task.wait(0.5)
+                        end
+
+                        local newTrue = {}
+                        for _, obj in pairs(workspace:GetChildren()) do
+                            if obj:IsA("Model") and obj:GetAttribute("hadEntrance") == true then
+                                table.insert(newTrue, obj)
+                            end
+                        end
+
+                        if #newTrue > 0 then
+                            pullMobs(newTrue)
+                        else
+                            warpToLargestRoom()
+                        end
+
+                        isBusy = false
+                    end)
+                    return
+                end
+
+                -- (3) ไม่มีทั้ง true/false → ห้องเลขใหญ่สุด
+                warpToLargestRoom()
+                task.wait(1)
+                isBusy = false
             end)
-        elseif not AutoWarpLoop and warpLoop then
-            task.cancel(warpLoop)
-            warpLoop = nil
         end
     end
 })
@@ -345,7 +306,7 @@ local abilities_use = {"boneStrength", "rejuvenate", "berserk", "bloodThirst", "
 local abilities_other = {"voidGrip", "raiseTheDead", "goldenArmy", "CosmicVision", "Oblivion", "blackHole", "cosmicBeam"}
 
 local abilities_all1 = {
-    "raiseTheDead"
+    "rejuvenate"
 }
 
 local abilities_all = {
@@ -353,7 +314,7 @@ local abilities_all = {
     "rejuvenate","bloodThirst","frozenWall", "ablaze", "voidGrip",
     "DeathGrasp", "Oblivion", "raiseTheDead","goldenArmy","CosmicVision","blackHole","cosmicBeam",
 }
-local use_Ability = true
+local use_Ability = false
 local currentAbilityIndex, abilityLoop = 1, nil
 
 MovementSection:AddToggle({
@@ -378,6 +339,79 @@ MovementSection:AddToggle({
             abilityLoop:Disconnect()
             abilityLoop = nil
             currentAbilityIndex = 1
+        end
+    end
+})
+
+
+local open_Wish = false
+MovementSection:AddToggle({
+    Name = "Open Gacha Even",
+    Default = open_Wish,
+    Callback = function(state)
+        open_Wish = state
+        if open_Wish then
+            while open_Wish do
+                game:GetService("ReplicatedStorage"):WaitForChild("remotes"):WaitForChild("openWish"):InvokeServer()
+                wait(0.3)
+            end
+        end
+    end
+})
+
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local autoUpgradeToggle = false
+local upgradeLoop
+
+-- =========================
+-- Toggle
+-- =========================
+MovementSection:AddToggle({
+    Name = "Auto Upgrade",
+    Default = autoUpgradeToggle,
+    Callback = function(state)
+        autoUpgradeToggle = state
+
+        if autoUpgradeToggle then
+            upgradeLoop = task.spawn(function()
+                -- 🔹 ดึงรายการไอเทมทั้งหมดจาก Weapons + Armor
+                local gui = player.PlayerGui:WaitForChild("gameUI"):WaitForChild("armory"):WaitForChild("inventory"):WaitForChild("clip")
+                local items = {}
+                local categories = {"Weapons", "Armor"}
+                for _, categoryName in ipairs(categories) do
+                    local category = gui:FindFirstChild(categoryName)
+                    if category then
+                        for _, item in ipairs(category:GetChildren()) do
+                            if item.Name ~= "filler" and item.Name ~= "none" then
+                                table.insert(items, item.Name)
+                            end
+                        end
+                    end
+                end
+
+                -- 🔹 สร้าง queue ของทุก item + tier
+                local queue = {}
+                for _, itemName in ipairs(items) do
+                    for tier = 1, 15 do
+                        table.insert(queue, {itemName, "itemUpgrade", {upgradeTier = tier}})
+                    end
+                end
+
+                local remote = ReplicatedStorage:WaitForChild("remotes"):WaitForChild("requestPurchase")
+
+                -- 🔹 ไล่ส่ง FireServer ตาม queue พร้อม delay 0.01 วิ
+                for _, args in ipairs(queue) do
+                    if not autoUpgradeToggle then return end -- ถ้า toggle ปิด ให้หยุด
+                    remote:FireServer(unpack(args))
+                    task.wait(0.01)
+                end
+            end)
+        else
+            if upgradeLoop then
+                task.cancel(upgradeLoop)
+                upgradeLoop = nil
+            end
         end
     end
 })
