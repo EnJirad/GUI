@@ -79,8 +79,16 @@ local AkumaSpecials = {"Akuma", "CorruptAkuma"}
 local mainRooms = {"Small_odd","Small_even","Medium_even","Medium_odd","Large_even","Large_odd"}
 
 local akumaPositions = {}
-local visitedBossRooms = {}     -- ห้อง BossFight ที่เคยไปแล้ว
-local lastFalseMob = nil        -- จำมอน false ล่าสุด
+local visitedBossRooms = {}
+local lastFalseMob = nil
+
+-- ระบบตรวจจับติดลูป
+local lastPos = nil
+local samePosTime = 0
+local lastWarpPos = nil
+local warpLoopCount = 0
+local maxSameTime = 180 -- 3 นาที
+local maxWarpLoop = 10  -- วาปที่เดิมเกิน 10 ครั้ง = บัคแน่นอน
 
 -- =========================================================
 -- Helper
@@ -92,6 +100,25 @@ local function warpTo(pos, offsetY)
         pcall(function()
             hrp.CFrame = CFrame.new(pos + Vector3.new(0, offsetY or 0, 0))
         end)
+
+        -- ตรวจจับการวาปซ้ำ
+        if lastWarpPos and (lastWarpPos - pos).Magnitude < 5 then
+            warpLoopCount += 1
+        else
+            warpLoopCount = 0
+        end
+        lastWarpPos = pos
+    end
+end
+
+local function resetCharacter()
+    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        warn("[Auto TP Mon] Resetting character due to stuck or warp loop!")
+        player.Character:BreakJoints()
+        samePosTime = 0
+        warpLoopCount = 0
+        lastPos = nil
+        lastWarpPos = nil
     end
 end
 
@@ -199,10 +226,28 @@ MovementSection:AddToggle({
         end
 
         if tp_mon and not connection then
-            connection = RunService.Heartbeat:Connect(function()
+            connection = RunService.Heartbeat:Connect(function(dt)
                 if not tp_mon or isBusy then return end
                 isBusy = true
 
+                -- ตรวจจับว่าอยู่ที่เดิมนานเกินไปไหม
+                local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+                if hrp then
+                    if lastPos and (hrp.Position - lastPos).Magnitude < 3 then
+                        samePosTime += dt
+                    else
+                        samePosTime = 0
+                    end
+                    lastPos = hrp.Position
+                end
+
+                if samePosTime > maxSameTime or warpLoopCount > maxWarpLoop then
+                    resetCharacter()
+                    isBusy = false
+                    return
+                end
+
+                -- ระบบหลัก
                 local mobsTrue, mobsFalse = {}, {}
                 for _, obj in pairs(workspace:GetChildren()) do
                     if obj:IsA("Model") and not table.find(friendlyMobs, obj.Name) then
@@ -218,22 +263,18 @@ MovementSection:AddToggle({
                     end
                 end
 
-                -- (1) ถ้ามี hadEntrance == true → ดูดเลย
                 if #mobsTrue > 0 then
                     pullMobs(mobsTrue)
                     isBusy = false
                     return
                 end
 
-                -- (2) ไม่มี true แต่มี false
                 if #mobsFalse > 0 then
                     task.spawn(function()
                         if not tp_mon then isBusy = false return end
-
                         local exitPos = warpToNearestExitZone(mobsFalse)
                         local target = mobsFalse[1]
 
-                        -- ถ้าเคยไปหามอน false ตัวนี้แล้ว ข้ามไป
                         if lastFalseMob == target then
                             warpToLargestRoom()
                             isBusy = false
@@ -241,7 +282,6 @@ MovementSection:AddToggle({
                         end
                         lastFalseMob = target
 
-                        -- เช็คห้อง BossFight
                         for _, room in pairs(workspace:GetChildren()) do
                             if room:IsA("Model") and room.Name:find("BossFight") then
                                 handleBossFightRoom(room)
@@ -253,7 +293,6 @@ MovementSection:AddToggle({
                             task.wait(0.5)
                         end
 
-                        -- เช็คมอนที่เปลี่ยนเป็น hadEntrance == true หรือยัง
                         local foundTrue = false
                         for _, obj in pairs(workspace:GetChildren()) do
                             if obj:IsA("Model") and obj:GetAttribute("hadEntrance") == true then
@@ -287,7 +326,6 @@ MovementSection:AddToggle({
                     return
                 end
 
-                -- (3) ไม่มีทั้ง true/false → ห้องเลขใหญ่สุด
                 warpToLargestRoom()
                 task.wait(1)
                 isBusy = false
@@ -295,6 +333,7 @@ MovementSection:AddToggle({
         end
     end
 })
+
 
 -- =====================
 -- ⚡ Auto Skill
