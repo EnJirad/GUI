@@ -296,7 +296,6 @@ MovementSection:AddToggle({
     end
 })
 
-
 -- =====================
 -- ⚡ Auto Skill
 -- =====================
@@ -343,9 +342,11 @@ MovementSection:AddToggle({
     end
 })
 
+------------------------------------------------------------------------------------
+local ShopSection = PlayerTab:AddSection("Shop", true)
 
 local open_Wish = false
-MovementSection:AddToggle({
+ShopSection:AddToggle({
     Name = "Open Gacha Even",
     Default = open_Wish,
     Callback = function(state)
@@ -367,7 +368,7 @@ local upgradeLoop
 -- =========================
 -- Toggle
 -- =========================
-MovementSection:AddToggle({
+ShopSection:AddToggle({
     Name = "Auto Upgrade",
     Default = autoUpgradeToggle,
     Callback = function(state)
@@ -412,6 +413,102 @@ MovementSection:AddToggle({
                 task.cancel(upgradeLoop)
                 upgradeLoop = nil
             end
+        end
+    end
+})
+
+local Chest_Rarity_E = {"GodlyChest", "RavenChest", "SamuraiChest"}
+local Chest_Rarity_R = {"CrystalChest", "FossilChest", "RoyalChest"}
+local Chest_Rarity_C = {"FrostChest", "SandyChest", "WoodenChest"}
+
+local allChests = {
+    ["E"] = Chest_Rarity_E,
+    ["R"] = Chest_Rarity_R,
+    ["C"] = Chest_Rarity_C
+}
+
+-- เก็บ Rarity ที่เลือก
+local selectedRarity = {} -- {E=true, R=false, C=true}
+-- เก็บชื่อกล่องเฉพาะที่เลือก
+local selectedSingleChest = nil
+
+-- ✅ สร้าง List ของ Options: Rarity ด้านบน + ชื่อกล่องทั้งหมดด้านล่าง พร้อมต่อท้าย Rarity
+local dropdownOptions = { "All", "All Chest C", "All Chest R", "All Chest E" }
+local chestNameMap = {} -- ใช้เก็บ mapping ของชื่อที่แสดง → ชื่อจริง (เช่น "SamuraiChest - E" -> "SamuraiChest")
+
+for rarity, list in pairs(allChests) do
+    for _, chestName in pairs(list) do
+        local displayName = chestName .. " - " .. rarity
+        table.insert(dropdownOptions, displayName)
+        chestNameMap[displayName] = chestName
+    end
+end
+
+-- Dropdown รวม
+ShopSection:AddDropdown({
+    Name = "Chest Rarity",
+    Options = dropdownOptions,
+    Default = "All",
+    Callback = function(selected)
+        -- Reset
+        selectedRarity = {}
+        selectedSingleChest = nil
+
+        if selected == "All" then
+            selectedRarity = {E=true, R=true, C=true}
+
+        elseif selected == "All Chest E" then
+            selectedRarity = {E=true, R=false, C=false}
+        elseif selected == "All Chest R" then
+            selectedRarity = {E=false, R=true, C=false}
+        elseif selected == "All Chest C" then
+            selectedRarity = {E=false, R=false, C=true}
+
+        elseif chestNameMap[selected] then
+            -- ✅ เลือกชื่อกล่องเฉพาะ
+            selectedSingleChest = chestNameMap[selected]
+        end
+
+        PixelLib:CreateNotification({
+            Title = "Chest Selection",
+            Description = "Updated",
+            Content = selectedSingleChest and ("Selected chest: " .. selectedSingleChest) or "Selected rarities updated",
+            Color = Color3.fromRGB(0, 255, 0)
+        })
+    end
+})
+
+-- Toggle Buy Chest
+ShopSection:AddToggle({
+    Name = "Buy Chest",
+    Default = false,
+    Callback = function(state)
+        if state then
+            local chestsToBuy = {}
+
+            if selectedSingleChest then
+                table.insert(chestsToBuy, selectedSingleChest .. "2")
+            else
+                for rarity, isSelected in pairs(selectedRarity) do
+                    if isSelected then
+                        for _, chestName in pairs(allChests[rarity]) do
+                            table.insert(chestsToBuy, chestName .. "2")
+                        end
+                    end
+                end
+            end
+
+            for _, chestNameWith2 in pairs(chestsToBuy) do
+                local args = {chestNameWith2, "daily"}
+                game:GetService("ReplicatedStorage"):WaitForChild("remotes"):WaitForChild("requestPurchase"):FireServer(unpack(args))
+            end
+
+            PixelLib:CreateNotification({
+                Title = "Buy Chest",
+                Description = "Purchased",
+                Content = "Bought " .. #chestsToBuy .. " chests",
+                Color = Color3.fromRGB(0, 255, 0)
+            })
         end
     end
 })
