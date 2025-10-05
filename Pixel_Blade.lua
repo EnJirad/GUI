@@ -192,7 +192,7 @@ end
 -- Health Monitor (Warp ก่อน 2 ครั้ง → Reset Player)
 -- =========================================================
 local healthCheckInterval = 5
-local healthTimeout = 60
+local healthTimeout = 20
 local mobHealthData = {}
 
 task.spawn(function()
