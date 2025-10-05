@@ -75,7 +75,7 @@ local mainRooms = {"Small_odd","Small_even","Medium_even","Medium_odd","Large_ev
 
 local visitedBossRooms = {}
 local lastFalseMob = nil
-local exitZoneBlacklist = {}  -- ห้อง ExitZone ห้ามกลับ
+local lockedExitZones = {} -- เก็บห้อง ExitZone ที่ล็อกไม่ให้กลับไป
 
 -- =========================================================
 -- Helper Functions
@@ -90,10 +90,37 @@ local function warpTo(pos, offsetY)
     end
 end
 
+local function warpToNearestExitZone(mobsFalse)
+    local nearestExit, minDist, exitRoomName = nil, math.huge, nil
+    for _, mob in ipairs(mobsFalse) do
+        local mobHRP = mob:FindFirstChild("HumanoidRootPart")
+        if mobHRP then
+            for _, room in ipairs(workspace:GetChildren()) do
+                if room:IsA("Model") and not lockedExitZones[room.Name] and (table.find(mainRooms, room.Name) or room.Name:find("BossFight")) then
+                    local exit = room:FindFirstChild("ExitZone")
+                    if exit then
+                        local dist = (mobHRP.Position - exit.Position).Magnitude
+                        if dist < minDist then
+                            minDist = dist
+                            nearestExit = exit.Position
+                            exitRoomName = room.Name
+                        end
+                    end
+                end
+            end
+        end
+    end
+    if nearestExit then
+        warpTo(nearestExit, 5)
+        return nearestExit, exitRoomName
+    end
+    return nil, nil
+end
+
 local function warpToLargestRoom()
     local maxNum, targetPos = 0, nil
     for _, roomObj in ipairs(workspace:GetChildren()) do
-        if roomObj:IsA("Model") and not exitZoneBlacklist[roomObj.Name] then
+        if roomObj:IsA("Model") then
             local n = tonumber(roomObj.Name)
             if n and n > maxNum then
                 maxNum = n
@@ -106,11 +133,12 @@ local function warpToLargestRoom()
 end
 
 -- =========================================================
--- ExitZone Warp Fix (Cooldown + Blacklist)
+-- ExitZone Warp Fix (Cooldown + Lock)
 -- =========================================================
 local lastExitWarp = 0
 local exitWarpCooldown = 1 -- วินาทีระหว่าง warp
-local exitZoneTimer = {}    -- เก็บเวลาอยู่ ExitZone แต่ละห้อง
+local exitZoneWarpStart = 0
+local currentExitZoneRoom = nil
 
 local function warpIfInExitZone()
     local char = player.Character or player.CharacterAdded:Wait()
@@ -120,34 +148,39 @@ local function warpIfInExitZone()
     if tick() - lastExitWarp < exitWarpCooldown then return end
 
     for _, room in ipairs(workspace:GetChildren()) do
-        if room:IsA("Model") and not exitZoneBlacklist[room.Name] then
+        if room:IsA("Model") and not lockedExitZones[room.Name] then
             local exit = room:FindFirstChild("ExitZone")
             if exit then
                 local dist = (hrp.Position - exit.Position).Magnitude
                 if dist < 30 then
-                    -- เริ่มนับเวลาอยู่ ExitZone
-                    if not exitZoneTimer[room.Name] then
-                        exitZoneTimer[room.Name] = tick()
-                    end
-
-                    -- ถ้าอยู่เกิน 20 วิ → Warp ห้องใหญ่สุด + Blacklist ห้องนี้
-                    if tick() - exitZoneTimer[room.Name] > 20 then
-                        exitZoneBlacklist[room.Name] = true
-                        warpToLargestRoom()
-                        exitZoneTimer[room.Name] = nil
-                        return
-                    end
-
                     warpTo(exit.Position + Vector3.new(0, 5, 0))
                     lastExitWarp = tick()
+
+                    -- เริ่มจับเวลาอยู่ ExitZone
+                    if currentExitZoneRoom ~= room.Name then
+                        currentExitZoneRoom = room.Name
+                        exitZoneWarpStart = tick()
+                    end
+
+                    -- ถ้าวาปเกิน 20 วิ ล็อกห้องและวาปออก
+                    if tick() - exitZoneWarpStart >= 20 then
+                        lockedExitZones[currentExitZoneRoom] = true
+                        warpToLargestRoom()
+                        currentExitZoneRoom = nil
+                        exitZoneWarpStart = 0
+                        warn("[Auto TP Mon]: Locked ExitZone room "..room.Name.." after 20s stuck!")
+                    end
+
                     task.wait(0.35)
                     return
-                else
-                    exitZoneTimer[room.Name] = nil
                 end
             end
         end
     end
+
+    -- ถ้าไม่อยู่ ExitZone ให้รีเซ็ตเวลาจับ
+    currentExitZoneRoom = nil
+    exitZoneWarpStart = 0
 end
 
 local function pullMobs(mobs)
@@ -263,7 +296,6 @@ MovementSection:AddToggle({
             isBusy = false
             lastFalseMob = nil
             visitedBossRooms = {}
-            exitZoneBlacklist = {}
             return
         end
 
@@ -343,7 +375,7 @@ MovementSection:AddToggle({
                         if #newTrue > 0 then
                             pullMobs(newTrue)
                         else
-                            warpIfInExitZone()
+                            warpIfInExitZone() -- Warp จาก ExitZone ครั้งเดียว
                             warpToLargestRoom()
                         end
 
@@ -360,7 +392,6 @@ MovementSection:AddToggle({
         end
     end
 })
-
 
 -- =====================
 -- ⚡ Auto Skill
