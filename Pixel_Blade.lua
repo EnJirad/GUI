@@ -201,7 +201,7 @@ local function safeResetCheck()
                 local lastHealth = mobHealthCache[id] or healthObj.Value
                 if healthObj.Value >= lastHealth then
                     if not lastCheckTime[id] then lastCheckTime[id] = tick() end
-                    if tick() - lastCheckTime[id] > 60 then
+                    if tick() - lastCheckTime[id] > 180 then
                         stuck = true
                     end
                 else
