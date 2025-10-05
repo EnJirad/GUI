@@ -217,7 +217,7 @@ local function safeResetCheck()
     local lastPos = lastPositions[posKey]
     if lastPos and (hrp.Position - lastPos).Magnitude < 1 then
         if not lastCheckTime[posKey] then lastCheckTime[posKey] = tick() end
-        if tick() - lastCheckTime[posKey] > 60 then
+        if tick() - lastCheckTime[posKey] > 180 then
             stuck = true
         end
     else
