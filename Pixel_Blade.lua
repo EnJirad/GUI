@@ -71,15 +71,14 @@ local BossFT = {
     "ShimBomboYeti","CorruptShimBomboYeti","Akuma","CorruptAkuma","IceDragon"
 }
 
-local AkumaSpecials = {"Akuma", "CorruptAkuma"}
 local mainRooms = {"Small_odd","Small_even","Medium_even","Medium_odd","Large_even","Large_odd"}
 
-local akumaPositions = {}
-local visitedBossRooms = {}     -- ห้อง BossFight ที่เคยไปแล้ว
-local lastFalseMob = nil        -- จำมอน false ล่าสุด
+local visitedBossRooms = {}
+local lastFalseMob = nil
+local exitZoneBlacklist = {}  -- ห้อง ExitZone ห้ามกลับ
 
 -- =========================================================
--- Helper
+-- Helper Functions
 -- =========================================================
 local function warpTo(pos, offsetY)
     if not tp_mon or not pos then return end
@@ -91,37 +90,10 @@ local function warpTo(pos, offsetY)
     end
 end
 
-local function warpToNearestExitZone(mobsFalse)
-    local nearestExit, minDist = nil, math.huge
-    for _, mob in ipairs(mobsFalse) do
-        local mobHRP = mob:FindFirstChild("HumanoidRootPart")
-        if mobHRP then
-            for _, room in ipairs(workspace:GetChildren()) do
-                if room:IsA("Model") and (table.find(mainRooms, room.Name) or room.Name:find("BossFight")) then
-                    local exit = room:FindFirstChild("ExitZone")
-                    if exit then
-                        local dist = (mobHRP.Position - exit.Position).Magnitude
-                        if dist < minDist then
-                            minDist = dist
-                            nearestExit = exit.Position
-                        end
-                    end
-                end
-            end
-        end
-    end
-    if nearestExit then
-        warpTo(nearestExit, 5)
-        task.wait(0.35)
-        return nearestExit
-    end
-    return nil
-end
-
 local function warpToLargestRoom()
     local maxNum, targetPos = 0, nil
     for _, roomObj in ipairs(workspace:GetChildren()) do
-        if roomObj:IsA("Model") then
+        if roomObj:IsA("Model") and not exitZoneBlacklist[roomObj.Name] then
             local n = tonumber(roomObj.Name)
             if n and n > maxNum then
                 maxNum = n
@@ -133,20 +105,45 @@ local function warpToLargestRoom()
     if targetPos then warpTo(targetPos, 5) end
 end
 
+-- =========================================================
+-- ExitZone Warp Fix (Cooldown + Blacklist)
+-- =========================================================
+local lastExitWarp = 0
+local exitWarpCooldown = 1 -- วินาทีระหว่าง warp
+local exitZoneTimer = {}    -- เก็บเวลาอยู่ ExitZone แต่ละห้อง
+
 local function warpIfInExitZone()
     local char = player.Character or player.CharacterAdded:Wait()
     local hrp = char:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
 
+    if tick() - lastExitWarp < exitWarpCooldown then return end
+
     for _, room in ipairs(workspace:GetChildren()) do
-        if room:IsA("Model") then
+        if room:IsA("Model") and not exitZoneBlacklist[room.Name] then
             local exit = room:FindFirstChild("ExitZone")
             if exit then
                 local dist = (hrp.Position - exit.Position).Magnitude
-                if dist < 30 then -- อยู่ใกล้ ExitZone < 10 studs
+                if dist < 30 then
+                    -- เริ่มนับเวลาอยู่ ExitZone
+                    if not exitZoneTimer[room.Name] then
+                        exitZoneTimer[room.Name] = tick()
+                    end
+
+                    -- ถ้าอยู่เกิน 20 วิ → Warp ห้องใหญ่สุด + Blacklist ห้องนี้
+                    if tick() - exitZoneTimer[room.Name] > 20 then
+                        exitZoneBlacklist[room.Name] = true
+                        warpToLargestRoom()
+                        exitZoneTimer[room.Name] = nil
+                        return
+                    end
+
                     warpTo(exit.Position + Vector3.new(0, 5, 0))
+                    lastExitWarp = tick()
                     task.wait(0.35)
                     return
+                else
+                    exitZoneTimer[room.Name] = nil
                 end
             end
         end
@@ -191,10 +188,10 @@ local function handleBossFightRoom(room)
 end
 
 -- =========================================================
--- Health Monitor (เช็คมอนที่เลือดไม่ลดภายใน 1 นาที → รีเซ็ตผู้เล่น)
+-- Health Monitor (Warp ก่อน 2 ครั้ง → Reset Player)
 -- =========================================================
-local healthCheckInterval = 5 -- ตรวจทุก 5 วินาที
-local healthTimeout = 60 -- ถ้าเลือดมอนไม่ลดเกิน 60 วิ ให้รีเซ็ตตัวผู้เล่น
+local healthCheckInterval = 5
+local healthTimeout = 60
 local mobHealthData = {}
 
 task.spawn(function()
@@ -212,7 +209,8 @@ task.spawn(function()
 					if not mobHealthData[id] then
 						mobHealthData[id] = {
 							lastHealth = healthObj.Value,
-							lastChange = tick()
+							lastChange = tick(),
+							attempts = 0
 						}
 					end
 
@@ -221,17 +219,26 @@ task.spawn(function()
 					if healthObj.Value < data.lastHealth then
 						data.lastHealth = healthObj.Value
 						data.lastChange = tick()
+						data.attempts = 0
 					end
 
 					if tick() - data.lastChange >= healthTimeout then
-						warn("[Auto TP Mon]: "..mob.Name.." stuck HP! Resetting Player...")
-						local char = player.Character
-						if char then
-							pcall(function()
-								char:BreakJoints()
-							end)
+						data.attempts = data.attempts + 1
+
+						if data.attempts <= 2 then
+							warn("[Auto TP Mon]: "..mob.Name.." stuck HP! Warping attempt "..data.attempts.."...")
+							warpTo(hrp.Position, 5)
+							data.lastChange = tick()
+						else
+							warn("[Auto TP Mon]: "..mob.Name.." still stuck HP! Resetting Player...")
+							local char = player.Character
+							if char then
+								pcall(function()
+									char:BreakJoints()
+								end)
+							end
+							mobHealthData[id] = nil
 						end
-						mobHealthData[id] = nil
 					end
 				end
 			end
@@ -256,6 +263,7 @@ MovementSection:AddToggle({
             isBusy = false
             lastFalseMob = nil
             visitedBossRooms = {}
+            exitZoneBlacklist = {}
             return
         end
 
@@ -335,7 +343,7 @@ MovementSection:AddToggle({
                         if #newTrue > 0 then
                             pullMobs(newTrue)
                         else
-                            warpIfInExitZone() -- <--- เพิ่มตรงนี้ก่อน warp ห้องใหญ่
+                            warpIfInExitZone()
                             warpToLargestRoom()
                         end
 
@@ -344,7 +352,7 @@ MovementSection:AddToggle({
                     return
                 end
 
-                warpIfInExitZone() -- <--- เพิ่มตรงนี้ด้วย
+                warpIfInExitZone()
                 warpToLargestRoom()
                 task.wait(1)
                 isBusy = false
@@ -352,6 +360,7 @@ MovementSection:AddToggle({
         end
     end
 })
+
 
 -- =====================
 -- ⚡ Auto Skill
