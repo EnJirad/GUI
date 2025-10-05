@@ -60,6 +60,7 @@ MovementSection:AddToggle({
 -- =========================================================
 -- Auto TP Mon Complete Fixed
 -- =========================================================
+
 local tp_mon = true
 local connection = nil
 local isBusy = false
@@ -183,9 +184,15 @@ local function handleBossFightRoom(room)
 end
 
 -- =========================================================
--- Anti-stuck checks
+-- Safe Reset Logic
 -- =========================================================
-local function checkStuckMobs()
+local function safeResetCheck()
+    local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
+    local stuck = false
+
+    -- ตรวจสอบมอน hadEntrance ค้าง
     for _, obj in pairs(workspace:GetChildren()) do
         if obj:IsA("Model") and obj:GetAttribute("hadEntrance") == true then
             local healthObj = obj:FindFirstChild("Health")
@@ -195,11 +202,7 @@ local function checkStuckMobs()
                 if healthObj.Value >= lastHealth then
                     if not lastCheckTime[id] then lastCheckTime[id] = tick() end
                     if tick() - lastCheckTime[id] > 60 then
-                        print("Mob stuck too long, resetting character")
-                        resetCharacter()
-                        lastCheckTime[id] = nil
-                        mobHealthCache[id] = healthObj.Value
-                        return
+                        stuck = true
                     end
                 else
                     lastCheckTime[id] = tick()
@@ -208,24 +211,45 @@ local function checkStuckMobs()
             end
         end
     end
-end
 
-local function checkStuckPosition()
-    local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
+    -- ตรวจสอบตำแหน่งติด
     local posKey = "player"
     local lastPos = lastPositions[posKey]
     if lastPos and (hrp.Position - lastPos).Magnitude < 1 then
         if not lastCheckTime[posKey] then lastCheckTime[posKey] = tick() end
         if tick() - lastCheckTime[posKey] > 60 then
-            print("Player stuck too long, resetting character")
-            resetCharacter()
-            lastCheckTime[posKey] = nil
+            stuck = true
         end
     else
         lastCheckTime[posKey] = tick()
     end
     lastPositions[posKey] = hrp.Position
+
+    -- ถ้าเกิดติด → ลองวาปตามขั้นตอน
+    if stuck then
+        print("Detected stuck, trying safe warp first")
+        warpToLargestRoom() -- Step 1: ห้องเลขใหญ่สุด
+        task.wait(2)
+
+        -- Step 2: วาปไป ExitZone ของมอน hadEntrance == false
+        local foundExit = false
+        for _, obj in pairs(workspace:GetChildren()) do
+            if obj:IsA("Model") and obj:GetAttribute("hadEntrance") == false then
+                local exitPos = warpToNearestExitZone({obj})
+                if exitPos then
+                    foundExit = true
+                    break
+                end
+            end
+        end
+        task.wait(2)
+
+        -- Step 3: ถ้ายังติด → รีเซ็ตตัว
+        if not foundExit then
+            print("Still stuck, resetting character")
+            resetCharacter()
+        end
+    end
 end
 
 -- =========================================================
@@ -253,8 +277,7 @@ MovementSection:AddToggle({
                 if not tp_mon or isBusy then return end
                 isBusy = true
 
-                checkStuckMobs()
-                checkStuckPosition()
+                safeResetCheck() -- ใช้ระบบใหม่
 
                 local mobsTrue, mobsFalse = {}, {}
                 for _, obj in pairs(workspace:GetChildren()) do
@@ -342,7 +365,6 @@ MovementSection:AddToggle({
         end
     end
 })
-
 
 -- =====================
 -- ⚡ Auto Skill
