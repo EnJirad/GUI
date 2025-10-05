@@ -131,10 +131,18 @@ local function warpToLargestRoom()
     if targetPos then warpTo(targetPos, 5) end
 end
 
+-- =========================================================
+-- ExitZone Warp Fix (Cooldown)
+-- =========================================================
+local lastExitWarp = 0
+local exitWarpCooldown = 1 -- วินาทีระหว่าง warp
+
 local function warpIfInExitZone()
     local char = player.Character or player.CharacterAdded:Wait()
     local hrp = char:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
+
+    if tick() - lastExitWarp < exitWarpCooldown then return end
 
     for _, room in ipairs(workspace:GetChildren()) do
         if room:IsA("Model") then
@@ -143,6 +151,7 @@ local function warpIfInExitZone()
                 local dist = (hrp.Position - exit.Position).Magnitude
                 if dist < 30 then -- อยู่ใกล้ ExitZone < 30 studs
                     warpTo(exit.Position + Vector3.new(0, 5, 0))
+                    lastExitWarp = tick()
                     task.wait(0.35)
                     return
                 end
@@ -343,7 +352,7 @@ MovementSection:AddToggle({
                         if #newTrue > 0 then
                             pullMobs(newTrue)
                         else
-                            warpIfInExitZone()
+                            warpIfInExitZone() -- Warp จาก ExitZone ครั้งเดียว
                             warpToLargestRoom()
                         end
 
