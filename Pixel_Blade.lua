@@ -130,7 +130,7 @@ MovementSection:AddToggle({
                         if cache and math.abs(cache - healthNow) < 1 then
                             -- ถ้าเลือดไม่เปลี่ยนแปลงเลยเกิน 10 วิ → รีเซ็ต
                             mobHealthCache[name .. "_timer"] = (mobHealthCache[name .. "_timer"] or 0) + dt
-                            if mobHealthCache[name .. "_timer"] >= 10 then
+                            if mobHealthCache[name .. "_timer"] >= 30 then
                                 resetCharacter()
                                 mobHealthCache = {}
                                 isBusy = false
