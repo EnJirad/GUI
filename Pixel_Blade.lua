@@ -415,6 +415,15 @@ MovementSection:AddToggle({
 ------------------------------------------------------------------------------------
 local ShopSection = PlayerTab:AddSection("Shop", true)
 
+local open_Wish55 = false
+ShopSection:AddToggle({
+    Name = "Open Gacha Even55555",
+    Default = open_Wish55,
+    Callback = function(state)
+        open_Wish55 = state
+    end
+})
+
 local open_Wish = false
 ShopSection:AddToggle({
     Name = "Open Gacha Even",
