@@ -61,108 +61,67 @@ MovementSection:AddToggle({
 -- Auto TP Mon Complete Fixed
 -- =========================================================
 
-local tp_mon = true
-local connection = nil
-local isBusy = false
-
-local friendlyMobs = { 
-    "GoldenPhantom","GiantInfernoGuardian","GiantSkeleton","GiantWizard","GiantZombie",
-    "NecromancerGhoul","ShroomArcher","ShroomKnight","ShroomPaladin"
-}
-
-local BossFT = {
-    "GiantGoblin","CursedGiantGoblin","LumberJack","CursedLumberJack","Kingslayer",
-    "ShimBomboYeti","CorruptShimBomboYeti","Akuma","CorruptAkuma","IceDragon"
-}
-
-local AkumaSpecials = {"Akuma", "CorruptAkuma"}
+local tp_mon, connection, isBusy = true, nil, false
+local friendlyMobs = {"GoldenPhantom","GiantInfernoGuardian","GiantSkeleton","GiantWizard","GiantZombie","NecromancerGhoul","ShroomArcher","ShroomKnight","ShroomPaladin"}
+local BossFT = {"GiantGoblin","CursedGiantGoblin","LumberJack","CursedLumberJack","Kingslayer","ShimBomboYeti","CorruptShimBomboYeti","Akuma","CorruptAkuma","IceDragon"}
+local AkumaSpecials = {"Akuma","CorruptAkuma"}
 local mainRooms = {"Small_odd","Small_even","Medium_even","Medium_odd","Large_even","Large_odd"}
 
-local akumaPositions = {}
-local visitedBossRooms = {}
-local lastFalseMob = nil
-local lastPositions = {}
-local lastCheckTime = {}
-local mobHealthCache = {}
+local visitedBossRooms, lastFalseMob, lastPositions, lastCheckTime, mobHealthCache = {}, nil, {}, {}, {}
 
--- =========================================================
+--========================================================
 -- Helper
--- =========================================================
-local function resetCharacter()
-    if player.Character then
-        player.Character:BreakJoints()
+--========================================================
+local function resetCharacter() if player.Character then player.Character:BreakJoints() end end
+
+local function warpTo(pos, y)
+    if tp_mon and pos then
+        local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+        if hrp then pcall(function() hrp.CFrame = CFrame.new(pos + Vector3.new(0, y or 0, 0)) end) end
     end
 end
 
-local function warpTo(pos, offsetY)
-    if not tp_mon or not pos then return end
-    local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-    if hrp then
-        pcall(function()
-            hrp.CFrame = CFrame.new(pos + Vector3.new(0, offsetY or 0, 0))
-        end)
-    end
-end
-
-local function warpToNearestExitZone(mobsFalse)
-    local nearestExit, minDist = nil, math.huge
-    for _, mob in ipairs(mobsFalse) do
-        local mobHRP = mob:FindFirstChild("HumanoidRootPart")
-        if mobHRP then
+local function warpToNearestExitZone(mobs)
+    local nearest, dist = nil, math.huge
+    for _, mob in ipairs(mobs) do
+        local hrp = mob:FindFirstChild("HumanoidRootPart")
+        if hrp then
             for _, room in ipairs(workspace:GetChildren()) do
                 if room:IsA("Model") and (table.find(mainRooms, room.Name) or room.Name:find("BossFight")) then
                     local exit = room:FindFirstChild("ExitZone")
                     if exit then
-                        local dist = (mobHRP.Position - exit.Position).Magnitude
-                        if dist < minDist then
-                            minDist = dist
-                            nearestExit = exit.Position
-                        end
+                        local d = (hrp.Position - exit.Position).Magnitude
+                        if d < dist then dist, nearest = d, exit.Position end
                     end
                 end
             end
         end
     end
-    if nearestExit then
-        warpTo(nearestExit, 5)
-        task.wait(0.35)
-        return nearestExit
-    end
-    return nil
+    if nearest then warpTo(nearest, 5) task.wait(0.35) return nearest end
 end
 
 local function warpToLargestRoom()
-    local maxNum, targetPos = 0, nil
-    for _, roomObj in ipairs(workspace:GetChildren()) do
-        if roomObj:IsA("Model") then
-            local n = tonumber(roomObj.Name)
-            if n and n > maxNum then
-                maxNum = n
-                local root = roomObj:FindFirstChild("Root")
-                if root then targetPos = root.Position end
-            end
+    local max, pos = 0, nil
+    for _, room in ipairs(workspace:GetChildren()) do
+        if room:IsA("Model") then
+            local n = tonumber(room.Name)
+            if n and n > max then max = n pos = room:FindFirstChild("Root") and room.Root.Position end
         end
     end
-    if targetPos then warpTo(targetPos, 5) end
+    if pos then warpTo(pos, 5) end
 end
 
 local function pullMobs(mobs)
     if not tp_mon then return end
-    local char = player.Character or player.CharacterAdded:Wait()
-    local playerHRP = char and char:FindFirstChild("HumanoidRootPart")
-    if not playerHRP then return end
-
+    local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
     for _, mob in ipairs(mobs) do
-        if not tp_mon then break end
-        if not mob or not mob.Parent then continue end
         local monHRP = mob:FindFirstChild("HumanoidRootPart")
         if monHRP then
             monHRP.CanCollide = false
-            local monSize = monHRP.Size or Vector3.new(2,2,2)
-            local distanceOffset = 20 + (monSize.Z / 2)
-            local heightOffset = 20 + (monSize.Y / 4)
-            local tpPosition = playerHRP.Position + playerHRP.CFrame.LookVector * distanceOffset + Vector3.new(0, heightOffset, 0)
-            monHRP.CFrame = CFrame.new(tpPosition, tpPosition + playerHRP.CFrame.LookVector)
+            local size = monHRP.Size or Vector3.new(2,2,2)
+            local tpPos = hrp.Position + hrp.CFrame.LookVector * (20 + size.Z / 2) + Vector3.new(0, 20 + size.Y / 4, 0)
+            monHRP.CFrame = CFrame.new(tpPos, tpPos + hrp.CFrame.LookVector)
         end
     end
 end
@@ -170,105 +129,69 @@ end
 local function handleBossFightRoom(room)
     if visitedBossRooms[room.Name] then return end
     visitedBossRooms[room.Name] = true
-
-    local exit = room:FindFirstChild("ExitZone")
-    local floor = room:FindFirstChild("FLOOR")
-
+    local exit, floor = room:FindFirstChild("ExitZone"), room:FindFirstChild("FLOOR")
     if exit and floor then
-        warpTo(exit.Position, 5)
-        task.wait(0.5)
-        warpTo(floor.Position, 5)
-        task.wait(2)
+        warpTo(exit.Position, 5) task.wait(0.5)
+        warpTo(floor.Position, 5) task.wait(2)
         warpTo(floor.Position, 5)
     end
 end
 
--- =========================================================
--- Safe Reset Logic
--- =========================================================
+--========================================================
+-- Safe Reset
+--========================================================
 local function safeResetCheck()
     local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
-
     local stuck = false
 
-    -- ตรวจสอบมอน hadEntrance ค้าง
     for _, obj in pairs(workspace:GetChildren()) do
         if obj:IsA("Model") and obj:GetAttribute("hadEntrance") == true then
-            local healthObj = obj:FindFirstChild("Health")
-            if healthObj then
-                local id = obj:GetDebugId() or obj:GetFullName()
-                local lastHealth = mobHealthCache[id] or healthObj.Value
-                if healthObj.Value >= lastHealth then
-                    if not lastCheckTime[id] then lastCheckTime[id] = tick() end
-                    if tick() - lastCheckTime[id] > 180 then
-                        stuck = true
-                    end
-                else
-                    lastCheckTime[id] = tick()
-                end
-                mobHealthCache[id] = healthObj.Value
+            local health = obj:FindFirstChild("Health")
+            if health then
+                local id, val = obj:GetDebugId() or obj:GetFullName(), health.Value
+                local last = mobHealthCache[id] or val
+                if val >= last then
+                    lastCheckTime[id] = lastCheckTime[id] or tick()
+                    if tick() - lastCheckTime[id] > 180 then stuck = true end
+                else lastCheckTime[id] = tick() end
+                mobHealthCache[id] = val
             end
         end
     end
 
-    -- ตรวจสอบตำแหน่งติด
-    local posKey = "player"
-    local lastPos = lastPositions[posKey]
+    local posKey, lastPos = "player", lastPositions.player
     if lastPos and (hrp.Position - lastPos).Magnitude < 1 then
-        if not lastCheckTime[posKey] then lastCheckTime[posKey] = tick() end
-        if tick() - lastCheckTime[posKey] > 180 then
-            stuck = true
-        end
-    else
-        lastCheckTime[posKey] = tick()
-    end
+        lastCheckTime[posKey] = lastCheckTime[posKey] or tick()
+        if tick() - lastCheckTime[posKey] > 180 then stuck = true end
+    else lastCheckTime[posKey] = tick() end
     lastPositions[posKey] = hrp.Position
 
-    -- ถ้าเกิดติด → ลองวาปตามขั้นตอน
     if stuck then
         print("Detected stuck, trying safe warp first")
-        warpToLargestRoom() -- Step 1: ห้องเลขใหญ่สุด
-        task.wait(2)
-
-        -- Step 2: วาปไป ExitZone ของมอน hadEntrance == false
+        warpToLargestRoom() task.wait(2)
         local foundExit = false
-        for _, obj in pairs(workspace:GetChildren()) do
-            if obj:IsA("Model") and obj:GetAttribute("hadEntrance") == false then
-                local exitPos = warpToNearestExitZone({obj})
-                if exitPos then
-                    foundExit = true
-                    break
-                end
+        for _, o in pairs(workspace:GetChildren()) do
+            if o:IsA("Model") and o:GetAttribute("hadEntrance") == false then
+                if warpToNearestExitZone({o}) then foundExit = true break end
             end
         end
         task.wait(2)
-
-        -- Step 3: ถ้ายังติด → รีเซ็ตตัว
-        if not foundExit then
-            print("Still stuck, resetting character")
-            resetCharacter()
-        end
+        if not foundExit then print("Still stuck, resetting character") resetCharacter() end
     end
 end
 
--- =========================================================
+--========================================================
 -- Main Loop
--- =========================================================
+--========================================================
 MovementSection:AddToggle({
     Name = "Auto TP Mon",
     Default = tp_mon,
     Callback = function(state)
         tp_mon = state
-
         if not tp_mon then
-            if connection then
-                connection:Disconnect()
-                connection = nil
-            end
-            isBusy = false
-            lastFalseMob = nil
-            visitedBossRooms = {}
+            if connection then connection:Disconnect() connection = nil end
+            isBusy, lastFalseMob, visitedBossRooms = false, nil, {}
             return
         end
 
@@ -276,90 +199,51 @@ MovementSection:AddToggle({
             connection = RunService.Heartbeat:Connect(function()
                 if not tp_mon or isBusy then return end
                 isBusy = true
-
-                safeResetCheck() -- ใช้ระบบใหม่
+                safeResetCheck()
 
                 local mobsTrue, mobsFalse = {}, {}
-                for _, obj in pairs(workspace:GetChildren()) do
-                    if obj:IsA("Model") and not table.find(friendlyMobs, obj.Name) then
-                        local hrp = obj:FindFirstChild("HumanoidRootPart")
-                        local hadEntrance = obj:GetAttribute("hadEntrance")
+                for _, o in pairs(workspace:GetChildren()) do
+                    if o:IsA("Model") and not table.find(friendlyMobs, o.Name) then
+                        local hrp, had = o:FindFirstChild("HumanoidRootPart"), o:GetAttribute("hadEntrance")
                         if hrp then
-                            if hadEntrance == true then
-                                table.insert(mobsTrue, obj)
-                            elseif hadEntrance == false then
-                                table.insert(mobsFalse, obj)
-                            end
+                            if had == true then table.insert(mobsTrue, o)
+                            elseif had == false then table.insert(mobsFalse, o) end
                         end
                     end
                 end
 
-                if #mobsTrue > 0 then
-                    pullMobs(mobsTrue)
-                    isBusy = false
-                    return
-                end
-
+                if #mobsTrue > 0 then pullMobs(mobsTrue) isBusy = false return end
                 if #mobsFalse > 0 then
                     task.spawn(function()
                         if not tp_mon then isBusy = false return end
-
-                        local exitPos = warpToNearestExitZone(mobsFalse)
-                        local target = mobsFalse[1]
-
-                        if lastFalseMob == target then
-                            warpToLargestRoom()
-                            isBusy = false
-                            return
-                        end
+                        local exitPos, target = warpToNearestExitZone(mobsFalse), mobsFalse[1]
+                        if lastFalseMob == target then warpToLargestRoom() isBusy = false return end
                         lastFalseMob = target
 
                         for _, room in pairs(workspace:GetChildren()) do
-                            if room:IsA("Model") and room.Name:find("BossFight") then
-                                handleBossFightRoom(room)
-                            end
+                            if room:IsA("Model") and room.Name:find("BossFight") then handleBossFightRoom(room) end
                         end
 
-                        if target and target:FindFirstChild("HumanoidRootPart") then
-                            warpTo(target.HumanoidRootPart.Position, 5)
-                            task.wait(0.5)
-                        end
-
+                        if target and target:FindFirstChild("HumanoidRootPart") then warpTo(target.HumanoidRootPart.Position, 5) task.wait(0.5) end
                         local foundTrue = false
-                        for _, obj in pairs(workspace:GetChildren()) do
-                            if obj:IsA("Model") and obj:GetAttribute("hadEntrance") == true then
-                                foundTrue = true
-                                break
-                            end
+                        for _, o in pairs(workspace:GetChildren()) do
+                            if o:IsA("Model") and o:GetAttribute("hadEntrance") == true then foundTrue = true break end
                         end
-
                         if not foundTrue and exitPos and target and target:FindFirstChild("HumanoidRootPart") then
-                            warpTo(exitPos, 5)
-                            task.wait(2)
-                            warpTo(target.HumanoidRootPart.Position, 5)
-                            task.wait(0.5)
+                            warpTo(exitPos, 5) task.wait(2) warpTo(target.HumanoidRootPart.Position, 5) task.wait(0.5)
                         end
 
                         local newTrue = {}
-                        for _, obj in pairs(workspace:GetChildren()) do
-                            if obj:IsA("Model") and obj:GetAttribute("hadEntrance") == true then
-                                table.insert(newTrue, obj)
-                            end
+                        for _, o in pairs(workspace:GetChildren()) do
+                            if o:IsA("Model") and o:GetAttribute("hadEntrance") == true then table.insert(newTrue, o) end
                         end
-
-                        if #newTrue > 0 then
-                            pullMobs(newTrue)
-                        else
-                            warpToLargestRoom()
-                        end
-
+                        if #newTrue > 0 then pullMobs(newTrue) else warpToLargestRoom() end
                         isBusy = false
                     end)
                     return
                 end
 
-                warpToLargestRoom()
-                task.wait(1)
+                warpToLargestRoom() task.wait(1)
                 isBusy = false
             end)
         end
@@ -375,7 +259,7 @@ local abilities_use = {"boneStrength", "rejuvenate", "berserk", "bloodThirst", "
 local abilities_other = {"voidGrip", "raiseTheDead", "goldenArmy", "CosmicVision", "Oblivion", "blackHole", "cosmicBeam"}
 
 local abilities_all1 = {
-    "rejuvenate"
+    "rebirth"
 }
 
 local abilities_all = {
