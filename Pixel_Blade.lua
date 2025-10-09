@@ -149,6 +149,45 @@ local function pullMobs(mobs)
 end
 
 --========================================================
+-- 🔍 หา room จาก Part ที่ยืนอยู่
+--========================================================
+local function getRoomFromPart(part)
+    if not part or not part.Parent then return nil end
+    local p = part.Parent
+    while p.Parent do
+        if table.find(mainRooms, p.Name) or p.Name:find("BossFight") then
+            return p
+        end
+        p = p.Parent
+    end
+    return nil
+end
+
+--========================================================
+-- ⚡ Warp ไป ExitZone ก่อน แล้วค่อยไป target
+--========================================================
+local function warpToExitThenTarget(target)
+    local hrp = getHRP()
+    if not hrp or not target then return end
+
+    -- หา Part ที่เราอยู่
+    local currentPart = workspace:FindPartOnRayWithIgnoreList(Ray.new(hrp.Position, Vector3.new(0, -5, 0)), {player.Character})
+    local currentRoom = getRoomFromPart(currentPart)
+    local exitZone = currentRoom and currentRoom:FindFirstChild("ExitZone")
+    
+    if exitZone then
+        warpTo(exitZone.Position, 5)
+        task.wait(0.5)
+    end
+    
+    -- วาปไป target หลังจากแตะ ExitZone
+    local tHRP = target:FindFirstChild("HumanoidRootPart")
+    if tHRP then
+        warpTo(tHRP.Position, 5)
+    end
+end
+
+--========================================================
 -- 🎯 Core Logic
 --========================================================
 local function getTargets()
@@ -183,7 +222,7 @@ local function handleBoss(bosses)
             lastBossTarget = boss
             local dist = (hrp.Position - bhrp.Position).Magnitude
             if dist > 50 then
-                warpTo(bhrp.Position, 5)
+                warpToExitThenTarget(boss)
                 task.wait(0.3)
             end
             -- 💥 ดึงทั้งบอสและมอน true ที่อยู่ใกล้ ๆ ด้วย
@@ -201,35 +240,13 @@ end
 --========================================================
 local function handleFalseMob(target)
     if not target then return end
-    local hrp = target:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-
-    local currentRoom = getCurrentRoom()
-    if currentRoom then
-        local exitZone = findExitZone(currentRoom)
-        if exitZone then
-            warpTo(exitZone.Position, 5)
-            task.wait(0.5)
-        end
-    end
-
-    warpTo(hrp.Position, 5)
+    warpToExitThenTarget(target)
     lastFalseTarget = target
-    task.wait(1)
 
     local start = tick()
     while tick() - start < 5 do
         if target:GetAttribute("hadEntrance") == true then return end
         task.wait(0.5)
-    end
-
-    if currentRoom then
-        local exitZone = findExitZone(currentRoom)
-        if exitZone then
-            warpTo(exitZone.Position, 5)
-            task.wait(1)
-            warpTo(hrp.Position, 5)
-        end
     end
 end
 
@@ -257,6 +274,9 @@ end
 --========================================================
 -- ⚙️ Main Toggle
 --========================================================
+--========================================================
+-- ⚙️ Main Toggle (ปรับปรุงให้ warp ExitZone ห้องว่าง)
+--========================================================
 MovementSection:AddToggle({
     Name = "Auto TP Mon (Smart v3.3)",
     Default = tp_mon,
@@ -282,17 +302,20 @@ MovementSection:AddToggle({
                 -- 1. ถ้ามีบอส → ดึงทั้งบอสและลูกน้อง true
                 -- 2. ถ้ามีมอน true → ดึงมาทั้งหมดก่อน
                 -- 3. ถ้ามอน true หมด → วาปไป ExitZone แล้วไปมอน false
+                -- 4. ถ้าไม่มีมอนเลย → วาปไป ExitZone ของห้องนั้นก่อน แล้วค่อยเช็คต่อ
                 if #bosses > 0 then
                     handleBoss(bosses)
                 elseif #mobsTrue > 0 then
                     pullMobs(mobsTrue)
                 elseif #mobsTrue == 0 and #mobsFalse > 0 then
+                    handleFalseMob(mobsFalse[1])
+                else
+                    -- ห้องนี้ไม่มีมอนเลย → warp ไป ExitZone ก่อน
                     if exitZone then
                         warpTo(exitZone.Position, 5)
                         task.wait(0.5)
                     end
-                    handleFalseMob(mobsFalse[1])
-                else
+                    -- หลังแตะ ExitZone ให้ warp ไปห้องใหญ่หรือเช็คมอนใหม่
                     warpToLargestRoom()
                 end
 
@@ -301,6 +324,7 @@ MovementSection:AddToggle({
         end
     end
 })
+
 
 -- =====================
 -- ⚡ Auto Skill
