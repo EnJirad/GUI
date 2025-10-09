@@ -212,6 +212,9 @@ end
 --========================================================
 -- 🧠 Smart Boss Behavior (ดูดลูกน้องด้วย)
 --========================================================
+--========================================================
+-- 🧠 Smart Boss Behavior (ดูดลูกน้องด้วย + ExitZone ห้องบอส)
+--========================================================
 local function handleBoss(bosses)
     local hrp = getHRP()
     if not hrp then return false end
@@ -222,7 +225,16 @@ local function handleBoss(bosses)
             lastBossTarget = boss
             local dist = (hrp.Position - bhrp.Position).Magnitude
             if dist > 50 then
-                warpToExitThenTarget(boss)
+                -- 🔹 Warp ไป ExitZone ของห้องบอสก่อน
+                local bossRoom = getRoomFromPart(bhrp)
+                local bossExit = bossRoom and bossRoom:FindFirstChild("ExitZone")
+                if bossExit then
+                    warpTo(bossExit.Position, 5)
+                    task.wait(0.5)
+                end
+
+                -- 🔹 Warp มาหาบอส
+                warpTo(bhrp.Position, 5)
                 task.wait(0.3)
             end
             -- 💥 ดึงทั้งบอสและมอน true ที่อยู่ใกล้ ๆ ด้วย
