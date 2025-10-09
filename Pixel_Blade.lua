@@ -61,10 +61,10 @@ MovementSection:AddToggle({
 -- Auto TP Mon Complete Fixed
 -- =========================================================
 
+
 local tp_mon, connection, isBusy = true, nil, false
 local friendlyMobs = {"GoldenPhantom","GiantInfernoGuardian","GiantSkeleton","GiantWizard","GiantZombie","NecromancerGhoul","ShroomArcher","ShroomKnight","ShroomPaladin"}
-local BossFT = {"GiantGoblin","CursedGiantGoblin","LumberJack","CursedLumberJack","Kingslayer","ShimBomboYeti","CorruptShimBomboYeti","Akuma","CorruptAkuma","IceDragon"}
-local AkumaSpecials = {"Akuma","CorruptAkuma"}
+local BossFT = {"LumberJack","CursedLumberJack", "GiantGoblin","CursedGiantGoblin","Kingslayer", "Maneater", "Nekros", "DarkNekros", "Atticus", "ShimBomboYeti","CorruptShimBomboYeti","Akuma","CorruptAkuma","IceDragon"}
 local mainRooms = {"Small_odd","Small_even","Medium_even","Medium_odd","Large_even","Large_odd"}
 
 local visitedBossRooms, lastFalseMob, lastPositions, lastCheckTime, mobHealthCache = {}, nil, {}, {}, {}
