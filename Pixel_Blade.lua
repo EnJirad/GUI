@@ -210,7 +210,10 @@ local function getTargets()
 end
 
 --========================================================
--- 🧠 Smart Boss Behavior (รองรับทุกห้องบอส + ExitZone + StartDoor หรือ Part ชื่อ Start*)
+-- 🧠 Smart Boss Behavior (รองรับทุกห้องบอส + ExitZone + StartDoor/Part Start*)
+--========================================================
+--========================================================
+-- 🧠 Smart Boss Behavior (ExitZone + StartDoor/Start* + Pull)
 --========================================================
 local function handleBoss(bosses)
     local hrp = getHRP()
@@ -232,7 +235,7 @@ local function handleBoss(bosses)
                     task.wait(0.5)
                 end
 
-                -- 🔹 ถ้ามี StartDoor (Model) ให้ warp ไป PrimaryPart
+                -- 🔹 Warp ไป StartDoor (Model) ถ้ามี
                 local warpedStart = false
                 if bossRoom then
                     local startDoor = bossRoom:FindFirstChild("StartDoor")
@@ -243,7 +246,7 @@ local function handleBoss(bosses)
                     end
                 end
 
-                -- 🔹 ถ้าไม่เจอ StartDoor ให้ค้นหา Part ชื่อขึ้นต้นด้วย "Start"
+                -- 🔹 ถ้าไม่เจอ StartDoor → warp ไป Part ชื่อ Start*
                 if not warpedStart and bossRoom then
                     for _, obj in ipairs(bossRoom:GetDescendants()) do
                         if obj:IsA("BasePart") and obj.Name:sub(1,5) == "Start" then
@@ -259,7 +262,7 @@ local function handleBoss(bosses)
                 task.wait(0.3)
             end
 
-            -- 💥 ดึงทั้งบอสและมอน true รอบ ๆ
+            -- ดึงบอส + มอน true รอบ ๆ
             local _, mobsTrue = getTargets()
             pullMobs({boss})
             if #mobsTrue > 0 then pullMobs(mobsTrue) end
@@ -308,11 +311,8 @@ end
 --========================================================
 -- ⚙️ Main Toggle
 --========================================================
---========================================================
--- ⚙️ Main Toggle (ปรับปรุงให้ warp ExitZone ห้องว่าง)
---========================================================
 MovementSection:AddToggle({
-    Name = "Auto TP Mon (Smart v3.3)",
+    Name = "Auto TP Mon (Smart v3.4)",
     Default = tp_mon,
     Callback = function(state)
         tp_mon = state
@@ -332,11 +332,7 @@ MovementSection:AddToggle({
                 if currentRoom then lastRoom = currentRoom end
                 local exitZone = currentRoom and findExitZone(currentRoom)
 
-                -- ✅ ลำดับการทำงาน:
-                -- 1. ถ้ามีบอส → ดึงทั้งบอสและลูกน้อง true
-                -- 2. ถ้ามีมอน true → ดึงมาทั้งหมดก่อน
-                -- 3. ถ้ามอน true หมด → วาปไป ExitZone แล้วไปมอน false
-                -- 4. ถ้าไม่มีมอนเลย → วาปไป ExitZone ของห้องนั้นก่อน แล้วค่อยเช็คต่อ
+                -- ลำดับการทำงาน
                 if #bosses > 0 then
                     handleBoss(bosses)
                 elseif #mobsTrue > 0 then
@@ -344,12 +340,11 @@ MovementSection:AddToggle({
                 elseif #mobsTrue == 0 and #mobsFalse > 0 then
                     handleFalseMob(mobsFalse[1])
                 else
-                    -- ห้องนี้ไม่มีมอนเลย → warp ไป ExitZone ก่อน
+                    -- ห้องว่าง → warp ExitZone ก่อน
                     if exitZone then
                         warpTo(exitZone.Position, 5)
                         task.wait(0.5)
                     end
-                    -- หลังแตะ ExitZone ให้ warp ไปห้องใหญ่หรือเช็คมอนใหม่
                     warpToLargestRoom()
                 end
 
