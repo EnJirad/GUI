@@ -142,7 +142,7 @@ local function pullMobs(mobs)
         local mhrp = mob:FindFirstChild("HumanoidRootPart")
         if mhrp then
             mhrp.CanCollide = false
-            local tpPos = hrp.Position + hrp.CFrame.LookVector * 15 + Vector3.new(0, 10, 0)
+            local tpPos = hrp.Position + hrp.CFrame.LookVector * 20 + Vector3.new(0, 20, 0)
             mhrp.CFrame = CFrame.new(tpPos)
         end
     end
