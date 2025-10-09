@@ -210,10 +210,7 @@ local function getTargets()
 end
 
 --========================================================
--- 🧠 Smart Boss Behavior (ดูดลูกน้องด้วย)
---========================================================
---========================================================
--- 🧠 Smart Boss Behavior (ดูดลูกน้องด้วย + ExitZone ห้องบอส)
+-- 🧠 Smart Boss Behavior (รองรับทุกห้องบอส + ExitZone + StartDoor หรือ Part ชื่อ Start*)
 --========================================================
 local function handleBoss(bosses)
     local hrp = getHRP()
@@ -225,19 +222,44 @@ local function handleBoss(bosses)
             lastBossTarget = boss
             local dist = (hrp.Position - bhrp.Position).Magnitude
             if dist > 50 then
-                -- 🔹 Warp ไป ExitZone ของห้องบอสก่อน
+                -- 🔹 หา Room ของบอส
                 local bossRoom = getRoomFromPart(bhrp)
+
+                -- 🔹 Warp ไป ExitZone ของห้องบอสก่อน
                 local bossExit = bossRoom and bossRoom:FindFirstChild("ExitZone")
                 if bossExit then
                     warpTo(bossExit.Position, 5)
                     task.wait(0.5)
                 end
 
+                -- 🔹 ถ้ามี StartDoor (Model) ให้ warp ไป PrimaryPart
+                local warpedStart = false
+                if bossRoom then
+                    local startDoor = bossRoom:FindFirstChild("StartDoor")
+                    if startDoor and startDoor.PrimaryPart then
+                        warpTo(startDoor.PrimaryPart.Position, 5)
+                        task.wait(0.5)
+                        warpedStart = true
+                    end
+                end
+
+                -- 🔹 ถ้าไม่เจอ StartDoor ให้ค้นหา Part ชื่อขึ้นต้นด้วย "Start"
+                if not warpedStart and bossRoom then
+                    for _, obj in ipairs(bossRoom:GetDescendants()) do
+                        if obj:IsA("BasePart") and obj.Name:sub(1,5) == "Start" then
+                            warpTo(obj.Position, 5)
+                            task.wait(0.5)
+                            break
+                        end
+                    end
+                end
+
                 -- 🔹 Warp มาหาบอส
                 warpTo(bhrp.Position, 5)
                 task.wait(0.3)
             end
-            -- 💥 ดึงทั้งบอสและมอน true ที่อยู่ใกล้ ๆ ด้วย
+
+            -- 💥 ดึงทั้งบอสและมอน true รอบ ๆ
             local _, mobsTrue = getTargets()
             pullMobs({boss})
             if #mobsTrue > 0 then pullMobs(mobsTrue) end
