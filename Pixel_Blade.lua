@@ -29,7 +29,7 @@ local BossRooms = {
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
-
+local TweenService = game:GetService("TweenService")
 
 -- =====================
 -- ⚡ Replay Games
@@ -61,9 +61,6 @@ MovementSection:AddToggle({
 -- Auto TP Mon Complete Fixed
 -- =========================================================
 local tp_mon, connection, isBusy = true, nil, false
-local player = game.Players.LocalPlayer
-local RunService = game:GetService("RunService")
-
 local friendlyMobs = {
     "GoldenPhantom","GiantInfernoGuardian","GiantSkeleton","GiantWizard","GiantZombie",
     "NecromancerGhoul","ShroomArcher","ShroomKnight","ShroomPaladin"
@@ -210,11 +207,20 @@ local function getTargets()
 end
 
 --========================================================
--- 🧠 Smart Boss Behavior (รองรับทุกห้องบอส + ExitZone + StartDoor/Part Start*)
+-- 🧠 Smart Boss Behavior (ExitZone + StartDoor/Start* + Tween to Boss)
 --========================================================
---========================================================
--- 🧠 Smart Boss Behavior (ExitZone + StartDoor/Start* + Pull)
---========================================================
+local function tweenToPosition(targetPos, speed)
+    local hrp = getHRP()
+    if not hrp then return end
+    local distance = (hrp.Position - targetPos).Magnitude
+    local duration = math.clamp(distance / (speed or 100), 0.5, 3) -- ความเร็ว/เวลา
+    local tween = TweenService:Create(hrp, TweenInfo.new(duration, Enum.EasingStyle.Linear), {
+        CFrame = CFrame.new(targetPos + Vector3.new(0, 5, 0))
+    })
+    tween:Play()
+    tween.Completed:Wait()
+end
+
 local function handleBoss(bosses)
     local hrp = getHRP()
     if not hrp then return false end
@@ -252,14 +258,21 @@ local function handleBoss(bosses)
                         if obj:IsA("BasePart") and obj.Name:sub(1,5) == "Start" then
                             warpTo(obj.Position, 5)
                             task.wait(0.5)
+                            warpedStart = true
                             break
                         end
                     end
                 end
 
-                -- 🔹 Warp มาหาบอส
-                warpTo(bhrp.Position, 5)
-                task.wait(0.3)
+                -- 🔹 หลังจากวาปมาที่ StartDoor หรือ Start* แล้ว → Tween ไปหาบอส
+                if warpedStart and bhrp then
+                    tweenToPosition(bhrp.Position, 80) -- ความเร็ว 80 (ปรับได้)
+                    task.wait(0.3)
+                else
+                    -- ถ้าไม่มี start → ใช้วาปแบบเดิม
+                    warpTo(bhrp.Position, 5)
+                    task.wait(0.3)
+                end
             end
 
             -- ดึงบอส + มอน true รอบ ๆ
