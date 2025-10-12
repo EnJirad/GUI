@@ -394,12 +394,13 @@ local teleportDuration = 0.5
 local cooldownDuration = 0.5
 local farmRaidTask
 
--- Raid positions for cycling every 5 seconds
+-- Raid positions for cycling every 5 seconds (added CrystalTree as 5th target)
 local raidPositions = {
     Vector3.new(-788.7662963867188, -194.17047119140625, -152.11851501464844),
     Vector3.new(-692.055419921875, -194.1704864501953, -233.7333526611328),
     Vector3.new(-790.2472534179688, -194.17050170898438, -328.41143798828125),
-    Vector3.new(-879.9151611328125, -194.1704864501953, -233.5121307373047)
+    Vector3.new(-879.9151611328125, -194.1704864501953, -233.5121307373047),
+    "CrystalTree"  -- Special string target for dynamic teleport
 }
 local currentPosIndex = 1
 local lastPosTeleport = 0
@@ -414,8 +415,24 @@ local function farmRaidLoop()
             local char = player.Character
             local playerHRP = char and char:FindFirstChild("HumanoidRootPart")
             if playerHRP then
-                playerHRP.CFrame = CFrame.new(raidPositions[currentPosIndex] + Vector3.new(0, 5, 0))
-                print("[FarmRaid] ▶ Teleported to raid position " .. currentPosIndex)
+                local target = raidPositions[currentPosIndex]
+                local targetCFrame
+                if typeof(target) == "Vector3" then
+                    targetCFrame = CFrame.new(target + Vector3.new(0, 5, 0))
+                else  -- "CrystalTree"
+                    local raidArena = workspace:FindFirstChild("RaidArena")
+                    if raidArena then
+                        local crystalTree = raidArena:FindFirstChild("CrystalTree")
+                        if crystalTree then
+                            targetCFrame = crystalTree:GetModelCFrame() + Vector3.new(0, 5, 0)
+                        end
+                    end
+                end
+                if targetCFrame then
+                    playerHRP.CFrame = targetCFrame
+                    local posName = typeof(target) == "Vector3" and ("position " .. currentPosIndex) or "CrystalTree"
+                    print("[FarmRaid] ▶ Teleported to raid " .. posName)
+                end
                 currentPosIndex = (currentPosIndex % #raidPositions) + 1
                 lastPosTeleport = tick()
             end
