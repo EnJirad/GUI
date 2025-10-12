@@ -96,6 +96,11 @@ local function startPull(mobs)
             if not mob or not mob.Parent then continue end
             if table.find(friendlyMobs, mob.Name) then continue end
 
+            -- ✅ เพิ่มเช็คชื่อ IceDragon
+            if mob:GetAttribute("hadEntrance") ~= true and mob.Name ~= "IceDragon" then
+                continue
+            end
+
             local monHRP = mob:FindFirstChild("HumanoidRootPart")
             if monHRP then
                 monHRP.CanCollide = false
