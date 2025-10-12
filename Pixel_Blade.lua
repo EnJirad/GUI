@@ -73,6 +73,9 @@ local visitedBossRooms = {}
 local Mon_TP = true
 local pullConnection
 
+-- เก็บค่า Health ล่าสุด และเวลาเริ่มค้าง
+local healthTracker = {}
+
 ----------------------------------------------------------
 -- FUNCTION: Continuous Pull (hadEntrance == true)
 ----------------------------------------------------------
@@ -183,21 +186,45 @@ local function teleportToLargestRoom()
 end
 
 ----------------------------------------------------------
--- FUNCTION: Auto TP Loop (Flow ใหม่)
+-- FUNCTION: Auto TP Loop + เช็ค Health ค้าง
 ----------------------------------------------------------
 local function autoTP()
     while Mon_TP do
-        --------------------------------------------------
-        -- 1️⃣ ดูดมอน hadEntrance == true ก่อน
-        --------------------------------------------------
         local allMobs = getMonsters()
-        local trueMobs = {}
+        local trueMobs, falseMobs = {}, {}
+
+        -- แยก hadEntrance == true และ false
         for _, mob in ipairs(allMobs) do
-            if mob:GetAttribute("hadEntrance") == true then
+            local had = mob:GetAttribute("hadEntrance")
+            if had == true then
                 table.insert(trueMobs, mob)
+            elseif had == false then
+                table.insert(falseMobs, mob)
             end
         end
 
+        --------------------------------------------------
+        -- เช็ค Health ค้าง 10 วิ
+        --------------------------------------------------
+        for _, mob in ipairs(trueMobs) do
+            if mob:FindFirstChild("Health") and mob.Health:IsA("NumberValue") then
+                local prev = healthTracker[mob]
+                if prev and prev.value == mob.Health.Value then
+                    if tick() - prev.time >= 10 then
+                        print("[AutoTP] Health stuck! Teleporting to", mob.Name)
+                        teleportTo(mob)
+                        -- รีเซ็ตเวลา tracker หลังวาป
+                        healthTracker[mob] = {value = mob.Health.Value, time = tick()}
+                    end
+                else
+                    healthTracker[mob] = {value = mob.Health.Value, time = tick()}
+                end
+            end
+        end
+
+        --------------------------------------------------
+        -- ดูด hadEntrance == true
+        --------------------------------------------------
         if #trueMobs > 0 then
             startPull(trueMobs)
             repeat
@@ -212,7 +239,7 @@ local function autoTP()
         end
 
         --------------------------------------------------
-        -- 2️⃣ เช็คบอส ถ้ามีห้องบอสและไม่มี hadEntrance == true → วาป ExitZone
+        -- เช็คบอส
         --------------------------------------------------
         for _, room in ipairs(Main_Room_Boss) do
             if not visitedBossRooms[room] then
@@ -233,16 +260,8 @@ local function autoTP()
         end
 
         --------------------------------------------------
-        -- 3️⃣ หา hadEntrance == false → วาป
+        -- หา hadEntrance == false → วาป
         --------------------------------------------------
-        allMobs = getMonsters()
-        local falseMobs = {}
-        for _, mob in ipairs(allMobs) do
-            if mob:GetAttribute("hadEntrance") == false then
-                table.insert(falseMobs, mob)
-            end
-        end
-
         if #falseMobs > 0 then
             for _, mob in ipairs(falseMobs) do
                 if not Mon_TP then break end
@@ -253,16 +272,14 @@ local function autoTP()
         end
 
         --------------------------------------------------
-        -- 4️⃣ ถ้าไม่มีมอนเหลือเลย → วาปห้องใหญ่สุด
+        -- ถ้าไม่มีมอนเหลือเลย → วาปห้องใหญ่สุด
         --------------------------------------------------
-        allMobs = getMonsters()
         local nonFriendly = {}
         for _, m in ipairs(allMobs) do
             if not table.find(friendlyMobs, m.Name) then
                 table.insert(nonFriendly, m)
             end
         end
-
         if #nonFriendly == 0 then
             teleportToLargestRoom()
             task.wait(1)
