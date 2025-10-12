@@ -33,7 +33,7 @@ local player = Players.LocalPlayer
 -- =====================
 -- ⚡ Replay Games
 -- =====================
-local replay_g = true
+local replay_g = false
 MovementSection:AddToggle({
     Name = "Replay Games",
     Default = replay_g,
@@ -59,6 +59,9 @@ MovementSection:AddToggle({
 -- =========================================================
 -- Auto TP Mon Complete Fixed
 -- =========================================================
+-- =========================================================
+-- Auto TP Mon Complete Fixed + Auto Reset if Stuck
+-- =========================================================
 local friendlyMobs = {
     "GoldenPhantom","GiantInfernoGuardian","GiantSkeleton","GiantWizard","GiantZombie",
     "NecromancerGhoul","ShroomArcher","ShroomKnight","ShroomPaladin","Kori"
@@ -70,16 +73,50 @@ local Main_Room_Boss = {
 }
 
 local visitedBossRooms = {}
-local Mon_TP = true
+local Mon_TP = false
 local pullConnection
 
 -- เก็บค่า Health ล่าสุด และเวลาเริ่มค้าง
 local healthTracker = {}
 
-----------------------------------------------------------
+-- =========================================================
+-- FUNCTION: Reset Character
+-- =========================================================
+local function resetCharacter()
+    if player.Character then
+        player.Character:BreakJoints()
+        print("[AutoTP] Character reset!")
+    end
+end
+
+-- =========================================================
+-- FUNCTION: Check if Character is Stuck
+-- =========================================================
+local lastPosition = nil
+local lastMoveTime = tick()
+local stuckThreshold = 120 -- 2 นาที
+
+local function checkStuck()
+    local char = player.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
+    local currentPos = hrp.Position
+    if lastPosition and (currentPos - lastPosition).Magnitude < 1 then
+        if tick() - lastMoveTime > stuckThreshold then
+            print("[AutoTP] Character stuck! Resetting...")
+            resetCharacter()
+            lastMoveTime = tick()
+        end
+    else
+        lastMoveTime = tick()
+    end
+    lastPosition = currentPos
+end
+
+-- =========================================================
 -- FUNCTION: Teleport to Monster (ระยะ 20 หน่วย)
-----------------------------------------------------------
--- ฟังก์ชันช่วยหา RootPart ของมอน
+-- =========================================================
 local function getMobRootPart(mob)
     return mob:FindFirstChild("HumanoidRootPart") or mob:FindFirstChild("basehitbox")
 end
@@ -94,9 +131,9 @@ local function teleportTo(mon)
     end
 end
 
-----------------------------------------------------------
+-- =========================================================
 -- FUNCTION: Continuous Pull (hadEntrance == true)
-----------------------------------------------------------
+-- =========================================================
 local function startPull(mobs)
     if pullConnection then pullConnection:Disconnect() end
     pullConnection = RunService.Heartbeat:Connect(function()
@@ -113,10 +150,7 @@ local function startPull(mobs)
         for _, mob in ipairs(mobs) do
             if not mob or not mob.Parent then continue end
             if table.find(friendlyMobs, mob.Name) then continue end
-
-            if mob:GetAttribute("hadEntrance") ~= true and mob.Name ~= "IceDragon" then
-                continue
-            end
+            if mob:GetAttribute("hadEntrance") ~= true and mob.Name ~= "IceDragon" then continue end
 
             local monRoot = getMobRootPart(mob)
             if monRoot then
@@ -131,9 +165,9 @@ local function startPull(mobs)
     end)
 end
 
-----------------------------------------------------------
+-- =========================================================
 -- FUNCTION: Find Monsters
-----------------------------------------------------------
+-- =========================================================
 local function getMonsters()
     local monsters = {}
     for _, model in ipairs(workspace:GetChildren()) do
@@ -151,9 +185,9 @@ local function getMonsters()
     return monsters
 end
 
-----------------------------------------------------------
+-- =========================================================
 -- FUNCTION: Teleport to Boss Exit
-----------------------------------------------------------
+-- =========================================================
 local function teleportToBossExit(roomName)
     local bossRoom = workspace:FindFirstChild(roomName)
     if bossRoom and bossRoom:FindFirstChild("ExitZone") then
@@ -169,9 +203,9 @@ local function teleportToBossExit(roomName)
     end
 end
 
-----------------------------------------------------------
+-- =========================================================
 -- FUNCTION: Teleport to largest numbered room
-----------------------------------------------------------
+-- =========================================================
 local function teleportToLargestRoom()
     local largest = -math.huge
     for _, child in ipairs(workspace:GetChildren()) do
@@ -194,10 +228,9 @@ local function teleportToLargestRoom()
     end
 end
 
-----------------------------------------------------------
--- FUNCTION: Auto TP Loop + เช็ค Health ค้าง
-----------------------------------------------------------
--- แยก hadEntrance == true และ IceDragon
+-- =========================================================
+-- FUNCTION: Auto TP Loop + เช็ค Health ค้าง + Stuck Reset
+-- =========================================================
 local function getTrueMobs()
     local mobs = {}
     for _, mob in ipairs(getMonsters()) do
@@ -208,10 +241,12 @@ local function getTrueMobs()
     return mobs
 end
 
--- autoTP loop
 local function autoTP()
     while Mon_TP do
-        -- ✅ 1. เช็ค Health ค้าง
+        -- 0. เช็คติดค้างตัวเอง
+        checkStuck()
+
+        -- 1. เช็ค Health ค้าง
         local trueMobs = getTrueMobs()
         for _, mob in ipairs(trueMobs) do
             if mob:FindFirstChild("Health") and mob.Health:IsA("NumberValue") then
@@ -228,21 +263,21 @@ local function autoTP()
             end
         end
 
-        -- ✅ 2. ดูด trueMobs (รวม IceDragon)
+        -- 2. ดูด trueMobs (รวม IceDragon)
         if #trueMobs > 0 then
             startPull(trueMobs)
             repeat
                 task.wait(0.5)
                 trueMobs = getTrueMobs()
+                checkStuck() -- เช็คติดค้างระหว่าง pull
             until not Mon_TP or #trueMobs == 0
         end
 
-        -- ✅ 3. เช็คบอส
+        -- 3. เช็คบอส
         for _, room in ipairs(Main_Room_Boss) do
             if not visitedBossRooms[room] then
                 local bossRoom = workspace:FindFirstChild(room)
                 if bossRoom then
-                    -- วาปไป Tp ก่อน
                     if bossRoom:FindFirstChild("Tp") then
                         local char = player.Character or player.CharacterAdded:Wait()
                         local playerHRP = char:FindFirstChild("HumanoidRootPart")
@@ -251,7 +286,7 @@ local function autoTP()
                             task.wait(0.5)
                         end
                     end
-                    -- ถ้าไม่มี trueMobs → วาป ExitZone
+
                     local hasTrue = false
                     for _, mob in ipairs(bossRoom:GetChildren()) do
                         if mob:GetAttribute("hadEntrance") == true then
@@ -266,7 +301,7 @@ local function autoTP()
             end
         end
 
-        -- ✅ 4. หา hadEntrance == false → วาป
+        -- 4. หา hadEntrance == false → วาป
         local allMobs = getMonsters()
         local falseMobs = {}
         for _, mob in ipairs(allMobs) do
@@ -280,7 +315,7 @@ local function autoTP()
             task.wait(0.5)
         end
 
-        -- ✅ 5. ถ้าไม่มีมอนเหลือ → วาปห้องใหญ่สุด
+        -- 5. ถ้าไม่มีมอนเหลือ → วาปห้องใหญ่สุด
         local nonFriendly = {}
         for _, m in ipairs(allMobs) do
             if not table.find(friendlyMobs, m.Name) then
@@ -296,9 +331,9 @@ local function autoTP()
     end
 end
 
-----------------------------------------------------------
+-- =========================================================
 -- TOGGLE: Auto TP Mon and Pull
-----------------------------------------------------------
+-- =========================================================
 MovementSection:AddToggle({
     Name = "Auto TP Mon and Pull",
     Default = Mon_TP,
@@ -317,6 +352,22 @@ MovementSection:AddToggle({
         end
     end
 })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ----------------------------------------------------------
@@ -465,7 +516,7 @@ local abilities_all = {
     "rejuvenate","bloodThirst","frozenWall", "ablaze", "voidGrip",
     "DeathGrasp", "Oblivion", "raiseTheDead","goldenArmy","CosmicVision","blackHole","cosmicBeam",
 }
-local use_Ability = true
+local use_Ability = false
 local currentAbilityIndex, abilityLoop = 1, nil
 
 MovementSection:AddToggle({
