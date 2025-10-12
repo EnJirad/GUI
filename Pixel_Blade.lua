@@ -318,20 +318,150 @@ MovementSection:AddToggle({
     end
 })
 
+
+----------------------------------------------------------
+-- FUNCTION: Farm Raid (วาป 10 วิ / หยุดดูด 3 วิ)
+----------------------------------------------------------
+local Raid_Farm = false
+local raidPullConnection
+local currentTarget
+local pulling = false
+
+local teleportDuration = 1 -- ระยะเวลาดูดหลังวาป
+local cooldownDuration = 2  -- เวลาหยุดดูดก่อนวาปใหม่
+
+----------------------------------------------------------
+-- FUNCTION: Start/Stop Pull
+----------------------------------------------------------
+local function startRaidPull()
+    if raidPullConnection then raidPullConnection:Disconnect() end
+
+    raidPullConnection = RunService.Heartbeat:Connect(function()
+        if not Raid_Farm or not pulling then return end
+
+        local char = player.Character
+        local playerHRP = char and char:FindFirstChild("HumanoidRootPart")
+        if not playerHRP then return end
+
+        -- ✅ ดูดมอนทั้งหมดที่มีอยู่ทุกเฟรม
+        local mobs = getTrueMobs()
+        for _, mob in ipairs(mobs) do
+            if not mob or not mob.Parent then continue end
+            if table.find(friendlyMobs, mob.Name) then continue end
+            if mob:GetAttribute("hadEntrance") ~= true and mob.Name ~= "IceDragon" then continue end
+
+            local monRoot = getMobRootPart(mob)
+            if monRoot then
+                monRoot.CanCollide = false
+                local monSize = monRoot.Size or Vector3.new(2,2,2)
+                local distanceOffset = 20 + (monSize.Z / 2)
+                local heightOffset = 20 + (monSize.Y / 4)
+                local tpPosition = playerHRP.Position
+                    + playerHRP.CFrame.LookVector * distanceOffset
+                    + Vector3.new(0, heightOffset, 0)
+                monRoot.CFrame = CFrame.new(tpPosition, tpPosition + playerHRP.CFrame.LookVector)
+            end
+        end
+    end)
+end
+
+
+----------------------------------------------------------
+-- FUNCTION: Farm Raid Main Loop
+----------------------------------------------------------
+----------------------------------------------------------
+-- FUNCTION: Farm Raid Main Loop (วาปไปหามอนไกลที่สุด)
+----------------------------------------------------------
+local function farmRaidLoop()
+    startRaidPull()
+
+    while Raid_Farm do
+        -- ✅ เลือกมอนเป้าหมายใหม่
+        local trueMobs = getTrueMobs()
+        local validMobs = {}
+        local char = player.Character
+        local playerHRP = char and char:FindFirstChild("HumanoidRootPart")
+        if not playerHRP then task.wait(1) continue end
+
+        for _, mob in ipairs(trueMobs) do
+            if mob:GetAttribute("hadEntrance") == true or mob.Name == "IceDragon" then
+                table.insert(validMobs, mob)
+            end
+        end
+
+        if #validMobs > 0 then
+            -- ✅ เลือกมอนตัวไกลที่สุด
+            table.sort(validMobs, function(a, b)
+                local aRoot = getMobRootPart(a)
+                local bRoot = getMobRootPart(b)
+                if not aRoot or not bRoot then return false end
+                return (aRoot.Position - playerHRP.Position).Magnitude > (bRoot.Position - playerHRP.Position).Magnitude
+            end)
+
+            currentTarget = validMobs[1]
+            teleportTo(currentTarget)
+            print("[FarmRaid] ▶ Teleported to farthest mob:", currentTarget.Name)
+
+            -- ✅ เริ่มดูด 3 วิ
+            pulling = true
+            task.wait(teleportDuration)
+
+            -- ✅ หยุดดูด 3 วิ
+            pulling = false
+            print("[FarmRaid] ⏸ Pause pulling for 3s...")
+            task.wait(cooldownDuration)
+        else
+            -- ไม่มีมอนให้ฟาร์ม → รอเช็กใหม่
+            pulling = false
+            task.wait(1)
+        end
+    end
+
+    -- ✅ ปิดการเชื่อมต่อเมื่อหยุดฟาร์ม
+    if raidPullConnection then
+        raidPullConnection:Disconnect()
+        raidPullConnection = nil
+    end
+end
+
+----------------------------------------------------------
+-- TOGGLE: Farm Raid
+----------------------------------------------------------
+MovementSection:AddToggle({
+    Name = "Farm Raid",
+    Default = Raid_Farm,
+    Callback = function(state)
+        Raid_Farm = state
+        if Raid_Farm then
+            print("[FarmRaid] Started farming in current room...")
+            task.spawn(farmRaidLoop)
+        else
+            Raid_Farm = false
+            if raidPullConnection then
+                raidPullConnection:Disconnect()
+                raidPullConnection = nil
+            end
+            pulling = false
+            print("[FarmRaid] Stopped")
+        end
+    end
+})
+
+
 -- =====================
 -- ⚡ Auto Skill
 -- =====================
 local abilities_mele = { "constellation","slash", }
-local abilities_magi = {"lightning", "solar", "sandTornado", "lunarSpell", "arcticWind", "gemstone", "bloodSnowstorm",}
+local abilities_magi = {"lightning", "solar", "sandTornado", "lunarSpell", "arcticWind", "gemstone", "bloodSnowstorm", "voidGrip_Shockwave"}
 local abilities_use = {"boneStrength", "rejuvenate", "berserk", "bloodThirst", "frozenWall", "ablaze", "voidGrip",}
 local abilities_other = {"voidGrip", "raiseTheDead", "goldenArmy", "CosmicVision", "Oblivion", "blackHole", "cosmicBeam"}
 
 local abilities_all1 = {
-    "rebirth"
+    "voidGrip_Shockwave"
 }
 
 local abilities_all = {
-    "lightning","solar", "arcticWind","bloodSnowstorm",
+    "lightning","solar", "arcticWind","bloodSnowstorm", "voidGrip_Shockwave",
     "rejuvenate","bloodThirst","frozenWall", "ablaze", "voidGrip",
     "DeathGrasp", "Oblivion", "raiseTheDead","goldenArmy","CosmicVision","blackHole","cosmicBeam",
 }
