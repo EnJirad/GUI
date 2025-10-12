@@ -33,7 +33,7 @@ local player = Players.LocalPlayer
 -- =====================
 -- ⚡ Replay Games
 -- =====================
-local replay_g = false
+local replay_g = true
 MovementSection:AddToggle({
     Name = "Replay Games",
     Default = replay_g,
@@ -73,7 +73,7 @@ local Main_Room_Boss = {
 }
 
 local visitedBossRooms = {}
-local Mon_TP = false
+local Mon_TP = true
 local pullConnection
 
 -- เก็บค่า Health ล่าสุด และเวลาเริ่มค้าง
@@ -516,7 +516,7 @@ local abilities_all = {
     "rejuvenate","bloodThirst","frozenWall", "ablaze", "voidGrip",
     "DeathGrasp", "Oblivion", "raiseTheDead","goldenArmy","CosmicVision","blackHole","cosmicBeam",
 }
-local use_Ability = false
+local use_Ability = true
 local currentAbilityIndex, abilityLoop = 1, nil
 
 MovementSection:AddToggle({
