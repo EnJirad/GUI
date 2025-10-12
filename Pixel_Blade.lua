@@ -402,47 +402,82 @@ local raidPositions = {
     Vector3.new(-879.9151611328125, -194.1704864501953, -233.5121307373047),
     "CrystalTree"  -- Special string target for dynamic teleport
 }
+local safePositions = {
+    raidPositions[1],
+    raidPositions[2],
+    raidPositions[3],
+    raidPositions[4]
+}
 local currentPosIndex = 1
 local lastPosTeleport = 0
 local posInterval = 5  -- Every 5 seconds
+
+local function getCrystalTreePosition()
+    local raidArena = workspace:FindFirstChild("RaidArena")
+    if raidArena then
+        local crystalTree = raidArena:FindFirstChild("CrystalTree")
+        if crystalTree then
+            return crystalTree:GetModelCFrame().Position
+        end
+    end
+    return nil
+end
+
+local function evacuateFromCrystalTree(playerHRP)
+    local safePos = safePositions[math.random(1, #safePositions)]
+    playerHRP.CFrame = CFrame.new(safePos + Vector3.new(0, 5, 0))
+    print("[FarmRaid] ▶ Evacuated to safe position")
+end
 
 local function farmRaidLoop()
     startGlobalPull({Raid_Farm = true})
 
     while Raid_Farm do
+        local char = player.Character
+        local playerHRP = char and char:FindFirstChild("HumanoidRootPart")
+        if not playerHRP then task.wait(1) continue end
+
+        -- Continuous check: If too close to CrystalTree, evacuate immediately
+        local crystalPos = getCrystalTreePosition()
+        if crystalPos then
+            local dist = (playerHRP.Position - crystalPos).Magnitude
+            if dist < 5 then
+                evacuateFromCrystalTree(playerHRP)
+            end
+        end
+
         -- Check and teleport to next raid position every 5 seconds
         if tick() - lastPosTeleport >= posInterval then
-            local char = player.Character
-            local playerHRP = char and char:FindFirstChild("HumanoidRootPart")
-            if playerHRP then
-                local target = raidPositions[currentPosIndex]
-                local targetCFrame
-                if typeof(target) == "Vector3" then
-                    targetCFrame = CFrame.new(target + Vector3.new(0, 5, 0))
-                else  -- "CrystalTree"
-                    local raidArena = workspace:FindFirstChild("RaidArena")
-                    if raidArena then
-                        local crystalTree = raidArena:FindFirstChild("CrystalTree")
-                        if crystalTree then
-                            targetCFrame = crystalTree:GetModelCFrame() + Vector3.new(0, 5, 0)
-                        end
+            local target = raidPositions[currentPosIndex]
+            local targetCFrame
+            if typeof(target) == "Vector3" then
+                targetCFrame = CFrame.new(target + Vector3.new(0, 5, 0))
+            else  -- "CrystalTree"
+                local raidArena = workspace:FindFirstChild("RaidArena")
+                if raidArena then
+                    local crystalTree = raidArena:FindFirstChild("CrystalTree")
+                    if crystalTree then
+                        -- Teleport to CrystalTree but evacuate immediately
+                        playerHRP.CFrame = crystalTree:GetModelCFrame() + Vector3.new(0, 5, 0)
+                        print("[FarmRaid] ▶ Teleported to CrystalTree (evacuating immediately)")
+                        task.wait(0.01)  -- Minimal delay
+                        evacuateFromCrystalTree(playerHRP)
+                        local posName = "CrystalTree (evacuated)"
+                        print("[FarmRaid] ▶ Teleported to raid " .. posName)
                     end
                 end
-                if targetCFrame then
-                    playerHRP.CFrame = targetCFrame
-                    local posName = typeof(target) == "Vector3" and ("position " .. currentPosIndex) or "CrystalTree"
-                    print("[FarmRaid] ▶ Teleported to raid " .. posName)
-                end
-                currentPosIndex = (currentPosIndex % #raidPositions) + 1
-                lastPosTeleport = tick()
             end
+            if typeof(target) == "Vector3" and targetCFrame then
+                playerHRP.CFrame = targetCFrame
+                local posName = "position " .. currentPosIndex
+                print("[FarmRaid] ▶ Teleported to raid " .. posName)
+            end
+            currentPosIndex = (currentPosIndex % #raidPositions) + 1
+            lastPosTeleport = tick()
         end
 
         local trueMobs = getTrueMobs()
         local validMobs = {}
-        local char = player.Character
-        local playerHRP = char and char:FindFirstChild("HumanoidRootPart")
-        if not playerHRP then task.wait(1) continue end
 
         for _, mob in ipairs(trueMobs) do
             if mob:GetAttribute("hadEntrance") == true or mob.Name == "IceDragon" then
