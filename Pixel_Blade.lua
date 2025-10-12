@@ -20,6 +20,12 @@ local PlayerTab = TabControls:CreateTab({
 -- Movement Section
 local MovementSection = PlayerTab:AddSection("Movement", true)
 
+local BossRooms = {
+    ["YetiBossFight"] = {"ShimBomboYeti","CorruptShimBomboYeti"},
+    ["AkumaBossFight"] = {"Akuma","CorruptAkuma"},
+    ["KoriBossFight"] = {"IceDragon"},
+}
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
@@ -37,11 +43,15 @@ local Main_Room_Boss = {
 }
 
 local visitedBossRooms = {}
-local Mon_TP = false
 local pullConnection  -- Single global Heartbeat for all pulls
 local raidPulling = false
 local currentTarget
 local currentAbilityIndex = 1
+
+local replay_g = true
+local Mon_TP = false
+local Raid_Farm = true
+local use_Ability = true
 
 -- Health & Stuck trackers with debounce
 local healthTracker = {}
@@ -50,6 +60,13 @@ local lastMoveTime = tick()
 local stuckThreshold = 120  -- 2 min
 local lastHealthCheck = 0
 local healthDebounce = 2  -- Check every 2s
+
+-- Abilities
+local abilities_all = {
+    "lightning","solar", "arcticWind","bloodSnowstorm", "voidGrip_Shockwave",
+    "rejuvenate","bloodThirst","frozenWall", "ablaze", "voidGrip",
+    "DeathGrasp", "Oblivion", "raiseTheDead","goldenArmy","CosmicVision","blackHole","cosmicBeam",
+}
 
 -- =====================
 -- Event-Driven Monster Tracking (Optimize: No more GetChildren() loops)
@@ -145,7 +162,6 @@ end
 -- =====================
 -- ⚡ Replay Games
 -- =====================
-local replay_g = false
 MovementSection:AddToggle({
     Name = "Replay Games",
     Default = replay_g,
@@ -191,21 +207,6 @@ local function checkStuck()
     lastPosition = currentPos
 end
 
-local function teleportToBossExit(roomName)
-    local bossRoom = workspace:FindFirstChild(roomName)
-    if bossRoom and bossRoom:FindFirstChild("ExitZone") then
-        local exitPart = bossRoom.ExitZone
-        local char = player.Character or player.CharacterAdded:Wait()
-        local playerHRP = char:FindFirstChild("HumanoidRootPart")
-        if playerHRP then
-            playerHRP.CFrame = exitPart.CFrame + Vector3.new(0,5,0)
-            print("[BossRoom] Teleported to Exit of", roomName)
-            visitedBossRooms[roomName] = true
-            task.wait(1)
-        end
-    end
-end
-
 local function checkHealthStuck(trueMobs)
     if tick() - lastHealthCheck < healthDebounce then return end
     lastHealthCheck = tick()
@@ -237,6 +238,21 @@ local function teleportTo(mon)
     if playerHRP and monRoot then
         local direction = (monRoot.Position - playerHRP.Position).Unit
         playerHRP.CFrame = CFrame.new(monRoot.Position - direction * 30 + Vector3.new(0,5,0), monRoot.Position)
+    end
+end
+
+local function teleportToBossExit(roomName)
+    local bossRoom = workspace:FindFirstChild(roomName)
+    if bossRoom and bossRoom:FindFirstChild("ExitZone") then
+        local exitPart = bossRoom.ExitZone
+        local char = player.Character or player.CharacterAdded:Wait()
+        local playerHRP = char:FindFirstChild("HumanoidRootPart")
+        if playerHRP then
+            playerHRP.CFrame = exitPart.CFrame + Vector3.new(0,5,0)
+            print("[BossRoom] Teleported to Exit of", roomName)
+            visitedBossRooms[roomName] = true
+            task.wait(1)
+        end
     end
 end
 
@@ -443,8 +459,6 @@ local function farmRaidLoop()
     end
 end
 
-
-local Raid_Farm = false
 MovementSection:AddToggle({
     Name = "Farm Raid",
     Default = Raid_Farm,
@@ -468,19 +482,9 @@ MovementSection:AddToggle({
     end
 })
 
-
 -- =====================
 -- ⚡ Auto Skill (Throttled to task.spawn, no Heartbeat)
 -- =====================
-
--- Abilities
-local abilities_all = {
-    "lightning","solar", "arcticWind","bloodSnowstorm", "voidGrip_Shockwave",
-    "rejuvenate","bloodThirst","frozenWall", "ablaze", "voidGrip",
-    "DeathGrasp", "Oblivion", "raiseTheDead","goldenArmy","CosmicVision","blackHole","cosmicBeam",
-}
-
-local use_Ability = false
 local skillTask
 MovementSection:AddToggle({
     Name = "Auto Skill (Interval)",
