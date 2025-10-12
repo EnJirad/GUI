@@ -74,7 +74,7 @@ local Mon_TP = true
 local pullConnection
 
 ----------------------------------------------------------
--- FUNCTION: Continuous Pull (ดูดมอนที่ hadEntrance == true)
+-- FUNCTION: Continuous Pull (hadEntrance == true)
 ----------------------------------------------------------
 local function startPull(mobs)
     if pullConnection then pullConnection:Disconnect() end
@@ -115,9 +115,7 @@ local function getMonsters()
         if model:IsA("Model") then
             local name = model.Name
             local hadAttr = model:GetAttribute("hadEntrance")
-
             if table.find(friendlyMobs, name) then continue end
-
             if hadAttr == true or hadAttr == false then
                 table.insert(monsters, model)
             elseif hadAttr == nil and name == "IceDragon" then
@@ -129,14 +127,15 @@ local function getMonsters()
 end
 
 ----------------------------------------------------------
--- FUNCTION: Teleport to Monster
+-- FUNCTION: Teleport to Monster (ระยะ 20 หน่วย)
 ----------------------------------------------------------
 local function teleportTo(mon)
     local char = player.Character or player.CharacterAdded:Wait()
     local playerHRP = char:FindFirstChild("HumanoidRootPart")
     local monHRP = mon:FindFirstChild("HumanoidRootPart")
     if playerHRP and monHRP then
-        playerHRP.CFrame = monHRP.CFrame + Vector3.new(0, 5, 0)
+        local direction = (monHRP.Position - playerHRP.Position).Unit
+        playerHRP.CFrame = CFrame.new(monHRP.Position - direction * 20 + Vector3.new(0,5,0), monHRP.Position)
     end
 end
 
@@ -150,7 +149,7 @@ local function teleportToBossExit(roomName)
         local char = player.Character or player.CharacterAdded:Wait()
         local playerHRP = char:FindFirstChild("HumanoidRootPart")
         if playerHRP then
-            playerHRP.CFrame = exitPart.CFrame + Vector3.new(0, 5, 0)
+            playerHRP.CFrame = exitPart.CFrame + Vector3.new(0,5,0)
             print("[BossRoom] Teleported to Exit of", roomName)
             visitedBossRooms[roomName] = true
             task.wait(1)
@@ -184,100 +183,92 @@ local function teleportToLargestRoom()
 end
 
 ----------------------------------------------------------
--- FUNCTION: Auto TP Loop
+-- FUNCTION: Auto TP Loop (Flow ใหม่)
 ----------------------------------------------------------
 local function autoTP()
     while Mon_TP do
         --------------------------------------------------
-        -- ✅ วาปไป ExitZone ของทุกห้องบอส (ทีละห้อง)
-        --------------------------------------------------
-        for _, room in ipairs(Main_Room_Boss) do
-            if not Mon_TP then break end
-            if not visitedBossRooms[room] then
-                local bossRoom = workspace:FindFirstChild(room)
-                if bossRoom and bossRoom:FindFirstChild("ExitZone") then
-                    teleportToBossExit(room)
-                    task.wait(1)
-                end
-            end
-        end
-
-        --------------------------------------------------
-        -- ✅ หาและจัดการมอนสเตอร์
+        -- 1️⃣ ดูดมอน hadEntrance == true ก่อน
         --------------------------------------------------
         local allMobs = getMonsters()
-        local falseMobs, trueMobs = {}, {}
-
+        local trueMobs = {}
         for _, mob in ipairs(allMobs) do
-            local had = mob:GetAttribute("hadEntrance")
-            if had == false then
-                table.insert(falseMobs, mob)
-            elseif had == true then
+            if mob:GetAttribute("hadEntrance") == true then
                 table.insert(trueMobs, mob)
             end
         end
 
-        --------------------------------------------------
-        -- ✅ ถ้ามอนหมดแล้ว → วาปไปห้องใหญ่สุด
-        --------------------------------------------------
-        if #falseMobs == 0 and #trueMobs == 0 and #allMobs == 0 then
-            teleportToLargestRoom()
-            task.wait(2)
-            -- หลังจากวาปไปห้องใหญ่สุด → รีเฟรชมอนใหม่
-            allMobs = getMonsters()
-            falseMobs, trueMobs = {}, {}
-            for _, mob in ipairs(allMobs) do
-                local had = mob:GetAttribute("hadEntrance")
-                if had == false then
-                    table.insert(falseMobs, mob)
-                elseif had == true then
-                    table.insert(trueMobs, mob)
-                end
-            end
-        end
-
-        --------------------------------------------------
-        -- ✅ เริ่มจากวาปไปมอน hadEntrance == false ก่อน
-        --------------------------------------------------
-        if Mon_TP and #falseMobs > 0 then
-            for _, target in ipairs(falseMobs) do
-                if not Mon_TP then break end
-                teleportTo(target)
-                task.wait(0.5)
-
-                local refresh = getMonsters()
-                local pullList = {}
-                for _, m in ipairs(refresh) do
-                    if m:GetAttribute("hadEntrance") == true and not table.find(friendlyMobs, m.Name) then
-                        table.insert(pullList, m)
-                    end
-                end
-
-                if #pullList > 0 then
-                    startPull(pullList)
-                    task.wait(3)
-                end
-            end
-        end
-
-        --------------------------------------------------
-        -- ✅ หลังจากนั้น ถ้ามอน true ยังเหลือ → ดูดทั้งหมด
-        --------------------------------------------------
-        if Mon_TP and #trueMobs > 0 then
+        if #trueMobs > 0 then
             startPull(trueMobs)
             repeat
                 task.wait(0.5)
-                local stillTrue = {}
+                trueMobs = {}
                 for _, m in ipairs(getMonsters()) do
                     if m:GetAttribute("hadEntrance") == true and not table.find(friendlyMobs, m.Name) then
-                        table.insert(stillTrue, m)
+                        table.insert(trueMobs, m)
                     end
                 end
-                trueMobs = stillTrue
             until not Mon_TP or #trueMobs == 0
         end
 
-        task.wait(1)
+        --------------------------------------------------
+        -- 2️⃣ เช็คบอส ถ้ามีห้องบอสและไม่มี hadEntrance == true → วาป ExitZone
+        --------------------------------------------------
+        for _, room in ipairs(Main_Room_Boss) do
+            if not visitedBossRooms[room] then
+                local bossRoom = workspace:FindFirstChild(room)
+                if bossRoom and bossRoom:FindFirstChild("ExitZone") then
+                    local hasTrue = false
+                    for _, mob in ipairs(bossRoom:GetChildren()) do
+                        if mob:GetAttribute("hadEntrance") and mob:GetAttribute("hadEntrance") == true then
+                            hasTrue = true
+                            break
+                        end
+                    end
+                    if not hasTrue then
+                        teleportToBossExit(room)
+                    end
+                end
+            end
+        end
+
+        --------------------------------------------------
+        -- 3️⃣ หา hadEntrance == false → วาป
+        --------------------------------------------------
+        allMobs = getMonsters()
+        local falseMobs = {}
+        for _, mob in ipairs(allMobs) do
+            if mob:GetAttribute("hadEntrance") == false then
+                table.insert(falseMobs, mob)
+            end
+        end
+
+        if #falseMobs > 0 then
+            for _, mob in ipairs(falseMobs) do
+                if not Mon_TP then break end
+                teleportTo(mob)
+                task.wait(0.5)
+            end
+            continue
+        end
+
+        --------------------------------------------------
+        -- 4️⃣ ถ้าไม่มีมอนเหลือเลย → วาปห้องใหญ่สุด
+        --------------------------------------------------
+        allMobs = getMonsters()
+        local nonFriendly = {}
+        for _, m in ipairs(allMobs) do
+            if not table.find(friendlyMobs, m.Name) then
+                table.insert(nonFriendly, m)
+            end
+        end
+
+        if #nonFriendly == 0 then
+            teleportToLargestRoom()
+            task.wait(1)
+        end
+
+        task.wait(0.5)
     end
 end
 
@@ -290,7 +281,7 @@ MovementSection:AddToggle({
     Callback = function(state)
         Mon_TP = state
         if Mon_TP then
-            visitedBossRooms = {} -- รีเซ็ตบอสที่เคยไปทุกครั้งที่เปิด
+            visitedBossRooms = {}
             task.spawn(autoTP)
         else
             if pullConnection then
