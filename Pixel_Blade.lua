@@ -77,6 +77,24 @@ local pullConnection
 local healthTracker = {}
 
 ----------------------------------------------------------
+-- FUNCTION: Teleport to Monster (ระยะ 20 หน่วย)
+----------------------------------------------------------
+-- ฟังก์ชันช่วยหา RootPart ของมอน
+local function getMobRootPart(mob)
+    return mob:FindFirstChild("HumanoidRootPart") or mob:FindFirstChild("basehitbox")
+end
+
+local function teleportTo(mon)
+    local char = player.Character or player.CharacterAdded:Wait()
+    local playerHRP = char:FindFirstChild("HumanoidRootPart")
+    local monRoot = getMobRootPart(mon)
+    if playerHRP and monRoot then
+        local direction = (monRoot.Position - playerHRP.Position).Unit
+        playerHRP.CFrame = CFrame.new(monRoot.Position - direction * 30 + Vector3.new(0,5,0), monRoot.Position)
+    end
+end
+
+----------------------------------------------------------
 -- FUNCTION: Continuous Pull (hadEntrance == true)
 ----------------------------------------------------------
 local function startPull(mobs)
@@ -96,19 +114,18 @@ local function startPull(mobs)
             if not mob or not mob.Parent then continue end
             if table.find(friendlyMobs, mob.Name) then continue end
 
-            -- ✅ เพิ่มเช็คชื่อ IceDragon
             if mob:GetAttribute("hadEntrance") ~= true and mob.Name ~= "IceDragon" then
                 continue
             end
 
-            local monHRP = mob:FindFirstChild("HumanoidRootPart")
-            if monHRP then
-                monHRP.CanCollide = false
-                local monSize = monHRP.Size or Vector3.new(2,2,2)
+            local monRoot = getMobRootPart(mob)
+            if monRoot then
+                monRoot.CanCollide = false
+                local monSize = monRoot.Size or Vector3.new(2,2,2)
                 local distanceOffset = 20 + (monSize.Z / 2)
                 local heightOffset = 20 + (monSize.Y / 4)
                 local tpPosition = playerHRP.Position + playerHRP.CFrame.LookVector * distanceOffset + Vector3.new(0, heightOffset, 0)
-                monHRP.CFrame = CFrame.new(tpPosition, tpPosition + playerHRP.CFrame.LookVector)
+                monRoot.CFrame = CFrame.new(tpPosition, tpPosition + playerHRP.CFrame.LookVector)
             end
         end
     end)
@@ -132,19 +149,6 @@ local function getMonsters()
         end
     end
     return monsters
-end
-
-----------------------------------------------------------
--- FUNCTION: Teleport to Monster (ระยะ 20 หน่วย)
-----------------------------------------------------------
-local function teleportTo(mon)
-    local char = player.Character or player.CharacterAdded:Wait()
-    local playerHRP = char:FindFirstChild("HumanoidRootPart")
-    local monHRP = mon:FindFirstChild("HumanoidRootPart")
-    if playerHRP and monHRP then
-        local direction = (monHRP.Position - playerHRP.Position).Unit
-        playerHRP.CFrame = CFrame.new(monHRP.Position - direction * 20 + Vector3.new(0,5,0), monHRP.Position)
-    end
 end
 
 ----------------------------------------------------------
@@ -193,32 +197,29 @@ end
 ----------------------------------------------------------
 -- FUNCTION: Auto TP Loop + เช็ค Health ค้าง
 ----------------------------------------------------------
+-- แยก hadEntrance == true และ IceDragon
+local function getTrueMobs()
+    local mobs = {}
+    for _, mob in ipairs(getMonsters()) do
+        if mob:GetAttribute("hadEntrance") == true or mob.Name == "IceDragon" then
+            table.insert(mobs, mob)
+        end
+    end
+    return mobs
+end
+
+-- autoTP loop
 local function autoTP()
     while Mon_TP do
-        local allMobs = getMonsters()
-        local trueMobs, falseMobs = {}, {}
-
-        -- แยก hadEntrance == true และ false
-        for _, mob in ipairs(allMobs) do
-            local had = mob:GetAttribute("hadEntrance")
-            if had == true then
-                table.insert(trueMobs, mob)
-            elseif had == false then
-                table.insert(falseMobs, mob)
-            end
-        end
-
-        --------------------------------------------------
-        -- เช็ค Health ค้าง 10 วิ
-        --------------------------------------------------
+        -- ✅ 1. เช็ค Health ค้าง
+        local trueMobs = getTrueMobs()
         for _, mob in ipairs(trueMobs) do
             if mob:FindFirstChild("Health") and mob.Health:IsA("NumberValue") then
                 local prev = healthTracker[mob]
                 if prev and prev.value == mob.Health.Value then
-                    if tick() - prev.time >= 10 then
+                    if tick() - prev.time >= 5 then
                         print("[AutoTP] Health stuck! Teleporting to", mob.Name)
                         teleportTo(mob)
-                        -- รีเซ็ตเวลา tracker หลังวาป
                         healthTracker[mob] = {value = mob.Health.Value, time = tick()}
                     end
                 else
@@ -227,58 +228,59 @@ local function autoTP()
             end
         end
 
-        --------------------------------------------------
-        -- ดูด hadEntrance == true
-        --------------------------------------------------
+        -- ✅ 2. ดูด trueMobs (รวม IceDragon)
         if #trueMobs > 0 then
             startPull(trueMobs)
             repeat
                 task.wait(0.5)
-                trueMobs = {}
-                for _, m in ipairs(getMonsters()) do
-                    if m:GetAttribute("hadEntrance") == true and not table.find(friendlyMobs, m.Name) then
-                        table.insert(trueMobs, m)
-                    end
-                end
+                trueMobs = getTrueMobs()
             until not Mon_TP or #trueMobs == 0
         end
 
-        --------------------------------------------------
-        -- เช็คบอส
-        --------------------------------------------------
+        -- ✅ 3. เช็คบอส
         for _, room in ipairs(Main_Room_Boss) do
             if not visitedBossRooms[room] then
                 local bossRoom = workspace:FindFirstChild(room)
-                if bossRoom and bossRoom:FindFirstChild("ExitZone") then
+                if bossRoom then
+                    -- วาปไป Tp ก่อน
+                    if bossRoom:FindFirstChild("Tp") then
+                        local char = player.Character or player.CharacterAdded:Wait()
+                        local playerHRP = char:FindFirstChild("HumanoidRootPart")
+                        if playerHRP then
+                            playerHRP.CFrame = bossRoom.Tp.CFrame + Vector3.new(0,5,0)
+                            task.wait(0.5)
+                        end
+                    end
+                    -- ถ้าไม่มี trueMobs → วาป ExitZone
                     local hasTrue = false
                     for _, mob in ipairs(bossRoom:GetChildren()) do
-                        if mob:GetAttribute("hadEntrance") and mob:GetAttribute("hadEntrance") == true then
+                        if mob:GetAttribute("hadEntrance") == true then
                             hasTrue = true
                             break
                         end
                     end
-                    if not hasTrue then
+                    if not hasTrue and bossRoom:FindFirstChild("ExitZone") then
                         teleportToBossExit(room)
                     end
                 end
             end
         end
 
-        --------------------------------------------------
-        -- หา hadEntrance == false → วาป
-        --------------------------------------------------
-        if #falseMobs > 0 then
-            for _, mob in ipairs(falseMobs) do
-                if not Mon_TP then break end
-                teleportTo(mob)
-                task.wait(0.5)
+        -- ✅ 4. หา hadEntrance == false → วาป
+        local allMobs = getMonsters()
+        local falseMobs = {}
+        for _, mob in ipairs(allMobs) do
+            if mob:GetAttribute("hadEntrance") == false then
+                table.insert(falseMobs, mob)
             end
-            continue
+        end
+        for _, mob in ipairs(falseMobs) do
+            if not Mon_TP then break end
+            teleportTo(mob)
+            task.wait(0.5)
         end
 
-        --------------------------------------------------
-        -- ถ้าไม่มีมอนเหลือเลย → วาปห้องใหญ่สุด
-        --------------------------------------------------
+        -- ✅ 5. ถ้าไม่มีมอนเหลือ → วาปห้องใหญ่สุด
         local nonFriendly = {}
         for _, m in ipairs(allMobs) do
             if not table.find(friendlyMobs, m.Name) then
@@ -315,7 +317,6 @@ MovementSection:AddToggle({
         end
     end
 })
-
 
 -- =====================
 -- ⚡ Auto Skill
