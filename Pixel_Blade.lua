@@ -49,8 +49,8 @@ local currentTarget
 local currentAbilityIndex = 1
 
 local replay_g = true
-local Mon_TP = true
-local Raid_Farm = false
+local Mon_TP = false
+local Raid_Farm = true
 local use_Ability = true
 
 -- Health & Stuck trackers with debounce
