@@ -49,8 +49,8 @@ local currentTarget
 local currentAbilityIndex = 1
 
 local replay_g = true
-local Mon_TP = false
-local Raid_Farm = true
+local Mon_TP = true
+local Raid_Farm = false
 local use_Ability = true
 
 -- Health & Stuck trackers with debounce
@@ -388,29 +388,23 @@ MovementSection:AddToggle({
 })
 
 -- =====================
--- Farm Raid (Throttled, use global pull)
+-- Farm Raid (Fixed - Only raidPositions loop)
 -- =====================
 local teleportDuration = 0.5
 local cooldownDuration = 0.5
 local farmRaidTask
 
--- Raid positions for cycling every 5 seconds (added CrystalTree as 5th target)
 local raidPositions = {
     Vector3.new(-788.7662963867188, -194.17047119140625, -152.11851501464844),
     Vector3.new(-692.055419921875, -194.1704864501953, -233.7333526611328),
     Vector3.new(-790.2472534179688, -194.17050170898438, -328.41143798828125),
     Vector3.new(-879.9151611328125, -194.1704864501953, -233.5121307373047),
-    "CrystalTree"  -- Special string target for dynamic teleport
+    Vector3.new(-649.653564453125, -194.17047119140625, -232.2523193359375),
+    Vector3.new(-784.7623901367188, -194.17047119140625, -373.07000732421875),
+    Vector3.new(-928.5982055664062, -194.17050170898438, -235.7322540283203),
+    Vector3.new(-790.2870483398438, -194.17050170898438, -94.15525817871094),
+    "CrystalTree"
 }
-local safePositions = {
-    raidPositions[1],
-    raidPositions[2],
-    raidPositions[3],
-    raidPositions[4]
-}
-local currentPosIndex = 1
-local lastPosTeleport = 0
-local posInterval = 5  -- Every 5 seconds
 
 local function getCrystalTreePosition()
     local raidArena = workspace:FindFirstChild("RaidArena")
@@ -423,10 +417,17 @@ local function getCrystalTreePosition()
     return nil
 end
 
-local function evacuateFromCrystalTree(playerHRP)
-    local safePos = safePositions[math.random(1, #safePositions)]
-    playerHRP.CFrame = CFrame.new(safePos + Vector3.new(0, 5, 0))
-    print("[FarmRaid] ▶ Evacuated to safe position")
+local function teleportToRaidPosition(target, playerHRP)
+    if typeof(target) == "Vector3" then
+        playerHRP.CFrame = CFrame.new(target + Vector3.new(0, 5, 0))
+        print("[FarmRaid] ▶ Teleported to raid position")
+    elseif target == "CrystalTree" then
+        local crystalPos = getCrystalTreePosition()
+        if crystalPos then
+            playerHRP.CFrame = CFrame.new(crystalPos + Vector3.new(0, 10, 0))
+            print("[FarmRaid] ▶ Teleported near CrystalTree")
+        end
+    end
 end
 
 local function farmRaidLoop()
@@ -437,76 +438,15 @@ local function farmRaidLoop()
         local playerHRP = char and char:FindFirstChild("HumanoidRootPart")
         if not playerHRP then task.wait(1) continue end
 
-        -- Continuous check: If too close to CrystalTree, evacuate immediately
-        local crystalPos = getCrystalTreePosition()
-        if crystalPos then
-            local dist = (playerHRP.Position - crystalPos).Magnitude
-            if dist < 5 then
-                evacuateFromCrystalTree(playerHRP)
-            end
-        end
+        for _, target in ipairs(raidPositions) do
+            if not Raid_Farm then break end
 
-        -- Check and teleport to next raid position every 5 seconds
-        if tick() - lastPosTeleport >= posInterval then
-            local target = raidPositions[currentPosIndex]
-            local targetCFrame
-            if typeof(target) == "Vector3" then
-                targetCFrame = CFrame.new(target + Vector3.new(0, 5, 0))
-            else  -- "CrystalTree"
-                local raidArena = workspace:FindFirstChild("RaidArena")
-                if raidArena then
-                    local crystalTree = raidArena:FindFirstChild("CrystalTree")
-                    if crystalTree then
-                        -- Teleport to CrystalTree but evacuate immediately
-                        playerHRP.CFrame = crystalTree:GetModelCFrame() + Vector3.new(0, 5, 0)
-                        print("[FarmRaid] ▶ Teleported to CrystalTree (evacuating immediately)")
-                        task.wait(0.01)  -- Minimal delay
-                        evacuateFromCrystalTree(playerHRP)
-                        local posName = "CrystalTree (evacuated)"
-                        print("[FarmRaid] ▶ Teleported to raid " .. posName)
-                    end
-                end
-            end
-            if typeof(target) == "Vector3" and targetCFrame then
-                playerHRP.CFrame = targetCFrame
-                local posName = "position " .. currentPosIndex
-                print("[FarmRaid] ▶ Teleported to raid " .. posName)
-            end
-            currentPosIndex = (currentPosIndex % #raidPositions) + 1
-            lastPosTeleport = tick()
-        end
-
-        local trueMobs = getTrueMobs()
-        local validMobs = {}
-
-        for _, mob in ipairs(trueMobs) do
-            if mob:GetAttribute("hadEntrance") == true or mob.Name == "IceDragon" then
-                table.insert(validMobs, mob)
-            end
-        end
-
-        if #validMobs > 0 then
-            -- Farthest mob
-            table.sort(validMobs, function(a, b)
-                local aRoot = getMobRootPart(a)
-                local bRoot = getMobRootPart(b)
-                if not aRoot or not bRoot then return false end
-                return (aRoot.Position - playerHRP.Position).Magnitude > (bRoot.Position - playerHRP.Position).Magnitude
-            end)
-
-            currentTarget = validMobs[1]
-            teleportTo(currentTarget)
-            print("[FarmRaid] ▶ Teleported to farthest mob:", currentTarget.Name)
-
+            teleportToRaidPosition(target, playerHRP)
             raidPulling = true
             task.wait(teleportDuration)
 
             raidPulling = false
-            print("[FarmRaid] ⏸ Pause pulling for 3s...")
             task.wait(cooldownDuration)
-        else
-            raidPulling = false
-            task.wait(1)
         end
     end
 end
@@ -517,10 +457,7 @@ MovementSection:AddToggle({
     Callback = function(state)
         Raid_Farm = state
         if Raid_Farm then
-            -- Reset position cycle when starting
-            currentPosIndex = 1
-            lastPosTeleport = 0
-            print("[FarmRaid] Started farming in current room...")
+            print("[FarmRaid] ▶ Started raid position loop...")
             farmRaidTask = task.spawn(farmRaidLoop)
         else
             Raid_Farm = false
@@ -529,7 +466,7 @@ MovementSection:AddToggle({
                 task.cancel(farmRaidTask)
                 farmRaidTask = nil
             end
-            print("[FarmRaid] Stopped")
+            print("[FarmRaid] ⏹️ Stopped")
         end
     end
 })
