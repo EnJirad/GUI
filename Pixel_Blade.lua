@@ -30,8 +30,42 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
 
--- Global tracking for optimization
-local trackedMonsters = {}  -- Cache all monsters, updated via events
+-- ==========================================================================================================================================================
+local replay_g = true
+local Mon_TP = true
+local Raid_Farm = false
+local use_Ability = true
+local open_Gacha = false
+local AT_upgrade = false
+-- ==========================================================================================================================================================
+-- ⚡ Replay Games
+-- =====================
+
+MovementSection:AddToggle({
+    Name = "Replay Games",
+    Default = replay_g,
+    Callback = function(state)
+        replay_g = state
+
+        if replay_g then
+            task.spawn(function()
+                while replay_g do
+                    local args = { "replay" }
+                    game:GetService("ReplicatedStorage")
+                        :WaitForChild("remotes")
+                        :WaitForChild("gameEndVote")
+                        :FireServer(unpack(args))
+
+                    task.wait(2)
+                end
+            end)
+        end
+    end
+})
+
+-- ==========================================================================================================================================================
+-- Auto TP Mon Complete Fixed + Auto Reset if Stuck
+-- =========================================================
 local friendlyMobs = {
     "GoldenPhantom","GiantInfernoGuardian","GiantSkeleton","GiantWizard","GiantZombie",
     "NecromancerGhoul","ShroomArcher","ShroomKnight","ShroomPaladin","Kori"
@@ -43,194 +77,19 @@ local Main_Room_Boss = {
 }
 
 local visitedBossRooms = {}
-local pullConnection  -- Single global Heartbeat for all pulls
-local raidPulling = false
-local currentTarget
-local currentAbilityIndex = 1
+local pullConnection
 
-local replay_g = true
-local Mon_TP = false
-local Raid_Farm = true
-local use_Ability = true
-
--- Health & Stuck trackers with debounce
+-- เก็บค่า Health ล่าสุด และเวลาเริ่มค้าง
 local healthTracker = {}
-local lastPosition = nil
-local lastMoveTime = tick()
-local stuckThreshold = 120  -- 2 min
-local lastHealthCheck = 0
-local healthDebounce = 2  -- Check every 2s
 
--- Abilities
-local abilities_all = {
-    "lightning","solar", "arcticWind","bloodSnowstorm", "voidGrip_Shockwave",
-    "rejuvenate","bloodThirst","frozenWall", "ablaze", "voidGrip",
-    "DeathGrasp", "Oblivion", "raiseTheDead","goldenArmy","CosmicVision","blackHole","cosmicBeam",
-}
-
--- =====================
--- Event-Driven Monster Tracking (Optimize: No more GetChildren() loops)
--- =====================
-local function updateMonsterCache(model)
-    local name = model.Name
-    local hadAttr = model:GetAttribute("hadEntrance")
-    if table.find(friendlyMobs, name) then return end
-    if hadAttr == true or hadAttr == false or (hadAttr == nil and name == "IceDragon") then
-        trackedMonsters[model] = true
-    end
-end
-
-local function removeFromCache(model)
-    trackedMonsters[model] = nil
-end
-
--- Connect events once
-workspace.ChildAdded:Connect(updateMonsterCache)
-workspace.ChildRemoved:Connect(removeFromCache)
-
--- Initial cache
-for _, model in ipairs(workspace:GetChildren()) do
-    if model:IsA("Model") then
-        updateMonsterCache(model)
-    end
-end
-
-local function getMonsters()  -- Now O(1) via cache
-    local monsters = {}
-    for model, _ in pairs(trackedMonsters) do
-        if model.Parent then
-            table.insert(monsters, model)
-        else
-            removeFromCache(model)  -- Cleanup
-        end
-    end
-    return monsters
-end
-
-local function getTrueMobs()  -- hadEntrance == true or IceDragon
-    local mobs = {}
-    for model, _ in pairs(trackedMonsters) do
-        if model.Parent and (model:GetAttribute("hadEntrance") == true or model.Name == "IceDragon") then
-            table.insert(mobs, model)
-        end
-    end
-    return mobs
-end
-
--- =====================
--- Single Global Pull Heartbeat (Optimize: Merge all pulls)
--- =====================
+----------------------------------------------------------
+-- FUNCTION: Teleport to Monster (ระยะ 20 หน่วย)
+----------------------------------------------------------
+-- ฟังก์ชันช่วยหา RootPart ของมอน
 local function getMobRootPart(mob)
     return mob:FindFirstChild("HumanoidRootPart") or mob:FindFirstChild("basehitbox")
 end
 
-local function performPull(mobs, playerHRP)
-    for _, mob in ipairs(mobs) do
-        if not mob or not mob.Parent then continue end
-        if table.find(friendlyMobs, mob.Name) then continue end
-        if mob:GetAttribute("hadEntrance") ~= true and mob.Name ~= "IceDragon" then continue end
-
-        local monRoot = getMobRootPart(mob)
-        if monRoot then
-            monRoot.CanCollide = false
-            local monSize = monRoot.Size or Vector3.new(2,2,2)
-            local distanceOffset = 20 + (monSize.Z / 2)
-            local heightOffset = 20 + (monSize.Y / 4)
-            local tpPosition = playerHRP.Position + playerHRP.CFrame.LookVector * distanceOffset + Vector3.new(0, heightOffset, 0)
-            monRoot.CFrame = CFrame.new(tpPosition, tpPosition + playerHRP.CFrame.LookVector)
-        end
-    end
-end
-
-local function startGlobalPull(activePulls)  -- activePulls = {Mon_TP = true, Raid_Farm = true, ...}
-    if pullConnection then pullConnection:Disconnect() end
-    pullConnection = RunService.Heartbeat:Connect(function()
-        local char = player.Character
-        local playerHRP = char and char:FindFirstChild("HumanoidRootPart")
-        if not playerHRP then return end
-
-        local trueMobs = getTrueMobs()
-        if activePulls.Mon_TP and #trueMobs > 0 then
-            performPull(trueMobs, playerHRP)
-        end
-        if activePulls.Raid_Farm and raidPulling and #trueMobs > 0 then
-            performPull(trueMobs, playerHRP)
-        end
-    end)
-end
-
--- =====================
--- ⚡ Replay Games
--- =====================
-MovementSection:AddToggle({
-    Name = "Replay Games",
-    Default = replay_g,
-    Callback = function(state)
-        replay_g = state
-        if replay_g then
-            task.spawn(function()
-                while replay_g do
-                    local args = { "replay" }
-                    game:GetService("ReplicatedStorage"):WaitForChild("remotes"):WaitForChild("gameEndVote"):FireServer(unpack(args))
-                    task.wait(2)  -- Unchanged
-                end
-            end)
-        end
-    end
-})
-
--- =====================
--- Reset & Stuck Check (Debounced)
--- =====================
-local function resetCharacter()
-    if player.Character then
-        player.Character:BreakJoints()
-        print("[AutoTP] Character reset!")
-    end
-end
-
-local function checkStuck()
-    local char = player.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-
-    local currentPos = hrp.Position
-    if lastPosition and (currentPos - lastPosition).Magnitude < 1 then
-        if tick() - lastMoveTime > stuckThreshold then
-            print("[AutoTP] Character stuck! Resetting...")
-            resetCharacter()
-            lastMoveTime = tick()
-        end
-    else
-        lastMoveTime = tick()
-    end
-    lastPosition = currentPos
-end
-
-local function checkHealthStuck(trueMobs)
-    if tick() - lastHealthCheck < healthDebounce then return end
-    lastHealthCheck = tick()
-
-    for _, mob in ipairs(trueMobs) do
-        local healthVal = mob:FindFirstChild("Health")
-        if healthVal and healthVal:IsA("NumberValue") then
-            local prev = healthTracker[mob]
-            if prev and prev.value == healthVal.Value then
-                if tick() - prev.time >= 5 then
-                    print("[AutoTP] Health stuck! Teleporting to", mob.Name)
-                    teleportTo(mob)  -- Define below
-                    healthTracker[mob] = {value = healthVal.Value, time = tick()}
-                end
-            else
-                healthTracker[mob] = {value = healthVal.Value, time = tick()}
-            end
-        end
-    end
-end
-
--- =====================
--- Teleport Functions (Unchanged but cached)
--- =====================
 local function teleportTo(mon)
     local char = player.Character or player.CharacterAdded:Wait()
     local playerHRP = char:FindFirstChild("HumanoidRootPart")
@@ -241,6 +100,66 @@ local function teleportTo(mon)
     end
 end
 
+----------------------------------------------------------
+-- FUNCTION: Continuous Pull (hadEntrance == true)
+----------------------------------------------------------
+local function startPull(mobs)
+    if pullConnection then pullConnection:Disconnect() end
+    pullConnection = RunService.Heartbeat:Connect(function()
+        if not Mon_TP then
+            pullConnection:Disconnect()
+            pullConnection = nil
+            return
+        end
+
+        local char = player.Character
+        local playerHRP = char and char:FindFirstChild("HumanoidRootPart")
+        if not playerHRP then return end
+
+        for _, mob in ipairs(mobs) do
+            if not mob or not mob.Parent then continue end
+            if table.find(friendlyMobs, mob.Name) then continue end
+
+            if mob:GetAttribute("hadEntrance") ~= true and mob.Name ~= "IceDragon" then
+                continue
+            end
+
+            local monRoot = getMobRootPart(mob)
+            if monRoot then
+                monRoot.CanCollide = false
+                local monSize = monRoot.Size or Vector3.new(2,2,2)
+                local distanceOffset = 20 + (monSize.Z / 2)
+                local heightOffset = 20 + (monSize.Y / 4)
+                local tpPosition = playerHRP.Position + playerHRP.CFrame.LookVector * distanceOffset + Vector3.new(0, heightOffset, 0)
+                monRoot.CFrame = CFrame.new(tpPosition, tpPosition + playerHRP.CFrame.LookVector)
+            end
+        end
+    end)
+end
+
+----------------------------------------------------------
+-- FUNCTION: Find Monsters
+----------------------------------------------------------
+local function getMonsters()
+    local monsters = {}
+    for _, model in ipairs(workspace:GetChildren()) do
+        if model:IsA("Model") then
+            local name = model.Name
+            local hadAttr = model:GetAttribute("hadEntrance")
+            if table.find(friendlyMobs, name) then continue end
+            if hadAttr == true or hadAttr == false then
+                table.insert(monsters, model)
+            elseif hadAttr == nil and name == "IceDragon" then
+                table.insert(monsters, model)
+            end
+        end
+    end
+    return monsters
+end
+
+----------------------------------------------------------
+-- FUNCTION: Teleport to Boss Exit
+----------------------------------------------------------
 local function teleportToBossExit(roomName)
     local bossRoom = workspace:FindFirstChild(roomName)
     if bossRoom and bossRoom:FindFirstChild("ExitZone") then
@@ -256,6 +175,9 @@ local function teleportToBossExit(roomName)
     end
 end
 
+----------------------------------------------------------
+-- FUNCTION: Teleport to largest numbered room
+----------------------------------------------------------
 local function teleportToLargestRoom()
     local largest = -math.huge
     for _, child in ipairs(workspace:GetChildren()) do
@@ -278,37 +200,55 @@ local function teleportToLargestRoom()
     end
 end
 
--- =====================
--- Auto TP Loop (Throttled to 1s, debounced checks)
--- =====================
-local autoTPConnection
+----------------------------------------------------------
+-- FUNCTION: Auto TP Loop + เช็ค Health ค้าง
+----------------------------------------------------------
+-- แยก hadEntrance == true และ IceDragon
+local function getTrueMobs()
+    local mobs = {}
+    for _, mob in ipairs(getMonsters()) do
+        if mob:GetAttribute("hadEntrance") == true or mob.Name == "IceDragon" then
+            table.insert(mobs, mob)
+        end
+    end
+    return mobs
+end
+
+-- autoTP loop
 local function autoTP()
-    autoTPConnection = RunService.Stepped:Connect(function()  -- Use Stepped for less freq than Heartbeat
-        if not Mon_TP then
-            autoTPConnection:Disconnect()
-            autoTPConnection = nil
-            return
+    while Mon_TP do
+        -- ✅ 1. เช็ค Health ค้าง
+        local trueMobs = getTrueMobs()
+        for _, mob in ipairs(trueMobs) do
+            if mob:FindFirstChild("Health") and mob.Health:IsA("NumberValue") then
+                local prev = healthTracker[mob]
+                if prev and prev.value == mob.Health.Value then
+                    if tick() - prev.time >= 5 then
+                        print("[AutoTP] Health stuck! Teleporting to", mob.Name)
+                        teleportTo(mob)
+                        healthTracker[mob] = {value = mob.Health.Value, time = tick()}
+                    end
+                else
+                    healthTracker[mob] = {value = mob.Health.Value, time = tick()}
+                end
+            end
         end
 
-        checkStuck()  -- Debounced internally
+        -- ✅ 2. ดูด trueMobs (รวม IceDragon)
+        if #trueMobs > 0 then
+            startPull(trueMobs)
+            repeat
+                task.wait(0.5)
+                trueMobs = getTrueMobs()
+            until not Mon_TP or #trueMobs == 0
+        end
 
-        local trueMobs = getTrueMobs()
-        checkHealthStuck(trueMobs)  -- Debounced
-
-        -- Pull via global
-        startGlobalPull({Mon_TP = true})
-
-        repeat
-            task.wait(1)  -- Throttle to 1s
-            trueMobs = getTrueMobs()
-            checkStuck()
-        until not Mon_TP or #trueMobs == 0
-
-        -- Boss check (unchanged, but less freq)
+        -- ✅ 3. เช็คบอส
         for _, room in ipairs(Main_Room_Boss) do
             if not visitedBossRooms[room] then
                 local bossRoom = workspace:FindFirstChild(room)
                 if bossRoom then
+                    -- วาปไป Tp ก่อน
                     if bossRoom:FindFirstChild("Tp") then
                         local char = player.Character or player.CharacterAdded:Wait()
                         local playerHRP = char:FindFirstChild("HumanoidRootPart")
@@ -317,7 +257,7 @@ local function autoTP()
                             task.wait(0.5)
                         end
                     end
-
+                    -- ถ้าไม่มี trueMobs → วาป ExitZone
                     local hasTrue = false
                     for _, mob in ipairs(bossRoom:GetChildren()) do
                         if mob:GetAttribute("hadEntrance") == true then
@@ -332,7 +272,7 @@ local function autoTP()
             end
         end
 
-        -- False mobs TP
+        -- ✅ 4. หา hadEntrance == false → วาป
         local allMobs = getMonsters()
         local falseMobs = {}
         for _, mob in ipairs(allMobs) do
@@ -346,7 +286,7 @@ local function autoTP()
             task.wait(0.5)
         end
 
-        -- No mobs -> largest room
+        -- ✅ 5. ถ้าไม่มีมอนเหลือ → วาปห้องใหญ่สุด
         local nonFriendly = {}
         for _, m in ipairs(allMobs) do
             if not table.find(friendlyMobs, m.Name) then
@@ -358,10 +298,13 @@ local function autoTP()
             task.wait(1)
         end
 
-        task.wait(1)  -- Throttle main loop
-    end)
+        task.wait(0.5)
+    end
 end
 
+----------------------------------------------------------
+-- TOGGLE: Auto TP Mon and Pull
+----------------------------------------------------------
 MovementSection:AddToggle({
     Name = "Auto TP Mon and Pull",
     Default = Mon_TP,
@@ -369,17 +312,11 @@ MovementSection:AddToggle({
         Mon_TP = state
         if Mon_TP then
             visitedBossRooms = {}
-            healthTracker = {}  -- Clear cache
             task.spawn(autoTP)
-            startGlobalPull({Mon_TP = true})
         else
             if pullConnection then
                 pullConnection:Disconnect()
                 pullConnection = nil
-            end
-            if autoTPConnection then
-                autoTPConnection:Disconnect()
-                autoTPConnection = nil
             end
             Mon_TP = false
             print("[AutoTP] Stopped")
@@ -387,13 +324,17 @@ MovementSection:AddToggle({
     end
 })
 
--- =====================
--- Farm Raid (Fixed - Only raidPositions loop)
--- =====================
+
+-- ==========================================================================================================================================================
 local teleportDuration = 0.5
 local cooldownDuration = 0.5
+local raidPulling = false
+local raid_pullConnection
 local farmRaidTask
 
+-- =====================================================
+-- 📦 Raid positions (loop วาปทุกจุด)
+-- =====================================================
 local raidPositions = {
     Vector3.new(-788.7662963867188, -194.17047119140625, -152.11851501464844),
     Vector3.new(-692.055419921875, -194.1704864501953, -233.7333526611328),
@@ -406,6 +347,9 @@ local raidPositions = {
     "CrystalTree"
 }
 
+-- =====================================================
+-- 🪄 ฟังก์ชัน Utility
+-- =====================================================
 local function getCrystalTreePosition()
     local raidArena = workspace:FindFirstChild("RaidArena")
     if raidArena then
@@ -417,10 +361,10 @@ local function getCrystalTreePosition()
     return nil
 end
 
-local function teleportToRaidPosition(target, playerHRP)
+local function Raid_teleportToRaidPosition(target, playerHRP)
     if typeof(target) == "Vector3" then
         playerHRP.CFrame = CFrame.new(target + Vector3.new(0, 5, 0))
-        print("[FarmRaid] ▶ Teleported to raid position")
+        print("[FarmRaid] ▶ Teleported to raid position:", target)
     elseif target == "CrystalTree" then
         local crystalPos = getCrystalTreePosition()
         if crystalPos then
@@ -430,18 +374,79 @@ local function teleportToRaidPosition(target, playerHRP)
     end
 end
 
+-- =====================================================
+-- 🧲 Pull Monsters (เฉพาะ Farm Raid เท่านั้น)
+-- =====================================================
+
+local function Raid_getMobRootPart(mob)
+    return mob:FindFirstChild("HumanoidRootPart") or mob:FindFirstChild("basehitbox")
+end
+
+local function Raid_getTrueMobs()
+    local mobs = {}
+    for _, model in ipairs(workspace:GetChildren()) do
+        if model:IsA("Model") and not table.find(friendlyMobs, model.Name) then
+            if model:GetAttribute("hadEntrance") == true or model.Name == "IceDragon" then
+                table.insert(mobs, model)
+            end
+        end
+    end
+    return mobs
+end
+
+local function performPull(mobs, playerHRP)
+    for _, mob in ipairs(mobs) do
+        if not mob or not mob.Parent then continue end
+        if table.find(friendlyMobs, mob.Name) then continue end
+        if mob:GetAttribute("hadEntrance") ~= true and mob.Name ~= "IceDragon" then continue end
+
+        local monRoot = Raid_getMobRootPart(mob)
+        if monRoot then
+            monRoot.CanCollide = false
+            local monSize = monRoot.Size or Vector3.new(2,2,2)
+            local distanceOffset = 20 + (monSize.Z / 2)
+            local heightOffset = 20 + (monSize.Y / 4)
+            local tpPosition = playerHRP.Position + playerHRP.CFrame.LookVector * distanceOffset + Vector3.new(0, heightOffset, 0)
+            monRoot.CFrame = CFrame.new(tpPosition, tpPosition + playerHRP.CFrame.LookVector)
+        end
+    end
+end
+
+local function startRaidPull()
+    if raid_pullConnection then raid_pullConnection:Disconnect() end
+    raid_pullConnection = RunService.Heartbeat:Connect(function()
+        if not Raid_Farm then return end
+        local char = player.Character
+        local playerHRP = char and char:FindFirstChild("HumanoidRootPart")
+        if not playerHRP then return end
+
+        if raidPulling then
+            local mobs = Raid_getTrueMobs()
+            if #mobs > 0 then
+                performPull(mobs, playerHRP)
+            end
+        end
+    end)
+end
+
+-- =====================================================
+-- 🔁 Farm Raid Loop
+-- =====================================================
 local function farmRaidLoop()
-    startGlobalPull({Raid_Farm = true})
+    startRaidPull()
 
     while Raid_Farm do
         local char = player.Character
         local playerHRP = char and char:FindFirstChild("HumanoidRootPart")
-        if not playerHRP then task.wait(1) continue end
+        if not playerHRP then
+            task.wait(1)
+            continue
+        end
 
         for _, target in ipairs(raidPositions) do
             if not Raid_Farm then break end
 
-            teleportToRaidPosition(target, playerHRP)
+            Raid_teleportToRaidPosition(target, playerHRP)
             raidPulling = true
             task.wait(teleportDuration)
 
@@ -451,8 +456,11 @@ local function farmRaidLoop()
     end
 end
 
+-- =====================================================
+-- 🎮 UI Toggle (Library section)
+-- =====================================================
 MovementSection:AddToggle({
-    Name = "Farm Raid",
+    Name = "Farm Raid (Separate)",
     Default = Raid_Farm,
     Callback = function(state)
         Raid_Farm = state
@@ -462,6 +470,10 @@ MovementSection:AddToggle({
         else
             Raid_Farm = false
             raidPulling = false
+            if raid_pullConnection then
+                raid_pullConnection:Disconnect()
+                raid_pullConnection = nil
+            end
             if farmRaidTask then
                 task.cancel(farmRaidTask)
                 farmRaidTask = nil
@@ -471,9 +483,28 @@ MovementSection:AddToggle({
     end
 })
 
+-- ==========================================================================================================================================================
+-- ⚡ Auto Skill
+-- =====================
+local abilities_mele = { "constellation","slash", }
+local abilities_magi = {"lightning", "solar", "sandTornado", "lunarSpell", "arcticWind", "gemstone", "bloodSnowstorm", "voidGrip_Shockwave"}
+local abilities_use = {"boneStrength", "rejuvenate", "berserk", "bloodThirst", "frozenWall", "ablaze", "voidGrip",}
+local abilities_other = {"voidGrip", "raiseTheDead", "goldenArmy", "CosmicVision", "Oblivion", "blackHole", "cosmicBeam"}
+
+local abilities_all1 = {
+    "rejuvenate"
+}
+
+local abilities_all = {
+    "lightning","solar", "arcticWind","bloodSnowstorm", "voidGrip_Shockwave",
+    "rejuvenate","bloodThirst","frozenWall", "ablaze", "voidGrip",
+    "DeathGrasp", "Oblivion", "raiseTheDead","goldenArmy","CosmicVision","blackHole","cosmicBeam",
+}
+
 -- =====================
 -- ⚡ Auto Skill (Throttled to task.spawn, no Heartbeat)
 -- =====================
+local currentAbilityIndex, abilityLoop = 1, nil
 local skillTask
 MovementSection:AddToggle({
     Name = "Auto Skill (Interval)",
@@ -502,52 +533,39 @@ MovementSection:AddToggle({
     end
 })
 
-------------------------------------------------------------------------------------
+-- ==========================================================================================================================================================
 local ShopSection = PlayerTab:AddSection("Shop", true)
 
-local open_Wish55 = false
-ShopSection:AddToggle({
-    Name = "Open Gacha Even55555",
-    Default = open_Wish55,
-    Callback = function(state)
-        open_Wish55 = state
-    end
-})
-
-local open_Wish = false
 local wishTask
 ShopSection:AddToggle({
     Name = "Open Gacha Even",
-    Default = open_Wish,
+    Default = open_Gacha,
     Callback = function(state)
-        open_Wish = state
-        if open_Wish and not wishTask then
+        open_Gacha = state
+        if open_Gacha and not wishTask then
             wishTask = task.spawn(function()
-                while open_Wish do
+                while open_Gacha do
                     game:GetService("ReplicatedStorage"):WaitForChild("remotes"):WaitForChild("openWish"):InvokeServer()
                     task.wait(0.5)  -- Increased from 0.3 to reduce spam
                 end
             end)
-        elseif not open_Wish and wishTask then
+        elseif not open_Gacha and wishTask then
             task.cancel(wishTask)
             wishTask = nil
         end
     end
 })
 
+-- ==========================================================================================================================================================
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local autoUpgradeToggle = false
 local upgradeTask
 
--- =========================
--- Auto Upgrade (Batched, delayed 0.1s, limit queue)
--- =========================
 ShopSection:AddToggle({
     Name = "Auto Upgrade",
-    Default = autoUpgradeToggle,
+    Default = AT_upgrade,
     Callback = function(state)
-        autoUpgradeToggle = state
-        if autoUpgradeToggle and not upgradeTask then
+        AT_upgrade = state
+        if AT_upgrade and not upgradeTask then
             upgradeTask = task.spawn(function()
                 local gui = player.PlayerGui:WaitForChild("gameUI"):WaitForChild("armory"):WaitForChild("inventory"):WaitForChild("clip")
                 local items = {}
@@ -580,7 +598,7 @@ ShopSection:AddToggle({
                 local remote = ReplicatedStorage:WaitForChild("remotes"):WaitForChild("requestPurchase")
 
                 for _, args in ipairs(queue) do
-                    if not autoUpgradeToggle then return end
+                    if not AT_upgrade then return end
                     remote:FireServer(unpack(args))
                     task.wait(0.1)  -- Increased from 0.01 to reduce spam/CPU
                 end
@@ -594,6 +612,7 @@ ShopSection:AddToggle({
     end
 })
 
+-- ==========================================================================================================================================================
 local Chest_Rarity_E = {"GodlyChest", "RavenChest", "SamuraiChest"}
 local Chest_Rarity_R = {"CrystalChest", "FossilChest", "RoyalChest"}
 local Chest_Rarity_C = {"FrostChest", "SandyChest", "WoodenChest"}
@@ -647,6 +666,7 @@ ShopSection:AddDropdown({
     end
 })
 
+-- ==========================================================================================================================================================
 ShopSection:AddToggle({
     Name = "Buy Chest",
     Default = false,
