@@ -32,8 +32,8 @@ local player = Players.LocalPlayer
 
 -- ==========================================================================================================================================================
 local replay_g = true
-local Mon_TP = true
-local Raid_Farm = false
+local Mon_TP = false
+local Raid_Farm = true
 local use_Ability = true
 local open_Gacha = false
 local AT_upgrade = false
